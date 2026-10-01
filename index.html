@@ -1,0 +1,746 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acompanhamento TUF</title>
+<style>
+/* fonte nativa de cada sistema (a mesma família que Apple/iOS, Windows e Android
+   já usam nos próprios apps) — sem carregar fonte nenhuma, sem "cara de site gerado" */
+/* layout: rail sidebar left, banner + friso-cards + chart grid on the right */
+/* vermelho e preto TUF por padrão; claro é uma escolha manual no botão sol/lua,
+   nunca decidido pelo sistema — por isso não há @media (prefers-color-scheme) */
+:root{
+  --bg:#0a0a0a;--surface:#131211;--surface-2:#1b1a18;--rail:#100f0e;
+  --fg:#f3f1ec;--fg-muted:#9c9890;--fg-faint:#6d6a63;
+  --border:#2a2825;--border-strong:#3a3733;
+  --accent:#c8433a;--accent-fg:#fbe9e7;--accent-soft:#3a1a17;
+  --banner-a:#ed1c24;--banner-b:#262422;
+  --series-2:#4a4744;
+  --warn:#d99a3d;--warn-soft:#3a2d14;
+  --good:#4f9d6e;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f0f0ef;--surface:#ffffff;--surface-2:#e9e8e5;--rail:#f0f0ef;
+  --fg:#141414;--fg-muted:#5c5c5c;--fg-faint:#8c8c8c;
+  --border:#e8e8e8;--border-strong:#d0d0d0;
+  --accent:#e8262a;--accent-fg:#ffffff;--accent-soft:#fde3e2;
+  --banner-a:#ed1c24;--banner-b:#b3181c;
+  --series-2:#2b2b2b;
+  --warn:#c77700;--warn-soft:#fdecd2;
+  --good:#1e8a4c;
+  color-scheme:light;
+}
+body{transition:background-color .35s cubic-bezier(.4,0,.2,1),color .35s cubic-bezier(.4,0,.2,1)}
+.card,.rail,.banner,.filters select,.statrows .row{transition:background-color .35s cubic-bezier(.4,0,.2,1),border-color .35s cubic-bezier(.4,0,.2,1)}
+.theme-toggle{position:relative;flex:none;width:56px;height:30px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border-strong);cursor:pointer;padding:0;display:flex;align-items:center;transition:background-color .35s cubic-bezier(.4,0,.2,1)}
+.theme-toggle .ico{width:28px;height:100%;display:flex;align-items:center;justify-content:center;color:var(--fg-faint);position:relative;z-index:1}
+.theme-toggle .thumb{position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+:root[data-theme="light"] .theme-toggle .thumb{transform:translateX(26px)}
+*{box-sizing:border-box}
+:root{--font-sys:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-sys);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-sys);font-weight:600;letter-spacing:-0.01em;text-wrap:balance;margin:0}
+.app{display:flex;min-height:100dvh}
+.rail{width:64px;flex:none;position:sticky;top:0;align-self:flex-start;height:100dvh;background:var(--rail);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:20px}
+.rail .mark{width:32px;height:32px;flex:none;border-radius:8px;background:var(--accent);color:var(--accent-fg);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px}
+.rail nav{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;padding:8px 0 12px;margin-top:8px;overflow-y:hidden}
+.rail nav:hover{overflow-y:auto}
+.rail nav::-webkit-scrollbar{width:4px}
+.rail nav::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.rail a{flex:none;color:var(--fg-faint);text-decoration:none;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px}
+.rail a.active{color:var(--accent-fg);background:var(--accent)}
+.rail a:hover:not(.active){background:var(--surface-2);color:var(--fg)}
+main{flex:1;min-width:0;padding:0 24px 48px;display:flex;flex-direction:column;gap:20px}
+.topline{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);margin:0 -24px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.proto-badge{font-size:11px;color:var(--fg-faint);border:1px solid var(--border);border-radius:999px;padding:3px 10px;letter-spacing:0.03em}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters select{font:500 13px var(--font-sys);color:var(--fg);background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:7px 10px}
+.filters select:disabled{opacity:.6;cursor:not-allowed}
+.banner{background:linear-gradient(120deg,var(--banner-a),var(--banner-b));border:1px solid var(--border);border-radius:14px;padding:22px 24px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.banner .eyebrow{font-size:12px;color:#f3d9d5;letter-spacing:0.06em;margin:0 0 6px}
+.banner h1{font-size:clamp(28px,4vw,40px);color:#fff}
+.banner .hero-num{font-weight:600;letter-spacing:-0.02em;font-size:clamp(36px,6vw,56px);color:#fff;line-height:1}
+.banner .hero-label{font-size:12px;color:#f3d9d5}
+.grid-top{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:14px;align-items:stretch}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+.bolsa-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;min-width:0}
+.card h2{font-size:15px;color:var(--fg);text-transform:none;letter-spacing:0}
+.card .sub{font-size:12px;color:var(--fg-faint);margin:2px 0 12px}
+.chartbox{position:relative;flex:1;min-height:0}
+.scrollbox{flex:1;min-height:0}
+.grid-top .card{height:320px}
+.grid-top .card h2{text-align:center}
+.podio{display:flex;justify-content:center;align-items:flex-end;gap:10px;margin:2px 0 12px}
+.podio .p-item{text-align:center;min-width:0}
+.podio .p-medal{display:flex;align-items:center;justify-content:center;margin:0 auto 4px;color:var(--fg)}
+.podio .p-item.gold .p-medal{color:var(--accent)}
+.podio .p-item.silver .p-medal{color:var(--fg)}
+.podio .p-item.bronze .p-medal{color:var(--fg-muted)}
+.podio .p-name{font-size:11px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}
+.podio .p-val{font-size:12px;font-weight:700;color:var(--accent)}
+.expanded .rail{display:none}
+.rail-trigger{display:none}
+.expanded .rail-trigger{display:block;position:fixed;left:0;top:0;width:14px;height:100dvh;z-index:49}
+.expanded.rail-peek .rail{display:flex;position:fixed;left:0;top:0;height:100dvh;z-index:50;box-shadow:2px 0 16px rgba(0,0,0,.3);animation:railIn .18s ease}
+@keyframes railIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.expanded main{padding-left:16px;padding-right:16px}
+.expanded .topline{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{position:sticky;top:0;background:var(--surface);text-align:center;color:var(--fg-faint);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;padding:0 8px 8px 0;border-bottom:1px solid var(--border)}
+td{padding:7px 8px 7px 0;border-bottom:1px solid var(--border);color:var(--fg)}
+td.days{font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+td.days.warn{color:var(--warn)}
+tr:last-child td{border-bottom:none}
+.scroll-clean{scrollbar-width:none;-ms-overflow-style:none}
+.scroll-clean::-webkit-scrollbar{display:none}
+.pill{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.good{background:var(--surface-2);color:var(--good)}
+.pill.critica{background:var(--accent);color:var(--accent-fg);font-weight:700}
+.pill.perdido{background:var(--accent-soft);color:var(--accent)}
+:root[data-theme="light"] .pill.perdido{background:var(--accent);color:var(--accent-fg);font-weight:700}
+:root[data-theme="light"] #totalAnoMeses{background:#d62b27!important;color:#ffffff!important}
+td.days.critica{color:var(--accent);font-weight:700}
+td.days.perdido{color:var(--accent)}
+.expand-btn{flex:none;width:30px;height:30px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border-strong);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--fg-faint)}
+.expand-btn:hover{color:var(--fg);background:var(--surface)}
+.aviso-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:10px}
+.aviso-col{padding:0 16px;min-width:0}
+.aviso-col:first-child{padding-left:0;border-right:1px solid var(--border)}
+.aviso-col:last-child{padding-right:0}
+.aviso-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 10px}
+.aviso-head .tit{font-size:13px;font-weight:600;color:var(--fg)}
+.aviso-head .dt{font-size:11px;color:var(--fg-faint)}
+.aviso-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.aviso-item{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.aviso-item .txt{font-size:13px;color:var(--fg)}
+.aviso-empty{font-size:12px;color:var(--fg-faint)}
+.pill.programado{background:var(--surface-2);color:var(--fg-muted)}
+.pill.esporadico{background:var(--warn-soft);color:var(--warn)}
+@media (max-width:760px){
+  .aviso-grid{grid-template-columns:1fr;gap:16px}
+  .aviso-col:first-child{border-right:none;border-bottom:1px solid var(--border);padding-bottom:14px}
+  .aviso-col{padding-left:0;padding-right:0}
+}
+.bolsa-card{padding:20px 24px}
+.bolsa-card .stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:14px}
+.bolsa-stat{flex:1;min-width:120px}
+.bolsa-stat .label{font-size:12px;color:var(--fg-muted);margin:0 0 6px}
+.bolsa-stat .value{font-size:24px;font-weight:600;letter-spacing:-0.01em;color:var(--fg)}
+.bolsa-stat.hero .value{color:var(--accent);font-size:30px}
+.bolsa-stat + .bolsa-stat{border-left:1px solid var(--border);padding-left:28px}
+.bolsa-stat .bar{margin-top:8px;height:4px;background:var(--surface-2);border:1px solid var(--border)}
+.bolsa-stat .bar-fill{height:100%;background:var(--accent)}
+.bolsa-stat .pct{font-size:11px;color:var(--fg-faint);margin:4px 0 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+.cal-dow{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-faint);text-align:center;padding-bottom:2px}
+.cal-day{min-height:82px;border:1px solid var(--border);border-top:3px solid var(--border);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:4px;background:var(--surface);min-width:0}
+.cal-day.out{opacity:.4;background:var(--surface-2)}
+.cal-day.off{border-top:3px solid var(--accent)}
+.cal-day .d-num{font-size:11px;font-weight:600;color:var(--fg)}
+.cal-day .d-off{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal-chip{font-size:10px;line-height:1.3;color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-chip.more{color:var(--fg-faint);font-weight:500}
+.dados-aviso{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600}
+.auth-screen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
+.auth-card{width:100%;max-width:320px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 24px;text-align:center}
+.auth-card .mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:var(--accent-fg);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:18px;margin:0 auto 16px}
+.auth-card h2{font-size:17px;margin:0 0 6px}
+.auth-card p{font-size:13px;color:var(--fg-faint);margin:0 0 18px}
+.auth-card input{width:100%;font:500 14px var(--font-sys);color:var(--fg);background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:10px 12px;margin:0 0 10px}
+.auth-card button{width:100%;font:600 14px var(--font-sys);color:var(--accent-fg);background:var(--accent);border:none;border-radius:8px;padding:10px 12px;cursor:pointer}
+.auth-card button:disabled{opacity:.6;cursor:wait}
+.auth-status{min-height:18px;font-size:12px;color:var(--warn);margin:10px 0 0}
+.sair-btn{display:none;font:500 12px var(--font-sys);color:var(--fg-faint);background:none;border:1px solid var(--border);border-radius:999px;padding:5px 12px;cursor:pointer}
+.sair-btn:hover{color:var(--fg);background:var(--surface-2)}
+.sair-btn.show{display:inline-block}
+@media (max-width:980px){
+  .grid-top{grid-template-columns:1fr 1fr}
+}
+@media (max-width:760px){
+  .app{flex-direction:column}
+  .rail{width:100%;height:auto;position:static;flex-direction:row;padding:10px 16px;border-right:none;border-bottom:1px solid var(--border)}
+  .rail nav{flex-direction:row;margin-top:0;overflow-x:auto;overflow-y:visible}
+  main{padding:0 16px 32px}
+  .topline{margin:0 -16px;padding:16px}
+  .grid,.grid-top{grid-template-columns:1fr}
+  .bolsa-stat + .bolsa-stat{border-left:none;padding-left:0}
+  .cal-grid{gap:4px}
+  .cal-day{min-height:60px;padding:4px}
+  .cal-chip{display:none}
+  .cal-day .d-num::after{content:attr(data-count);display:block;font-size:9px;font-weight:500;color:var(--accent)}
+}
+</style>
+<div class="auth-screen" id="authScreen" style="display:none">
+  <div class="auth-card">
+    <div class="mark">T</div>
+    <h2>Acompanhamento TUF</h2>
+    <p>Digite a senha para abrir o painel.</p>
+    <input type="password" id="authSenha" placeholder="Senha" autocomplete="current-password">
+    <button type="button" id="authBtn">Abrir</button>
+    <p class="auth-status" id="authStatus"></p>
+  </div>
+</div>
+<div class="app">
+  <div class="rail-trigger" id="railTrigger"></div>
+  <aside class="rail">
+    <div class="mark">T</div>
+    <nav>
+      <a class="active" href="#" aria-label="Farmoterapica" title="Farmoterapica"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-35 12 12)"/><line x1="12" y1="8.2" x2="12" y2="15.8" transform="rotate(-35 12 12)"/></svg></a>
+      <a href="#" aria-label="Motoristas" title="Motoristas"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="9" width="14" height="7" rx="1.5"/><path d="M16 11h3.5l2.5 3v2h-6z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></a>
+      <a href="#" aria-label="Região" title="Região"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></a>
+      <a href="#" aria-label="Devoluções" title="Devoluções"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6"/><path d="M4.5 14a8 8 0 1 0 2-8.4L4 10"/></svg></a>
+      <a href="#" aria-label="Financeiro" title="Financeiro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 6.5c0-2-2-3.5-5-3.5s-5 1.5-5 3.5 2 3 5 3.5 5 1.5 5 3.5-2 3.5-5 3.5-5-1.5-5-3.5"/></svg></a>
+      <a href="#" aria-label="Custos" title="Custos"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></a>
+      <a href="#" aria-label="Configurações" title="Configurações"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg></a>
+    </nav>
+  </aside>
+  <main>
+    <div class="topline">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro ou escuro" aria-pressed="false">
+          <span class="ico" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+          <span class="ico" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span>
+          <span class="thumb"></span>
+        </button>
+        <button class="expand-btn" id="expandBtn" type="button" aria-label="Expandir layout" aria-pressed="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="expandIcon"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
+        <span class="proto-badge" id="protoBadge">Carregando dados…</span>
+        <button type="button" class="sair-btn" id="sairBtn">Sair</button>
+      </div>
+      <div class="filters">
+        <select id="fAno" disabled></select>
+        <select id="fMes" disabled></select>
+        <select id="fSemana" disabled></select>
+      </div>
+    </div>
+
+    <section class="banner">
+      <div>
+        <p class="eyebrow">TUF LOGÍSTICA · VISÃO GERAL</p>
+        <h1>Acompanhamento Farmoterápica</h1>
+      </div>
+      <div style="text-align:right">
+        <div class="hero-num" id="heroNum">—</div>
+        <p class="hero-label" id="heroLabel">Entregas</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Quadro de avisos</h2>
+      <div class="aviso-grid" id="avisoGrid"></div>
+    </section>
+
+    <section class="grid-top">
+      <div class="card">
+        <h2>Devoluções</h2>
+        <p class="sub">Situação de hoje · não muda com o filtro</p>
+        <div class="scroll-clean scrollbox" style="overflow-y:auto;margin-top:4px">
+          <table>
+            <thead><tr><th>Motorista</th><th>Dias pendentes</th><th>Situação</th></tr></thead>
+            <tbody id="tbodyDev"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Entregas por motorista</h2>
+        <div id="podioMotoristas" class="podio"></div>
+        <div class="scroll-clean" style="overflow-y:auto;flex:1;min-height:0">
+          <div class="chartbox" id="chMotoristaWrap"><canvas id="chMotorista" role="img" aria-label="Entregas por motorista"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Entregas por região</h2>
+        <p class="sub">Contribuição de cada motorista, empilhado</p>
+        <div class="chartbox"><canvas id="chRegiao" role="img" aria-label="Entregas por região, dividido por motorista"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card bolsa-card">
+      <h2>Bolsa multi</h2>
+      <p class="sub" id="bolsaSub">Fechamento</p>
+      <div class="stats">
+        <div class="bolsa-stat"><p class="label">Total de entregas</p><p class="value" id="bolsaEntregasVal">—</p></div>
+        <div class="bolsa-stat" id="bolsaAdicional"><p class="label">Adicional</p><p class="value" id="bolsaAdicionalVal">—</p><div class="bar"><div class="bar-fill"></div></div><p class="pct"></p></div>
+        <div class="bolsa-stat" id="bolsaTabela"><p class="label">Valor de tabela</p><p class="value" id="bolsaTabelaVal">—</p><div class="bar"><div class="bar-fill"></div></div><p class="pct"></p></div>
+        <div class="bolsa-stat hero"><p class="label">Valor total</p><p class="value" id="bolsaTotalVal">—</p></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Escala do mês</h2>
+      <p class="sub">Folgas por motorista · setembro/2026</p>
+      <div class="cal-grid" id="calGrid"></div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Entregas por ano <span id="totalAnoMeses" class="pill" style="background:var(--accent-soft);color:var(--accent);margin-left:6px"></span></h2>
+        <div class="chartbox"><canvas id="chMeses" role="img" aria-label="Entregas por ano"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Bolsas e termômetros</h2>
+        <div class="chartbox"><canvas id="chBolsas" role="img" aria-label="Bolsas A, B, C, isopor e termômetro em campo"></canvas></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="dados.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>
+Chart.register(ChartDataLabels);
+function tk(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
+function fmt(n){return n.toLocaleString('pt-BR')}
+function fmtR(n){return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+var CONECTORES=['de','do','da','dos','das'];
+function tcase(s){
+  return String(s).toLowerCase().split(' ').map(function(w,i){
+    if(i>0&&CONECTORES.indexOf(w)!==-1)return w;
+    return w.charAt(0).toUpperCase()+w.slice(1);
+  }).join(' ');
+}
+
+// === carregamento: window.DADOS direto (local/artefato) ou senha + dados.enc.json ===
+// atencao: NAO inicializar DADOS aqui (nem com =null) - "var DADOS" e global e
+// colidiria com o window.DADOS que o <script src="dados.js"> ja pode ter setado
+// antes desta linha rodar, zerando o dado real.
+var DADOS, FIXOS={}, modoCarregamento=null, chaveAtual=null, primeiraCarga=true;
+
+function b64ToBuf(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
+function bufToB64(buf){var u=new Uint8Array(buf),s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function derivarChave(senha,saltB64,iter){
+  var enc=new TextEncoder();
+  return crypto.subtle.importKey('raw',enc.encode(senha),{name:'PBKDF2'},false,['deriveKey']).then(function(material){
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64ToBuf(saltB64),iterations:iter,hash:'SHA-256'},material,{name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+  });
+}
+function decifrar(enc,chave){
+  return crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToBuf(enc.iv)},chave,b64ToBuf(enc.ct)).then(function(buf){
+    return JSON.parse(new TextDecoder().decode(buf));
+  });
+}
+
+var MESES_FULL=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+var MESES_ABR=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+// badge "Atualizado em dd/mm às hh:mm · lançamentos até dd/mm"
+function atualizarBadge(){
+  var d=new Date(DADOS.geradoEm);
+  var dd=String(d.getDate()).padStart(2,'0'), mm=String(d.getMonth()+1).padStart(2,'0');
+  var hh=String(d.getHours()).padStart(2,'0'), mi=String(d.getMinutes()).padStart(2,'0');
+  var ult=DADOS.ultimoRegistro?DADOS.ultimoRegistro.split('-'):null;
+  var ultTxt=ult?(' · lançamentos até '+ult[2]+'/'+ult[1]):'';
+  document.getElementById('protoBadge').textContent='Atualizado em '+dd+'/'+mm+' às '+hh+':'+mi+ultTxt;
+}
+
+var BLOCO_VAZIO={entregas:0,motoristas:[],regioes:{motoristas:['OUTROS'],linhas:[]},bolsas:[{nome:'Bolsa A',qtd:0},{nome:'Bolsa B',qtd:0},{nome:'Bolsa C',qtd:0},{nome:'Isopor',qtd:0},{nome:'Termômetro',qtd:0}],bolsaMulti:{entregas:0,adicional:0,tabela:0,total:0}};
+function labelPeriodo(ano,mes,semana){
+  var mesNome=mes?MESES_FULL[mes-1]:null;
+  if(mes===0&&semana===0)return{banner:'Entregas em '+ano,bolsa:'Fechamento · '+ano};
+  if(mes===0&&semana!==0)return{banner:'Entregas na semana '+semana+' (todos os meses)',bolsa:'Fechamento · semana '+semana+' (todos os meses), '+ano};
+  if(mes!==0&&semana===0)return{banner:'Entregas em '+mesNome,bolsa:'Fechamento · '+mesNome+'/'+ano};
+  return{banner:'Entregas na semana '+semana+' de '+mesNome,bolsa:'Fechamento · semana '+semana+' de '+mesNome+'/'+ano};
+}
+function chartEmptyMsg(canvas,show,msg){
+  var el=canvas.parentElement;
+  var m=el.querySelector('.chart-empty');
+  if(show){
+    if(!m){m=document.createElement('div');m.className='chart-empty aviso-empty';m.style.cssText='display:flex;align-items:center;justify-content:center;height:100%;text-align:center;padding:0 8px';el.appendChild(m)}
+    m.textContent=msg;
+    canvas.style.display='none';
+  }else{
+    if(m)m.remove();
+    canvas.style.display='';
+  }
+}
+
+// selects: Ano vem de DADOS.anos, Mes e Semana reconstroem ao trocar o Ano/selecao.
+// valor inicial = DADOS.padrao (periodo atual da planilha) - so na primeira carga,
+// trocas de dado por atualizacao automatica mantem o periodo que a pessoa escolheu.
+var estado={ano:0,mes:0,semana:0};
+var fAno=document.getElementById('fAno'), fMes=document.getElementById('fMes'), fSemana=document.getElementById('fSemana');
+var SEMANA_RANGE=['','1–7','8–14','15–21','22–28','29–31'];
+function anoInfo(ano){return DADOS.anos.filter(function(a){return a.ano===ano})[0]}
+function montarSelects(){
+  fAno.innerHTML=DADOS.anos.map(function(a){return '<option value="'+a.ano+'"'+(a.ano===estado.ano?' selected':'')+'>'+a.ano+'</option>'}).join('');
+  var info=anoInfo(estado.ano);
+  var meses=info?info.meses:[];
+  fMes.innerHTML='<option value="0"'+(estado.mes===0?' selected':'')+'>Todos</option>'+meses.map(function(m){
+    return '<option value="'+m+'"'+(m===estado.mes?' selected':'')+'>'+tcase(MESES_FULL[m-1])+'</option>';
+  }).join('');
+  fSemana.innerHTML='<option value="0"'+(estado.semana===0?' selected':'')+'>Todas</option>'+[1,2,3,4,5].map(function(s){
+    return '<option value="'+s+'"'+(s===estado.semana?' selected':'')+'>Semana '+s+' (dias '+SEMANA_RANGE[s]+')</option>';
+  }).join('');
+}
+[fAno,fMes,fSemana].forEach(function(el){el.disabled=false});
+fAno.addEventListener('change',function(){estado.ano=+fAno.value;estado.mes=0;montarSelects();aplicarPeriodo()});
+fMes.addEventListener('change',function(){estado.mes=+fMes.value;aplicarPeriodo()});
+fSemana.addEventListener('change',function(){estado.semana=+fSemana.value;aplicarPeriodo()});
+
+// lista de motoristas/regioes/bolsas do periodo selecionado - reatribuidas a cada troca
+var motNames=[],motVals=[],regNames=[],regTotals=[],regDriversRaw=[],regDrivers=[],meses=[],entMeses=[],currentRegLinhas=[],currentBolsas=[];
+
+function renderAno(){
+  var serie=DADOS.entregasMes[String(estado.ano)]||[];
+  meses=serie.map(function(m){return tcase(m.mes)});
+  entMeses=serie.map(function(m){return m.qtd});
+  document.getElementById('totalAnoMeses').textContent='Total no ano: '+fmt(entMeses.reduce(function(a,b){return a+b},0));
+}
+
+function aplicarPeriodo(){
+  var key=estado.ano+'-'+estado.mes+'-'+estado.semana;
+  var bloco=DADOS.periodos[key]||BLOCO_VAZIO;
+  var lbl=labelPeriodo(estado.ano,estado.mes,estado.semana);
+
+  document.getElementById('heroNum').textContent=fmt(bloco.entregas);
+  document.getElementById('heroLabel').textContent=lbl.banner;
+
+  motNames=bloco.motoristas.map(function(m){return tcase(m.nome)});
+  motVals=bloco.motoristas.map(function(m){return m.qtd});
+  regNames=bloco.regioes.linhas.map(function(l){return tcase(l.regiao)});
+  regTotals=bloco.regioes.linhas.map(function(l){return l.total});
+  regDriversRaw=bloco.regioes.motoristas;
+  regDrivers=regDriversRaw.map(function(n){return n==='OUTROS'?'Outros':tcase(n)});
+  currentRegLinhas=bloco.regioes.linhas;
+  currentBolsas=bloco.bolsas;
+
+  renderAno();
+
+  var podio=document.getElementById('podioMotoristas');
+  if(motNames.length===0){
+    podio.innerHTML='<p class="aviso-empty">Sem entregas neste período.</p>';
+  }else{
+    podio.innerHTML=classesPodio.map(function(cls,i){
+      return motNames[i]?'<div class="p-item '+cls+'"><div class="p-medal">'+svgMedalha(i+1,tamanhoMedalha[i])+'</div><div class="p-name">'+motNames[i]+'</div><div class="p-val">'+fmt(motVals[i])+'</div></div>':'';
+    }).join('');
+  }
+
+  var b=bloco.bolsaMulti;
+  document.getElementById('bolsaSub').textContent=lbl.bolsa;
+  document.getElementById('bolsaEntregasVal').textContent=fmt(b.entregas);
+  document.getElementById('bolsaAdicionalVal').textContent=fmtR(b.adicional);
+  document.getElementById('bolsaTabelaVal').textContent=fmtR(b.tabela);
+  document.getElementById('bolsaTotalVal').textContent=fmtR(b.total);
+  function pct(v){return b.total>0?v/b.total*100:0}
+  function setBar(id,v){
+    var el=document.getElementById(id);
+    var p=pct(v);
+    el.querySelector('.bar-fill').style.width=p.toFixed(1)+'%';
+    el.querySelector('.pct').textContent=p.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'% do total';
+  }
+  setBar('bolsaAdicional',b.adicional);
+  setBar('bolsaTabela',b.tabela);
+
+  buildCharts();
+}
+
+function renderEscala(){
+  // dado real da aba Escalas (Assistente Farmoterapica.xlsx): folga fixa por dia da
+  // semana (1=seg...6=sab) + rodizio de domingo por grupo (grupo N folga no domingo
+  // da semana N do mes, semana = min(4, floor((dia-1)/7)+1)). Vem de fixos.json -
+  // nao pode ficar hardcoded aqui, o index.html e publico. So cobre quem tem
+  // escala cadastrada - o resto da lista de motoristas do grafico nao tem folga
+  // registrada em planilha nenhuma, entao fica sem marcacao (nao aparece de folga).
+  var folgaRegras=FIXOS.escala||{};
+  var nomesComEscala=Object.keys(folgaRegras);
+  var dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  var startWeekday=2, diasNoMes=30; // 1/set/2026 cai numa terca
+  var cal=document.getElementById('calGrid');
+  var html=dow.map(function(d){return '<div class="cal-dow">'+d+'</div>'}).join('');
+  var totalCel=Math.ceil((startWeekday+diasNoMes)/7)*7;
+  for(var c=0;c<totalCel;c++){
+    var diaMes=c-startWeekday+1;
+    var dentro=diaMes>=1&&diaMes<=diasNoMes;
+    var weekday=c%7; // 0=dom...6=sab, igual ao codigo da planilha (exceto domingo=7 la)
+    var semanaDom=Math.min(4,Math.floor((diaMes-1)/7)+1);
+    var offNomes=dentro?nomesComEscala.filter(function(n){
+      var r=folgaRegras[n];
+      if(weekday===0)return r.grupoDom===semanaDom;
+      return r.fixos.indexOf(weekday)!==-1;
+    }):[];
+    var chips=offNomes.slice(0,3).map(function(n){return '<span class="cal-chip">'+n.split(' ')[0]+'</span>'}).join('');
+    if(offNomes.length>3)chips+='<span class="cal-chip more">+'+(offNomes.length-3)+'</span>';
+    var numLabel=dentro?diaMes:'';
+    var cls='cal-day'+(dentro?'':' out')+(offNomes.length?' off':'');
+    html+='<div class="'+cls+'" data-count="'+(dentro?offNomes.length+' de folga':'')+'"><div class="d-num">'+numLabel+'</div><div class="d-off">'+chips+'</div></div>';
+  }
+  cal.innerHTML=html;
+}
+
+// quadro de avisos: recorrentes/pontuais vem de fixos.json (nomes de loja/texto
+// nao podem ficar hardcoded aqui, o index.html e publico).
+function renderAvisos(){
+  var diasSemana=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  var recorrentes=FIXOS.avisosRecorrentes||[];
+  var pontuaisAmanha=FIXOS.avisosPontuaisAmanha||[];
+  var hojeDate=new Date();
+  var amanhaDate=new Date(hojeDate.getTime()+86400000);
+  var avisos={
+    hoje:{data:diasSemana[hojeDate.getDay()],itens:recorrentes.filter(function(r){return r.weekday===hojeDate.getDay()})},
+    amanha:{data:diasSemana[amanhaDate.getDay()],itens:recorrentes.filter(function(r){return r.weekday===amanhaDate.getDay()}).concat(pontuaisAmanha)}
+  };
+  var tagLabel={programado:'Programado',esporadico:'Esporádico'};
+  function renderCol(tit,bloco){
+    var itensHtml=bloco.itens.length?bloco.itens.map(function(a){
+      return '<li class="aviso-item"><span class="pill '+a.tipo+'">'+tagLabel[a.tipo]+'</span><span class="txt">'+a.txt+'</span></li>';
+    }).join(''):'<li class="aviso-empty">Nenhum aviso.</li>';
+    return '<div class="aviso-col"><div class="aviso-head"><span class="tit">'+tit+'</span><span class="dt">'+bloco.data+'</span></div><ul class="aviso-list">'+itensHtml+'</ul></div>';
+  }
+  document.getElementById('avisoGrid').innerHTML=renderCol('Hoje',avisos.hoje)+renderCol('Amanhã',avisos.amanha);
+}
+
+var classesPodio=['gold','silver','bronze'];
+var tamanhoMedalha=[40,34,34];
+function svgMedalha(pos,tam){
+  return '<svg width="'+tam+'" height="'+(tam*1.15|0)+'" viewBox="0 0 48 54" fill="none">'+
+    '<path d="M14 0L24 19L9 26L0 4Z" fill="currentColor"/>'+
+    '<path d="M34 0L24 19L39 26L48 4Z" fill="currentColor"/>'+
+    '<circle cx="24" cy="35" r="17" fill="currentColor"/>'+
+    '<circle cx="24" cy="35" r="13.5" fill="none" stroke="var(--surface)" stroke-width="1.4"/>'+
+    '<text x="24" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="var(--surface)" font-family="inherit">'+pos+'</text>'+
+  '</svg>';
+}
+// devolucoes: NAO depende do periodo selecionado - fixo, ja vem ordenado da origem
+function situacaoDev(dias){
+  if(dias>=21)return{cls:'perdido',pill:'perdido',texto:'Possível perdido'};
+  if(dias>=14)return{cls:'critica',pill:'critica',texto:'Crítica'};
+  if(dias>=4)return{cls:'warn',pill:'warn',texto:'Atenção'};
+  return{cls:'',pill:'good',texto:'Normal'};
+}
+function renderDevolucoes(){
+  var dev=(DADOS.devolucoes||[]).map(function(d){return [tcase(d.portador),d.dias]});
+  document.getElementById('tbodyDev').innerHTML=dev.map(function(d){
+    var s=situacaoDev(d[1]);
+    var cls='days'+(s.cls?' '+s.cls:'');
+    var pill='<span class="pill '+s.pill+'">'+s.texto+'</span>';
+    return '<tr><td>'+d[0]+'</td><td class="'+cls+'">'+d[1]+'</td><td>'+pill+'</td></tr>';
+  }).join('');
+}
+
+var charts=[];
+function buildCharts(){
+  charts.forEach(function(c){c.destroy()});
+  charts=[];
+  var fg=tk('--fg-muted'), fgStrong=tk('--fg'), accent=tk('--accent'), surface2=tk('--surface-2');
+
+  var chMotoristaEl=document.getElementById('chMotorista');
+  chartEmptyMsg(chMotoristaEl,motNames.length===0,'Sem entregas neste período.');
+  document.getElementById('chMotoristaWrap').style.height=(motNames.length*22+20)+'px';
+  if(motNames.length)charts.push(new Chart(chMotoristaEl,{type:'bar',data:{labels:motNames,datasets:[{data:motVals,backgroundColor:accent,borderRadius:3,maxBarThickness:16}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:28}},plugins:{legend:{display:false},datalabels:{color:fgStrong,anchor:'end',align:'end',font:{size:11,weight:'600'},formatter:fmt}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:fg,font:{size:11}}}}}}));
+
+  var series2=tk('--series-2');
+  var cinzaClaro=tk('--fg-faint');
+  // por POSICAO (nao por motorista fixo): pra cada regiao, ordena os motoristas do
+  // que mais entregou pro que menos entregou - o maior sempre vem primeiro na barra,
+  // e a cor alterna vermelho/cinza pela posicao (rank), nunca 2 iguais seguidas.
+  // "Outros" agora e dinamico: qualquer motorista que representa <=3% do total da
+  // regiao (mais quem ja vinha como Outros bruto da planilha) cai nesse balde -
+  // ele fica sempre cinza claro e sempre na ULTIMA posicao da barra.
+  var THRESH=0.03;
+  var maxRanks=0;
+  var perRegionSorted=[],outrosPerRegion=[];
+  var chRegiaoEl=document.getElementById('chRegiao');
+  chartEmptyMsg(chRegiaoEl,regNames.length===0,'Sem entregas neste período.');
+  if(regNames.length){
+    currentRegLinhas.forEach(function(linha,regionIdx){
+      var total=regTotals[regionIdx];
+      var named=[],outrosSum=0;
+      regDrivers.forEach(function(name,driverIdx){
+        var v=linha.valores[driverIdx]||0;
+        if(v<=0)return;
+        if(name==='Outros'||(total>0&&v/total<=THRESH)){outrosSum+=v}
+        else{named.push({name:name,value:v})}
+      });
+      named.sort(function(a,b){return b.value-a.value});
+      if(named.length>maxRanks)maxRanks=named.length;
+      perRegionSorted.push(named);
+      outrosPerRegion.push(outrosSum);
+    });
+    var rankValues=[],rankNames=[];
+    for(var k=0;k<maxRanks;k++){
+      rankValues.push(regNames.map(function(_,regionIdx){var e=perRegionSorted[regionIdx][k];return e?e.value:0}));
+      rankNames.push(regNames.map(function(_,regionIdx){var e=perRegionSorted[regionIdx][k];return e?e.name:''}));
+    }
+    var regDatasets=rankValues.map(function(vals,k){
+      return {label:'Posição '+(k+1),data:vals,backgroundColor:k%2===0?accent:series2,stack:'r',datalabels:{display:false}};
+    });
+    regDatasets.push({label:'Outros',data:outrosPerRegion,backgroundColor:cinzaClaro,stack:'r',
+      datalabels:{color:fgStrong,anchor:'end',align:'end',font:{size:10,weight:'600'},formatter:function(v,ctx){return fmt(regTotals[ctx.dataIndex])}}});
+    charts.push(new Chart(chRegiaoEl,{type:'bar',data:{labels:regNames,datasets:regDatasets},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:28}},plugins:{legend:{display:false},tooltip:{filter:function(item){return item.raw>0},callbacks:{label:function(ctx){
+      var nm=ctx.datasetIndex<maxRanks?rankNames[ctx.datasetIndex][ctx.dataIndex]:'Outros';
+      return nm+': '+fmt(ctx.parsed.x)}}}},scales:{x:{display:false,stacked:true},y:{stacked:true,grid:{display:false},ticks:{color:fg,font:{size:10}}}}}}));
+  }
+
+  var bolsasLabels=currentBolsas.map(function(b){return b.nome});
+  var bolsasVals=currentBolsas.map(function(b){return b.qtd});
+  var temBolsas=bolsasVals.some(function(v){return v>0});
+  var chBolsasEl=document.getElementById('chBolsas');
+  chartEmptyMsg(chBolsasEl,!temBolsas,'Sem movimentação neste período.');
+  if(temBolsas)charts.push(new Chart(chBolsasEl,{type:'bar',data:{labels:bolsasLabels,datasets:[{data:bolsasVals,backgroundColor:accent,borderRadius:4,maxBarThickness:34}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false},datalabels:{color:fgStrong,anchor:'end',align:'end',font:{size:12,weight:'600'},formatter:fmt}},scales:{x:{grid:{display:false},ticks:{color:fg,font:{size:11}}},y:{display:false}}}}));
+
+  var chMesesEl=document.getElementById('chMeses');
+  chartEmptyMsg(chMesesEl,meses.length===0,'Sem dados neste ano.');
+  if(meses.length)charts.push(new Chart(chMesesEl,{type:'line',data:{labels:meses,datasets:[{data:entMeses,borderColor:accent,backgroundColor:accent,tension:0.3,pointRadius:3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:false},datalabels:{color:fgStrong,anchor:'end',align:'top',font:{size:10,weight:'600'},formatter:fmt}},scales:{x:{grid:{display:false},ticks:{color:fg,font:{size:11}}},y:{display:false}}}}));
+}
+
+function startApp(dadosObj){
+  DADOS=dadosObj;
+  FIXOS=DADOS.fixos||{};
+  if(primeiraCarga){
+    estado.ano=DADOS.padrao.ano;estado.mes=DADOS.padrao.mes;estado.semana=DADOS.padrao.semana;
+    primeiraCarga=false;
+  }
+  montarSelects();
+  renderEscala();
+  renderAvisos();
+  renderDevolucoes();
+  aplicarPeriodo();
+  atualizarBadge();
+  document.getElementById('authScreen').style.display='none';
+  if(modoCarregamento==='senha')document.getElementById('sairBtn').classList.add('show');
+}
+
+// reaplica so se o dado realmente mudou (geradoEm) - mantem o periodo escolhido
+function tentarAtualizar(novoDados){
+  if(!DADOS||novoDados.geradoEm!==DADOS.geradoEm)startApp(novoDados);
+}
+
+new MutationObserver(buildCharts).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeToggle');
+  var saved=null;
+  try{saved=localStorage.getItem('tuf-theme')}catch(e){}
+  if(saved==='light'){root.setAttribute('data-theme','light');btn.setAttribute('aria-pressed','true')}
+  btn.addEventListener('click',function(){
+    var isLight=root.getAttribute('data-theme')==='light';
+    if(isLight){root.removeAttribute('data-theme');btn.setAttribute('aria-pressed','false')}
+    else{root.setAttribute('data-theme','light');btn.setAttribute('aria-pressed','true')}
+    try{localStorage.setItem('tuf-theme',isLight?'dark':'light')}catch(e){}
+  });
+})();
+
+(function(){
+  var root=document.documentElement, btn=document.getElementById('expandBtn'), icon=document.getElementById('expandIcon');
+  var pathExpand='M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3';
+  var pathMinimize='M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4';
+  // tenta tela cheia de verdade (F11) alem de esconder a rail; se o ambiente
+  // bloquear a Fullscreen API (artefato embutido em iframe sem permissao),
+  // cai sem erro pro modo so-layout, que sempre funciona.
+  btn.addEventListener('click',function(){
+    var on=root.classList.toggle('expanded');
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    btn.setAttribute('aria-label',on?'Restaurar layout':'Expandir layout');
+    icon.querySelector('path').setAttribute('d',on?pathMinimize:pathExpand);
+    buildCharts();
+    try{
+      if(on && document.fullscreenEnabled && !document.fullscreenElement){
+        root.requestFullscreen().catch(function(){});
+      } else if(!on && document.fullscreenElement){
+        document.exitFullscreen().catch(function(){});
+      }
+    }catch(e){}
+  });
+  document.addEventListener('fullscreenchange',function(){
+    if(!document.fullscreenElement && root.classList.contains('expanded')){
+      root.classList.remove('expanded');
+      btn.setAttribute('aria-pressed','false');
+      btn.setAttribute('aria-label','Expandir layout');
+      icon.querySelector('path').setAttribute('d',pathExpand);
+      buildCharts();
+    }
+  });
+})();
+
+(function(){
+  // quando maximizado, a rail some; encostar o mouse na quinilha esquerda
+  // (14px) faz ela reaparecer sobreposta, some de novo quando o mouse sai.
+  var root=document.documentElement, trigger=document.getElementById('railTrigger'), rail=document.querySelector('.rail');
+  var hideTimer=null;
+  function show(){clearTimeout(hideTimer);root.classList.add('rail-peek')}
+  function scheduleHide(){hideTimer=setTimeout(function(){root.classList.remove('rail-peek')},150)}
+  trigger.addEventListener('mouseenter',show);
+  rail.addEventListener('mouseenter',show);
+  trigger.addEventListener('mouseleave',scheduleHide);
+  rail.addEventListener('mouseleave',scheduleHide);
+})();
+
+// === boot: window.DADOS direto (local/artefato) ou senha + dados.enc.json (GitHub Pages) ===
+function tentarChaveGuardada(enc){
+  var guardado=null;
+  try{guardado=JSON.parse(localStorage.getItem('tuf-chave')||'null')}catch(e){}
+  if(!guardado||guardado.salt!==enc.salt)return Promise.resolve(false);
+  return crypto.subtle.importKey('raw',b64ToBuf(guardado.key),{name:'AES-GCM'},true,['decrypt']).then(function(chave){
+    return decifrar(enc,chave).then(function(dados){
+      chaveAtual=chave;
+      startApp(dados);
+      return true;
+    });
+  }).catch(function(){
+    try{localStorage.removeItem('tuf-chave')}catch(e){}
+    return false;
+  });
+}
+function mostrarTelaSenha(enc){
+  var tela=document.getElementById('authScreen'), input=document.getElementById('authSenha'),
+      btn=document.getElementById('authBtn'), status=document.getElementById('authStatus');
+  tela.style.display='flex';
+  function tentar(){
+    var senha=input.value;
+    if(!senha)return;
+    btn.disabled=true;status.textContent='Abrindo…';
+    derivarChave(senha,enc.salt,enc.iter).then(function(chave){
+      return decifrar(enc,chave).then(function(dados){
+        chaveAtual=chave;
+        try{
+          crypto.subtle.exportKey('raw',chave).then(function(raw){
+            localStorage.setItem('tuf-chave',JSON.stringify({salt:enc.salt,key:bufToB64(raw)}));
+          }).catch(function(){});
+        }catch(e){}
+        status.textContent='';
+        startApp(dados);
+      });
+    }).catch(function(){
+      status.textContent='Senha incorreta.';
+      btn.disabled=false;
+    });
+  }
+  btn.addEventListener('click',tentar);
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')tentar()});
+}
+function iniciarFluxoSenha(){
+  fetch('dados.enc.json',{cache:'no-store'}).then(function(r){
+    if(!r.ok)throw new Error('sem dados.enc.json');
+    return r.json();
+  }).then(function(enc){
+    return tentarChaveGuardada(enc).then(function(ok){
+      if(!ok)mostrarTelaSenha(enc);
+    });
+  }).catch(function(){
+    document.querySelector('main').innerHTML='<div class="dados-aviso">Dados não carregados — rode atualizar-dados.mjs ou confira o dados.enc.json.</div>';
+  });
+}
+document.getElementById('sairBtn').addEventListener('click',function(){
+  try{localStorage.removeItem('tuf-chave')}catch(e){}
+  location.reload();
+});
+
+if(window.DADOS){
+  modoCarregamento='script';
+  startApp(window.DADOS);
+  setInterval(function(){
+    fetch('dados.json',{cache:'no-store'}).then(function(r){return r.json()}).then(tentarAtualizar).catch(function(){});
+  },120000);
+}else{
+  modoCarregamento='senha';
+  iniciarFluxoSenha();
+  setInterval(function(){
+    if(!chaveAtual)return;
+    fetch('dados.enc.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(enc){
+      return decifrar(enc,chaveAtual);
+    }).then(tentarAtualizar).catch(function(){});
+  },120000);
+}
+</script>
