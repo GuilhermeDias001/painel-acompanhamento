@@ -148,7 +148,6 @@ td.days.perdido{color:var(--accent)}
 .mot-cad th{text-align:left;padding:0 12px 8px 0}
 .mot-cad td{padding:9px 12px 9px 0}
 .mot-cad td.sit{white-space:nowrap}
-.mot-cad mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 1px}
 .dados-aviso{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600}
 .auth-screen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
 .auth-card{width:100%;max-width:320px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 24px;text-align:center}
@@ -626,6 +625,7 @@ function startApp(dadosObj){
   renderEscala();
   renderAvisos();
   renderDevolucoes();
+  renderCadastro();
   aplicarPeriodo();
   atualizarBadge();
   document.getElementById('authScreen').style.display='none';
@@ -696,6 +696,58 @@ new MutationObserver(buildCharts).observe(document.documentElement,{attributes:t
   trigger.addEventListener('mouseleave',scheduleHide);
   rail.addEventListener('mouseleave',scheduleHide);
 })();
+
+// === pagina Motoristas: cadastro (nome, apelido, veiculo, situacao) com busca ===
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function norm(s){return String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+var motBusca=document.getElementById('motBusca');
+function renderCadastro(){
+  var lista=(DADOS&&DADOS.cadastroMotoristas)||null;
+  var body=document.getElementById('motCadBody'), vazio=document.getElementById('motCadVazio'), sub=document.getElementById('motCadSub');
+  var tabela=body.parentElement;
+  if(!lista){
+    tabela.style.display='none';
+    sub.textContent='Cadastro';
+    vazio.style.display='';vazio.textContent='Cadastro ainda não carregado — aparece na próxima atualização dos dados.';
+    return;
+  }
+  var temApelido=lista.some(function(m){return m.apelido});
+  Array.prototype.forEach.call(tabela.querySelectorAll('tr'),function(tr){
+    var c=tr.children[1];if(c)c.style.display=temApelido?'':'none';
+  });
+  var q=norm(motBusca.value.trim());
+  var achados=lista.filter(function(m){
+    return !q||norm(m.nome).indexOf(q)!==-1||norm(m.apelido).indexOf(q)!==-1||norm(m.veiculo).indexOf(q)!==-1;
+  });
+  sub.textContent=q?(achados.length+' de '+lista.length+' cadastros'):(lista.length+' cadastros');
+  if(!achados.length){
+    tabela.style.display='none';
+    vazio.style.display='';vazio.textContent='Nenhum motorista encontrado para "'+motBusca.value.trim()+'".';
+    return;
+  }
+  vazio.style.display='none';tabela.style.display='';
+  body.innerHTML=achados.map(function(m){
+    var sit=m.ativo?'<span class="pill good">Ativo</span>':'<span class="pill programado">Cadastro geral</span>';
+    return '<tr><td>'+esc(tcase(m.nome))+'</td>'+(temApelido?'<td>'+esc(m.apelido?tcase(m.apelido):'')+'</td>':'<td style="display:none"></td>')+'<td>'+esc(m.veiculo||'')+'</td><td class="sit">'+sit+'</td></tr>';
+  }).join('');
+}
+motBusca.addEventListener('input',renderCadastro);
+
+function mostrarView(v){
+  var motoristas=v==='motoristas';
+  document.getElementById('viewPainel').style.display=motoristas?'none':'';
+  document.getElementById('viewMotoristas').style.display=motoristas?'':'none';
+  document.querySelector('.filters').style.display=motoristas?'none':'';
+  Array.prototype.forEach.call(document.querySelectorAll('.rail a[data-view]'),function(a){
+    a.classList.toggle('active',a.getAttribute('data-view')===v);
+  });
+  try{history.replaceState(null,'',motoristas?'#motoristas':location.pathname+location.search)}catch(e){}
+  if(!motoristas&&DADOS)requestAnimationFrame(buildCharts);
+}
+Array.prototype.forEach.call(document.querySelectorAll('.rail a[data-view]'),function(a){
+  a.addEventListener('click',function(e){e.preventDefault();mostrarView(a.getAttribute('data-view'))});
+});
+if(location.hash==='#motoristas')mostrarView('motoristas');
 
 // === boot: window.DADOS direto (local/artefato) ou senha + dados.enc.json (GitHub Pages) ===
 function tentarChaveGuardada(enc){
