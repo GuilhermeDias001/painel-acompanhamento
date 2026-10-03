@@ -474,12 +474,17 @@ function renderEscala(){
 function renderAvisos(){
   var diasSemana=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
   var recorrentes=FIXOS.avisosRecorrentes||[];
-  var pontuaisAmanha=FIXOS.avisosPontuaisAmanha||[];
+  var pontuais=FIXOS.avisosPontuais||[];
   var hojeDate=new Date();
-  var amanhaDate=new Date(hojeDate.getTime()+86400000);
+  var amanhaDate=new Date(hojeDate.getFullYear(),hojeDate.getMonth(),hojeDate.getDate()+1);
+  function isoLocal(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  function itensDoDia(d){
+    var iso=isoLocal(d);
+    return recorrentes.filter(function(r){return r.weekday===d.getDay()}).concat(pontuais.filter(function(p){return p.data===iso}));
+  }
   var avisos={
-    hoje:{data:diasSemana[hojeDate.getDay()],itens:recorrentes.filter(function(r){return r.weekday===hojeDate.getDay()})},
-    amanha:{data:diasSemana[amanhaDate.getDay()],itens:recorrentes.filter(function(r){return r.weekday===amanhaDate.getDay()}).concat(pontuaisAmanha)}
+    hoje:{data:diasSemana[hojeDate.getDay()],itens:itensDoDia(hojeDate)},
+    amanha:{data:diasSemana[amanhaDate.getDay()],itens:itensDoDia(amanhaDate)}
   };
   var tagLabel={programado:'Programado',esporadico:'Esporádico'};
   function renderCol(tit,bloco){
