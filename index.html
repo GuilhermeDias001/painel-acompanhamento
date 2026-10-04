@@ -402,6 +402,258 @@ html::-webkit-scrollbar{display:none}
 .op-cab h2{display:flex;align-items:center;gap:8px;line-height:1.2}
 .op-cab h2 .pill{margin:0!important;vertical-align:baseline;line-height:1.3;padding:2px 8px}
 .op-cab.op-cab-c h2{justify-content:center}
+html.fit-modo,html.fit-modo body{height:100%;overflow:hidden}
+html.fit-modo .app{height:100dvh;min-height:0;overflow:hidden}
+html.fit-modo main{overflow:hidden;padding-bottom:0}
+#fitBtn[aria-pressed="true"]{background:var(--rail-vivo,var(--accent));color:#fff;border-color:transparent}
+.op-nota{margin:0 0 12px;font-size:12.5px;color:var(--fg-muted)}
+.op-nota+.op-cards{margin-top:0}
+/* modo "tudo em uma tela": tamanhos proporcionais a janela; listas rolam por dentro, sem barra */
+html.fit-modo{--u:calc((100vh - 330px)/100)}
+html.fit-modo .op-cards{margin:0 0 12px;gap:10px}
+html.fit-modo .op-card{padding:6px 12px}
+html.fit-modo .op-card .value{font-size:20px;margin:0}
+html.fit-modo .banner{padding:12px 20px}
+html.fit-modo .op-linha,html.fit-modo .op-duas{margin-top:12px;gap:12px}
+html.fit-modo .op-col{gap:12px}
+html.fit-modo #viewOperacao .card{padding:10px 12px;min-height:0!important;overflow:hidden}
+html.fit-modo #viewOperacao .card h2{font-size:13px;margin:0 0 4px}
+html.fit-modo .op-linha.l1 .card{height:calc(var(--u)*14)}
+html.fit-modo .op-linha.l1 .op-ch.alto{height:auto;flex:1;min-height:0}
+html.fit-modo .op-duas .op-col:first-child .card{height:calc(var(--u)*34)}
+html.fit-modo .op-duas .op-col:last-child .card{height:calc((var(--u)*34 - 24px)/3)}
+html.fit-modo .op-duas .op-ch{height:auto;flex:1;min-height:0}
+html.fit-modo .op-scroll{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none}
+html.fit-modo .op-scroll::-webkit-scrollbar{display:none}
+html.fit-modo .op-scroll .op-ch.fixo{flex:none}
+html.fit-modo .op-status .op-rosca{margin:0;gap:16px}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*34/3 - 40px);height:calc(var(--u)*34/3 - 40px);min-width:70px;min-height:70px}
+html.fit-modo .op-status .op-donut span{font-size:16px}
+html.fit-modo .op-status .op-leg{font-size:11px;gap:2px}
+html.fit-modo .op-linha.l3 .card{height:calc(var(--u)*18)}
+html.fit-modo .op-lista{height:calc(var(--u)*34)}
+html.fit-modo .op-rows{overflow-y:auto;scrollbar-width:none;flex:1;min-height:0}
+html.fit-modo .op-rows::-webkit-scrollbar{display:none}
+html.fit-modo .op-row3{padding:3px 6px;font-size:12px}
+html.fit-modo .op-linha.l3 .card,html.fit-modo .op-lista{display:flex;flex-direction:column}
+/* modo tela: layout desenhado numa altura fixa e depois reduzido ate caber; 4 graficos numa linha */
+html.fit-modo{--u:6.2px}
+html.fit-modo .op-duas{grid-template-columns:1.5fr 1fr 1fr 1fr}
+html.fit-modo .op-col{display:contents}
+html.fit-modo .op-duas .op-col:first-child .card,html.fit-modo .op-duas .op-col:last-child .card{height:calc(var(--u)*40)}
+html.fit-modo .op-linha.l1 .card{height:calc(var(--u)*17)}
+html.fit-modo .op-linha.l3 .card{height:calc(var(--u)*16)}
+html.fit-modo .op-lista{height:calc(var(--u)*28)}
+html.fit-modo .op-status .op-donut{width:100px;height:100px;min-width:0;min-height:0}
+html.fit-modo .op-status .op-donut span{font-size:22px}
+html.fit-modo .op-status .op-leg{font-size:11.5px;gap:3px}
+html.fit-modo .op-status .op-rosca{justify-content:center}
+html.fit-modo .op-linha.l1 .card{height:calc(var(--u)*22)}
+/* modo tela unica, novo arranjo: indicadores + 5 graficos a esquerda (2/3), listas altas a direita, 3 cards embaixo */
+html.fit-modo #opCorpo{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;
+  grid-template-areas:"nota nota nota nota nota nota" "kpi kpi kpi kpi disp sum" "vagas vagas vagas vagas disp sum" "lojas lojas status status disp sum" "repos repos custo custo disp sum" "ret ret avi avi port port";
+  grid-template-rows:auto auto calc(var(--u)*17) calc(var(--u)*36) calc(var(--u)*32) calc(var(--u)*17)}
+html.fit-modo #opCorpo>section{display:contents}
+html.fit-modo #opCorpo>.op-cards{display:grid;grid-area:kpi;grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+html.fit-modo #opCorpo>.op-nota{grid-area:nota;margin:0}
+html.fit-modo #opCorpo .card{height:auto;min-height:0!important;margin:0}
+html.fit-modo #opCorpo .op-linha.l1 .card{grid-area:vagas}
+html.fit-modo #opCorpo .op-duas .op-col:first-child .card{grid-area:lojas}
+html.fit-modo #opCorpo .op-duas .op-col:last-child .card:nth-child(1){grid-area:status}
+html.fit-modo #opCorpo .op-duas .op-col:last-child .card:nth-child(2){grid-area:repos}
+html.fit-modo #opCorpo .op-duas .op-col:last-child .card:nth-child(3){grid-area:custo}
+html.fit-modo #opCorpo .op-linha.l3 .card:nth-child(1){grid-area:ret}
+html.fit-modo #opCorpo .op-linha.l3 .card:nth-child(2){grid-area:avi}
+html.fit-modo #opCorpo .op-linha.l3 .card:nth-child(3){grid-area:port}
+html.fit-modo #opCorpo .op-grid2 .op-lista:nth-child(1){grid-area:disp}
+html.fit-modo #opCorpo .op-grid2 .op-lista:nth-child(2){grid-area:sum}
+html.fit-modo #opCorpo .op-grid2{margin:0}
+@media (max-width:900px){html.fit-modo #opCorpo{display:block}}
+/* modo tela: sem a faixa fixa; os botoes ficam sobre o canto direito da faixa vermelha */
+html.fit-modo .topline{position:fixed;top:14px;right:24px;left:auto;z-index:30;margin:0;padding:0;border:0;background:transparent;width:auto;flex-wrap:nowrap}
+html.fit-modo main{padding-top:14px}
+html.fit-modo .banner{padding:10px 16px;padding-right:calc(560px / var(--fs,1))}
+html.fit-modo .banner h1{font-size:22px;margin:0}
+html.fit-modo .banner .hero-label{font-size:11px}
+html.fit-modo .topline .proto-badge{font-size:10.5px}
+html.fit-modo .topline .filters{display:none}
+/* modo tela, ajuste: botoes num bloco a esquerda da faixa vermelha (que fica mais estreita); indicadores num card so */
+html.fit-modo .topline{position:fixed;top:14px;left:88px;right:auto;width:168px;padding:0;margin:0;border:0;background:transparent;display:block}
+html.fit-modo .topline>div:first-child{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+html.fit-modo .topline .proto-badge{font-size:9.5px;white-space:normal;line-height:1.25;max-width:168px;border:0;padding:0;color:var(--fg-faint)}
+html.fit-modo .banner{margin-left:calc(184px / var(--fs,1));padding:8px 16px}
+html.fit-modo .banner h1{font-size:20px}
+html.fit-modo .op-cards{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 6px;gap:0;align-items:stretch}
+html.fit-modo .op-cards .op-card{background:none;border:0;border-radius:0;border-right:1px solid var(--border);display:flex;align-items:baseline;gap:8px;justify-content:center}
+html.fit-modo .op-cards .op-card:last-child{border-right:0}
+html.fit-modo .op-cards .op-card .label{margin:0}
+/* modo tela, v3: botoes a esquerda da faixa (relativo ao conteudo), indicadores dentro de Disponiveis, colunas de lista mais largas */
+.op-kpi-fit{display:none}
+html.fit-modo main{position:relative}
+html.fit-modo .topline{position:absolute;top:14px;left:24px;right:auto;width:168px;height:56px;display:flex;align-items:center}
+html.fit-modo .topline>div:first-child{justify-content:flex-start}
+html.fit-modo .banner{margin-left:calc(192px / var(--fs,1))}
+html.fit-modo .op-cards{display:none!important}
+html.fit-modo .op-kpi-fit{display:block;margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--fg)}
+html.fit-modo #opCorpo{grid-template-columns:repeat(2,minmax(0,3fr)) repeat(2,minmax(0,2fr));
+  grid-template-areas:"nota nota nota nota" "vagas vagas disp sum" "lojas status disp sum" "repos custo disp sum" "ret avi port port";
+  grid-template-rows:auto calc(var(--u)*24) calc(var(--u)*33) calc(var(--u)*30) calc(var(--u)*15)}
+html.fit-modo #opCorpo{grid-template-rows:auto calc(var(--u)*22) calc(var(--u)*37) calc(var(--u)*28) calc(var(--u)*15)}
+html.fit-modo #opCorpo{grid-template-rows:auto calc(var(--u)*22) calc(var(--u)*36) calc(var(--u)*33) calc(var(--u)*15)}
+/* modo tela: os 3 indicadores num unico card baixo */
+html.fit-modo .op-cards{display:grid!important;grid-area:kpi;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;margin:0;gap:0;height:38px;align-items:center}
+html.fit-modo .op-cards .op-card{padding:0 8px;height:auto}
+html.fit-modo .op-kpi-fit{display:none!important}
+html.fit-modo #opCorpo{grid-template-areas:"nota nota nota nota" "kpi kpi disp sum" "vagas vagas disp sum" "lojas status disp sum" "repos custo disp sum" "ret avi port port";
+  grid-template-rows:auto auto calc(var(--u)*22) calc(var(--u)*36) calc(var(--u)*33) calc(var(--u)*15)}
+/* modo tela, v4: Disponiveis acima de Sumidos numa coluna estreita; graficos maiores */
+html.fit-modo #opCorpo{grid-template-columns:minmax(0,3fr) minmax(0,3fr) minmax(0,2fr);
+  grid-template-areas:"nota nota nota" "kpi kpi lists" "vagas vagas lists" "lojas status lists" "repos custo lists" "ret avi port";
+  grid-template-rows:auto auto calc(var(--u)*20) calc(var(--u)*37) calc(var(--u)*34) calc(var(--u)*14)}
+html.fit-modo #opCorpo>section.op-grid2{display:grid;grid-area:lists;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:12px;min-height:0;margin:0}
+html.fit-modo #opCorpo .op-grid2 .op-lista{grid-area:auto;height:auto;min-height:0}
+html.fit-modo .op-lista .op-cab h2{font-size:12.5px}
+html.fit-modo #opCorpo .op-grid2 .op-lista:nth-child(1){grid-area:1 / 1 / 2 / 2}
+html.fit-modo #opCorpo .op-grid2 .op-lista:nth-child(2){grid-area:2 / 1 / 3 / 2}
+html.fit-modo #opCorpo>section.op-grid2{contain:size;overflow:hidden}
+/* modo tela, v5: retornos e avisos tambem na coluna da direita */
+html.fit-modo #opCorpo{grid-template-columns:minmax(0,3fr) minmax(0,3fr) minmax(0,2fr);
+  grid-template-areas:"nota nota nota" "kpi kpi lists" "vagas vagas lists" "lojas status lists" "repos custo ret" "port port avi";
+  grid-template-rows:auto auto calc(var(--u)*20) calc(var(--u)*37) calc(var(--u)*34) calc(var(--u)*16)}
+/* modo tela, v6: retornos, avisos e portaria empilhados na coluna da direita */
+html.fit-modo #opCorpo{
+  grid-template-areas:"nota nota nota" "kpi kpi lists" "vagas vagas lists" "lojas status lists" "repos custo ret" "repos custo avi" "repos custo port";
+  grid-template-rows:auto auto calc(var(--u)*20) calc(var(--u)*37) calc(var(--u)*13) calc(var(--u)*8) calc(var(--u)*8)}
+html.fit-modo #opCorpo .op-linha.l3 .card{padding:6px 10px}
+html.fit-modo #opCorpo .op-linha.l3 .card h2{margin:0 0 2px}
+html.fit-modo #opCorpo{grid-template-rows:auto auto calc(var(--u)*20) calc(var(--u)*37) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo #opCorpo .op-linha.l3 .card .op-rows{gap:4px}
+html.fit-modo #opCorpo .op-linha.l3 .op-aviso{padding:3px 8px;font-size:11.5px}
+/* modo tela, v7: faixa vermelha baixa e a coluna da direita sobe ate o topo (a tela inteira vira uma unica grade) */
+html.fit-modo #viewOperacao{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,3fr) minmax(0,2fr);gap:12px;align-content:start;
+  grid-template-areas:"banner banner lists" "nota nota lists" "kpi kpi lists" "vagas vagas lists" "lojas status lists" "repos custo ret" "repos custo avi" "repos custo port";
+  grid-template-rows:auto auto auto calc(var(--u)*20) calc(var(--u)*37) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo #viewOperacao>#opCorpo{display:contents}
+html.fit-modo #viewOperacao>.banner{grid-area:banner;margin:0 0 0 calc(192px / var(--fs,1));padding:5px 14px;min-height:0;border-radius:10px;align-items:center}
+html.fit-modo #viewOperacao>.banner .eyebrow{font-size:8.5px;margin:0}
+html.fit-modo #viewOperacao>.banner h1{font-size:16px;line-height:1.15;margin:0}
+html.fit-modo #viewOperacao>.banner .hero-label{font-size:10px;margin:0}
+html.fit-modo #viewOperacao>#opVazio{grid-column:1/-1}
+/* modo tela: motivos com legenda inteira (card mais alto) e rosca de status maior sem mexer no tamanho do card */
+html.fit-modo #viewOperacao{grid-template-rows:auto auto auto calc(var(--u)*27) calc(var(--u)*37) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*37 - 78px);height:calc(var(--u)*37 - 78px);min-width:130px;min-height:130px}
+html.fit-modo .op-status .op-donut span{font-size:calc(var(--u)*5)}
+html.fit-modo .op-status .op-leg{font-size:12.5px;gap:5px}
+.op-ml{display:none}
+html.fit-modo .op-linha.l1 .op-ch.alto{display:none}
+html.fit-modo .op-ml{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:column;grid-template-rows:repeat(5,auto);gap:3px 28px;align-content:center;flex:1;min-height:0}
+html.fit-modo .op-ml-i{display:grid;grid-template-columns:minmax(130px,38%) 1fr auto;align-items:center;gap:8px;font-size:12px;white-space:nowrap}
+html.fit-modo .op-ml-i span{overflow:hidden;text-overflow:clip}
+html.fit-modo .op-ml-i i{display:block;height:9px;border-radius:3px;background:var(--n-vermelho);width:var(--w);min-width:3px}
+html.fit-modo .op-ml-i b{font-variant-numeric:tabular-nums;min-width:20px;text-align:right}
+html.fit-modo #viewOperacao{grid-template-rows:auto auto auto calc(var(--u)*22) calc(var(--u)*37) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*37 - 56px);height:calc(var(--u)*37 - 56px);min-width:150px;min-height:150px}
+/* modo tela: motivos voltam ao grafico de colunas (sem a lista), card mais baixo */
+html.fit-modo .op-ml{display:none!important}
+html.fit-modo .op-linha.l1 .op-ch.alto{display:block}
+html.fit-modo #viewOperacao{grid-template-rows:auto auto auto calc(var(--u)*18) calc(var(--u)*37) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+/* planejamento: lista simples (sem grade de graficos) tambem no modo tela */
+html.fit-modo #viewOperacao.plan,html.fit-modo #viewOperacao.plan #opCorpo{display:block}
+html.fit-modo #viewOperacao.plan #opCorpo>section{display:block}
+html.fit-modo #viewOperacao.plan #opCorpo>section.op-cards{display:grid!important}
+html.fit-modo #viewOperacao.plan .banner{margin-bottom:12px}
+html.fit-modo #viewOperacao.plan .op-linha{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px;gap:12px}
+html.fit-modo #viewOperacao.plan #opCorpo .card{height:auto;max-height:calc(var(--u)*34);min-height:0!important}
+html.fit-modo #viewOperacao.plan .op-lista{height:auto;max-height:calc(var(--u)*50)}
+html.fit-modo #viewOperacao.plan .op-cards{margin-top:0}
+/* sem "Atualizado em" na faixa da Operacao e, no modo tela, sem o aviso ao lado dos botoes */
+#opCalculo{display:none}
+html.fit-modo .topline .proto-badge{display:none}
+/* indicadores laterais: so existem no modo tela */
+.op-kpi-lado{display:none}
+/* MODO TELA, v8: status + indicadores lado a lado; custo e reposicao lado a lado; lojas estreito e alto */
+html.fit-modo .op-kpi-lado{display:flex;flex-direction:column;gap:10px;grid-area:kpi;min-height:0}
+html.fit-modo .op-kpi-lado .op-card{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4px 12px;margin:0}
+html.fit-modo .op-kpi-lado .op-card .value{font-size:20px;margin:0}
+html.fit-modo .op-cards{display:none!important}
+html.fit-modo #viewOperacao{grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-template-areas:"banner banner banner banner banner banner banner banner banner lists lists lists" "nota nota nota nota nota nota nota nota nota lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists" "status status status status kpi kpi lojas lojas lojas lists lists lists" "custo custo custo repos repos repos lojas lojas lojas ret ret ret" "custo custo custo repos repos repos lojas lojas lojas avi avi avi" "custo custo custo repos repos repos lojas lojas lojas port port port";
+  grid-template-rows:auto auto calc(var(--u)*18) calc(var(--u)*35) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo #opCorpo .op-duas .op-col:nth-child(2) .card:nth-child(1){grid-area:status}
+html.fit-modo #opCorpo .op-duas .op-col:nth-child(2) .card:nth-child(2){grid-area:repos}
+html.fit-modo #opCorpo .op-duas .op-col:nth-child(2) .card:nth-child(3){grid-area:custo}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*35 - 56px);height:calc(var(--u)*35 - 56px);min-width:120px;min-height:120px}
+/* barra lateral sempre acima dos botoes do modo tela */
+html.fit-modo .topline{z-index:20}
+/* nome do perfil ao lado do T (so aparece com a barra aberta) */
+.rail-brand{display:flex;align-items:center;gap:12px;width:100%}
+.rail-brand .mark{margin-left:16px;align-self:center}
+.rail-nome{font-size:14px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;padding-right:12px}
+.rail:not(:hover):not(:has(:focus-visible)) .rail-nome{display:none}
+@media (max-width:760px){.rail-nome{display:none}}
+#fitBtn{display:none}
+/* modo tela: faixa central mais alta, mais perto dos cards e dos botoes */
+html.fit-modo .topline{left:24px;width:150px}
+html.fit-modo.expanded .topline{left:16px}
+html.fit-modo #viewOperacao>.banner{margin:0 0 -16px calc(160px / var(--fs,1));padding:12px 18px;min-height:54px}
+html.fit-modo #viewOperacao>.banner h1{font-size:19px}
+html.fit-modo #viewOperacao>.banner .eyebrow{font-size:9px}
+html.fit-modo #viewOperacao{grid-template-rows:auto 0 calc(var(--u)*18) calc(var(--u)*35) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo #viewOperacao>.banner{margin-left:calc(144px / var(--fs,1));padding:17px 18px;min-height:68px}
+html.fit-modo #viewOperacao>.banner h1{font-size:21px}
+html.fit-modo #viewOperacao{grid-template-rows:auto 0 calc(var(--u)*17) calc(var(--u)*35) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+/* modo tela, v9: indicadores com metade da largura; coluna da direita mais larga (nomes numa linha so) */
+html.fit-modo #viewOperacao{grid-template-columns:repeat(24,minmax(0,1fr));grid-template-areas:"banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner lists lists lists lists lists lists lists" "nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota lists lists lists lists lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists lists lists lists lists" "status status status status status status status status kpi kpi lojas lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas ret ret ret ret ret ret ret" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas port port port port port port port"}
+html.fit-modo #opCorpo .op-lista .op-row3{font-size:11.5px;gap:6px;padding:3px 6px}
+html.fit-modo #opCorpo .op-lista .op-row3>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+html.fit-modo #opCorpo .op-lista .op-row3 .pill{font-size:10px;padding:1px 7px}
+html.fit-modo #opCorpo .op-lista .op-row3>b{font-size:11px;white-space:nowrap}
+html.fit-modo .op-kpi-lado .op-card{padding:4px 8px}
+html.fit-modo .op-kpi-lado .op-card .label{font-size:9.5px;letter-spacing:0.02em}
+.op-custo{padding-left:4px!important;padding-right:4px!important}
+.op-custo h2{padding:0 12px}
+.op-custo{padding-left:0!important;padding-right:0!important}
+.op-custo .op-ch{margin-left:-4px;margin-right:-4px}
+/* modo tela: legenda de cores de Disponiveis na mesma linha do titulo, a direita */
+html.fit-modo .op-lista .op-cab{flex-wrap:nowrap;justify-content:space-between;gap:8px}
+html.fit-modo .op-lista .op-cab h2{white-space:nowrap}
+html.fit-modo .op-lista .op-cab .sub{display:flex!important;align-items:center;flex-wrap:nowrap;white-space:nowrap;font-size:10px;gap:2px}
+html.fit-modo .op-lista .op-cab .sub .op-dot{margin-left:6px}
+/* modo tela, v10: status mais estreito; indicadores num unico card retangular com a portaria embaixo */
+html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner lists lists lists lists lists lists lists" "nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota lists lists lists lists lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists lists lists lists lists" "status status status status status status status kpi kpi kpi lojas lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "status status status status status status status port port port lojas lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas ret ret ret ret ret ret ret" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi";
+  grid-template-rows:auto 0 calc(var(--u)*17) calc(var(--u)*17) calc(var(--u)*18) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo .op-kpi-lado{gap:0;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+html.fit-modo .op-kpi-lado .op-card{flex:1;background:none;border:0;border-radius:0;border-bottom:1px solid var(--border);flex-direction:row;align-items:center;justify-content:space-between;padding:0 14px}
+html.fit-modo .op-kpi-lado .op-card:last-child{border-bottom:0}
+html.fit-modo .op-kpi-lado .op-card .label{margin:0;font-size:10.5px}
+html.fit-modo .op-kpi-lado .op-card .value{font-size:20px;margin:0}
+html.fit-modo #opCorpo .op-linha.l3 .card:nth-child(3){grid-area:port}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*35 - 64px);height:calc(var(--u)*35 - 64px)}
+/* modo tela, v11: status com legenda a esquerda e rosca maior a direita; card Disponiveis/Elites/Bases mais baixo e largo; portaria mais alta */
+html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner lists lists lists lists lists lists lists" "nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota lists lists lists lists lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists lists lists lists lists" "status status status status status status kpi kpi kpi kpi lojas lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "status status status status status status port port port port lojas lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas ret ret ret ret ret ret ret" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi" "custo custo custo custo custo repos repos repos repos repos lojas lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi";
+  grid-template-rows:auto 0 calc(var(--u)*17) calc(var(--u)*13) calc(var(--u)*22) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo .op-status .op-rosca{flex-direction:row-reverse;justify-content:space-between;flex-wrap:nowrap;gap:12px;align-items:center;margin:0}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*35 - 52px);height:calc(var(--u)*35 - 52px);min-width:130px;min-height:130px;flex:none}
+html.fit-modo .op-status .op-leg{font-size:12px;gap:5px;flex:1;min-width:0}
+html.fit-modo .op-kpi-lado .op-card:first-child{background:var(--surface-2);border-bottom:1px solid var(--border-strong)}
+html.fit-modo .op-kpi-lado .op-card:first-child .label{font-size:12.5px;font-weight:700;color:var(--fg);letter-spacing:0.02em;text-transform:none}
+html.fit-modo .op-kpi-lado .op-card:first-child .value{font-size:22px}
+html.fit-modo .op-kpi-lado .op-card:not(:first-child) .value{font-size:17px}
+html.fit-modo .op-status .op-donut{width:calc(var(--u)*35 - 74px);height:calc(var(--u)*35 - 74px);min-width:120px;min-height:120px}
+html.fit-modo .op-status .op-leg{font-size:11.5px;gap:4px}
+html.fit-modo .op-status .op-leg li{white-space:nowrap}
+html.fit-modo .op-status .op-leg b{margin-left:4px}
+/* modo tela, v12: card Disponiveis/Elites/Bases a esquerda do grafico de status, mais alto e mais largo */
+html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner lists lists lists lists lists lists lists" "nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota lists lists lists lists lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists lists lists lists lists" "kpi kpi kpi kpi kpi status status status status status status lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "port port port port port status status status status status status lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas ret ret ret ret ret ret ret" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi";
+  grid-template-rows:auto 0 calc(var(--u)*17) calc(var(--u)*17) calc(var(--u)*18) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+html.fit-modo .op-kpi-lado .op-card:first-child .label{font-size:14px}
+html.fit-modo .op-kpi-lado .op-card:first-child .value{font-size:26px}
+html.fit-modo .op-kpi-lado .op-card:not(:first-child) .label{font-size:12px}
+html.fit-modo .op-kpi-lado .op-card:not(:first-child) .value{font-size:20px}
+/* modo tela, v13: sem o card Disponiveis/Elites/Bases; portaria ocupa a altura toda desse bloco */
+html.fit-modo .op-kpi-lado{display:none!important}
+html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner lists lists lists lists lists lists lists" "nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota lists lists lists lists lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists lists lists lists lists" "port port port port port status status status status status status lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "port port port port port status status status status status status lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas ret ret ret ret ret ret ret" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi";
+  grid-template-rows:auto 0 calc(var(--u)*17) calc(var(--u)*17) calc(var(--u)*18) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
 </style>
 <div class="auth-screen" id="authScreen" style="display:none">
   <div class="auth-card">
@@ -417,12 +669,13 @@ html::-webkit-scrollbar{display:none}
   <div class="rail-trigger" id="railTrigger"></div>
   <div class="rail-slot">
   <aside class="rail">
-    <div class="mark">T</div>
+    <div class="rail-brand"><div class="mark">T</div><span class="rail-nome" id="railNome"></span></div>
     <nav>
       <div class="nav-group">
         <a class="nav-item" href="#" id="navOperacao" data-home="operacao" aria-label="Operação" aria-expanded="false" title="Operação"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></svg><span class="nav-label">Operação</span><svg class="nav-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
         <div class="nav-sub">
           <a class="nav-subitem" href="#" data-view="operacao"><span class="nav-label">Hoje</span></a>
+          <a class="nav-subitem" href="#" data-view="planejamento"><span class="nav-label">Planejamento</span></a>
         </div>
       </div>
       <div class="nav-group">
@@ -449,6 +702,9 @@ html::-webkit-scrollbar{display:none}
         </button>
         <button class="expand-btn" id="expandBtn" type="button" aria-label="Expandir layout" aria-pressed="false">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="expandIcon"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
+        <button class="expand-btn" id="fitBtn" type="button" aria-label="Ajustar tudo em uma tela" aria-pressed="false" title="Ajustar tudo em uma tela">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
         </button>
         <span class="proto-badge" id="protoBadge">Carregando dados…</span>
         <button type="button" class="sair-btn" id="sairBtn">Sair</button>
@@ -548,8 +804,8 @@ html::-webkit-scrollbar{display:none}
     <div class="view" id="viewOperacao" style="display:none">
       <section class="banner">
         <div>
-          <p class="eyebrow">TUF LOGÍSTICA</p>
-          <h1>Operação Contrato</h1>
+          <p class="eyebrow" id="opEyebrow">TUF LOGÍSTICA</p>
+          <h1 id="opTitulo">Operação Contrato</h1>
         </div>
         <div style="text-align:right">
           <p class="hero-label" id="opCalculo">Aguardando dados</p>
@@ -913,6 +1169,8 @@ function buildCharts(){
 function startApp(dadosObj){
   DADOS=dadosObj;
   FIXOS=DADOS.fixos||{};
+  var pn=document.getElementById('railNome');
+  if(pn)pn.textContent=(FIXOS.perfil&&FIXOS.perfil.nome)||'';
   if(primeiraCarga){
     estado.ano=DADOS.padrao.ano;estado.mes=DADOS.padrao.mes;estado.semana=DADOS.padrao.semana;
     primeiraCarga=false;
@@ -927,6 +1185,7 @@ function startApp(dadosObj){
   aplicarPeriodo();
   atualizarBadge();
   document.getElementById('authScreen').style.display='none';
+  if(typeof ajustarTelaDepois==='function')ajustarTelaDepois();
   if(modoCarregamento==='senha')document.getElementById('sairBtn').classList.add('show');
 }
 
@@ -1192,11 +1451,22 @@ document.getElementById('funcSit').addEventListener('click',function(e){
   renderFuncionarios();
 });
 
+function retDias(x){
+  var q=norm(x.quando||'');
+  if(q.indexOf('hoje')===0)return 0;
+  if(q.indexOf('amanha')===0)return 1;
+  var m=/(\d+)/.exec(q);if(m)return +m[1];
+  var d=/^(\d{1,2})\/(\d{1,2})/.exec(x.data||'');
+  if(d){var n=new Date(),t=new Date(n.getFullYear(),+d[2]-1,+d[1]);return Math.round((t-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5)}
+  return 9999;
+}
+function retSort(a){return (a||[]).slice().sort(function(p,q){return retDias(p)-retDias(q)})}
 function opMin(t){var m=/^(\d+):(\d{2})/.exec(t||'');return m?(+m[1])*60+(+m[2]):0}
 function opCorStatus(r){var n=norm(r);return n==='confirmado'?'var(--n-verde)':n.indexOf('pre')===0?'var(--fg-faint)':n==='em aberto'?'var(--n-vermelho)':n==='pendente'?'var(--n-amarelo)':'var(--n-roxo)'}
 function opLista(arr,vazio,fn){return arr&&arr.length?arr.map(fn).join(''):'<p class="aviso-empty">'+vazio+'</p>'}
 function opBarra(pct,cor){return '<div class="op-bar"><div class="op-bar-fill" style="width:'+Math.max(0,Math.min(100,pct))+'%;background:'+cor+'"></div></div>'}
-var opCharts=[];
+var opCharts=[], opModo='operacao';
+function opDados(){return DADOS&&DADOS[opModo==='planejamento'?'planejamento':'operacao']}
 (function(){
   var tip=document.createElement('div');tip.className='op-tip';tip.hidden=true;document.body.appendChild(tip);
   document.addEventListener('mousemove',function(e){
@@ -1212,7 +1482,7 @@ var opCharts=[];
 function opHM(min){return Math.floor(min/60)+':'+('0'+Math.round(min%60)).slice(-2)}
 function opGraficos(){
   opCharts.forEach(function(c){c.destroy()});opCharts=[];
-  var o=DADOS&&DADOS.operacao;
+  var o=opDados();
   if(!o||document.getElementById('viewOperacao').style.display==='none')return;
   var nv=tk('--n-verde'), nr=tk('--n-vermelho'), na=tk('--n-amarelo'), nl=tk('--n-laranja'), nc=tk('--n-ciano'), nz=tk('--n-azul'), np=tk('--n-roxo'), nm=tk('--n-magenta'), pal=[nr,nl,na,nv,nc,nz,np,nm,nl,nc];
   var fg=tk('--fg-muted'), fgS=tk('--fg'), accent=tk('--accent'), good=tk('--good'), warn=tk('--warn'), grade=tk('--border');
@@ -1221,32 +1491,36 @@ function opGraficos(){
   var base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
   var cats=o.categorias||[], cm=o.custoMedio||[], tr=o.tempoReposicao||[], ab=o.lojasEmAberto||[];
   if(el('opChMotivos')&&cats.length)opCharts.push(new Chart(el('opChMotivos'),{type:'bar',
-    data:{labels:cats.map(function(x){return quebra(tcase(x.rotulo))}),datasets:[{data:cats.map(function(x){return x.qtd}),backgroundColor:nr,borderRadius:3,maxBarThickness:28,datalabels:{color:fgS,anchor:'end',align:'end',font:{size:11,weight:'700'}}}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:false}},scales:{x:{ticks:{color:fg,font:{size:10}},grid:{display:false},border:{color:grade}},y:{display:false,beginAtZero:true}}}}));
+    data:{labels:cats.map(function(x){return tcase(x.rotulo)}),datasets:[{data:cats.map(function(x){return x.qtd}),backgroundColor:nr,borderRadius:3,maxBarThickness:28,datalabels:{color:fgS,anchor:'end',align:'end',font:{size:11,weight:'700'}}}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:false}},scales:{x:{ticks:{color:fg,font:{size:9},autoSkip:false,maxRotation:0,minRotation:0,padding:4},grid:{display:false},border:{color:grade}},y:{display:false,beginAtZero:true}}}}));
   if(el('opChCusto')&&cm.length)opCharts.push(new Chart(el('opChCusto'),{type:'bar',
     data:{labels:cm.map(function(x){return tcase(x.tipo)}),datasets:[
-      {type:'bar',data:cm.map(function(x){return x.valor}),backgroundColor:cm.map(function(x){return x.valor>x.meta?nr:nv}),borderRadius:4,maxBarThickness:70,datalabels:{color:'#fff',anchor:'end',align:'start',font:{size:13,weight:'700'},formatter:function(v){return fmtR(v)}}},
-      {type:'line',data:cm.map(function(x){return x.meta}),showLine:false,pointStyle:'line',pointRadius:46,pointBorderWidth:3,pointBorderColor:fgS,datalabels:{color:fg,anchor:'end',align:'top',font:{size:11},formatter:function(v){return 'Meta '+fmtR(v)}}}]},
+      {type:'bar',data:cm.map(function(x){return x.valor}),backgroundColor:cm.map(function(x){return x.valor>x.meta?nr:nv}),borderRadius:4,order:1,maxBarThickness:42,barPercentage:0.5,categoryPercentage:0.6,datalabels:{color:'#fff',anchor:'end',align:'start',font:{size:13,weight:'700'},formatter:function(v){return fmtR(v)}}},
+      {type:'line',data:cm.map(function(x){return x.meta}),showLine:false,order:2,pointStyle:'line',pointRadius:function(c){var b=c.chart.getDatasetMeta(0).data[c.dataIndex];return Math.max(b&&b.width?b.width/2+20:0,40)},pointBorderWidth:3,pointBorderColor:fgS,datalabels:{color:fg,anchor:'end',align:'top',font:{size:11},formatter:function(v){return 'Meta '+fmtR(v)}}}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false}},scales:{x:{ticks:{color:fg},grid:{display:false},border:{color:grade}},y:{display:false,beginAtZero:true,grace:'12%'}}}}));
   var mMeta=opMin(o.metaReposicao);
   if(el('opChRepos')&&tr.length)opCharts.push(new Chart(el('opChRepos'),{type:'bar',
     data:{labels:tr.map(function(x){return quebra(tcase(x.rotulo))}),datasets:[
-      {type:'bar',data:tr.map(function(x){return opMin(x.horas)}),backgroundColor:tr.map(function(x){return opMin(x.horas)>mMeta?nr:nv}),borderRadius:4,maxBarThickness:60,datalabels:{color:fgS,anchor:'end',align:'end',font:{size:12,weight:'700'},formatter:function(v){return opHM(v)+'h'}}},
+      {type:'bar',data:tr.map(function(x){return opMin(x.horas)}),backgroundColor:tr.map(function(x){return opMin(x.horas)>mMeta?nr:nv}),borderRadius:4,maxBarThickness:40,barPercentage:0.75,categoryPercentage:0.7,datalabels:{color:fgS,anchor:'end',align:'end',font:{size:12,weight:'700'},formatter:function(v){return opHM(v)+'h'}}},
       {type:'line',data:tr.map(function(){return mMeta}),borderColor:fgS,borderWidth:2,pointRadius:0,fill:false,datalabels:{display:false}}]},
-    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false}},scales:{x:{ticks:{color:fg,font:{size:10}},grid:{display:false},border:{color:grade}},y:{display:false,beginAtZero:true,grace:'12%'}}}}));
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{title:function(it){return String(it[0].label).split(',').join(' ')},label:function(c){return c.dataset.type==='line'?'Meta '+opHM(c.parsed.y)+'h':opHM(c.parsed.y)+'h'}}}},scales:{x:{ticks:{color:fg,font:{size:10}},grid:{display:false},border:{color:grade}},y:{display:false,beginAtZero:true,grace:'12%'}}}}));
   if(el('opChLojas')&&ab.length)opCharts.push(new Chart(el('opChLojas'),{type:'bar',
     data:{labels:ab.map(function(x){return x.loja}),datasets:[{data:ab.map(function(x){return opMin(x.tempo)}),backgroundColor:ab.map(function(x){return opMin(x.tempo)<90?na:nr}),borderRadius:3,maxBarThickness:14,datalabels:{color:fgS,anchor:'end',align:'end',font:{size:11,weight:'700'},formatter:function(v){return opHM(v)+'h'}}}]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},plugins:{legend:{display:false}},scales:{x:{display:false,beginAtZero:true},y:{ticks:{color:fg,font:{size:10}},grid:{display:false},border:{display:false}}}}}));
 }
 new MutationObserver(function(){opGraficos()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 function renderOperacao(){
-  var o=DADOS&&DADOS.operacao;
-  var corpo=document.getElementById('opCorpo'), vazio=document.getElementById('opVazio');
+  var o=opDados();
+  var corpo=document.getElementById('opCorpo'), vazio=document.getElementById('opVazio'), plan=opModo==='planejamento';
+  document.getElementById('opTitulo').textContent=plan?'Planejamento Contrato':'Operação Contrato';
+  var amanha=new Date();amanha.setDate(amanha.getDate()+1);
+  document.getElementById('opEyebrow').textContent=plan?'TUF LOGÍSTICA · AMANHÃ, '+(function(){var od=opDados(),dd=od&&od.dia?new Date(od.dia+'T12:00:00'):amanha;return dd.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'}).toUpperCase()})():'TUF LOGÍSTICA';
+  vazio.textContent=plan?'Dados do planejamento ainda não carregados — aparecem quando o gerador ler o modo PLANEJAMENTO da aba Hoje.':'Dados da operação ainda não carregados — aparecem quando o gerador do site ler a aba Hoje.';
   if(!o){corpo.innerHTML='';vazio.style.display='';document.getElementById('opCalculo').textContent='Aguardando dados';return}
   vazio.style.display='none';
   var av=o.avisos||[];
   var c=o.calculadoEm?new Date(o.calculadoEm):null;
-  document.getElementById('opCalculo').textContent=c&&!isNaN(c)?'Calculado em '+c.toLocaleDateString('pt-BR')+' às '+c.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'Data do cálculo desconhecida';
+  document.getElementById('opCalculo').textContent=c&&!isNaN(c)?'Atualizado em '+c.toLocaleDateString('pt-BR')+' às '+c.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'Data do cálculo desconhecida';
   var k=o.cards||{}, st=o.status||[], totSt=st.reduce(function(s,x){return s+x.qtd},0), acum=0;
   var cards=[['Disponíveis',k.disponiveis],['Elites',k.elites],['Bases',k.bases]].filter(function(x){return x[1]!=null}).map(function(x){
     return '<div class="op-card"><p class="label">'+x[0]+'</p><p class="value">'+fmt(x[1])+'</p></div>';
@@ -1256,15 +1530,15 @@ function renderOperacao(){
     var len=x.qtd/totSt*C, s='<circle class="op-seg" cx="50" cy="50" r="'+R+'" fill="none" stroke="'+opCorStatus(x.rotulo)+'" stroke-width="18" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" data-nome="'+esc(tcase(x.rotulo))+'" data-qtd="'+x.qtd+'" data-pct="'+Math.round(x.qtd/totSt*100)+'"/>';
     off+=len;return s;
   }).join('');
-  var rosca='<div class="card op-status"><h2>Status das lojas</h2><div class="op-rosca"><div class="op-donut"><svg viewBox="0 0 100 100" role="img" aria-label="Status das lojas"><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="var(--border)" stroke-width="18"/><g transform="rotate(-90 50 50)">'+segs+'</g></svg><span>'+fmt(totSt)+'</span></div><ul class="op-leg">'+
+  var rosca='<div class="card op-status"><h2>Status das lojas</h2><div class="op-rosca"><div class="op-donut"><svg viewBox="0 0 100 100" role="img" aria-label="Status das lojas"><circle cx="50" cy="50" r="'+R+'" fill="none" stroke="var(--border)" stroke-width="18"/><g transform="rotate(-90 50 50)">'+segs+'</g></svg><span>'+(st.length?fmt(totSt):'')+'</span></div><ul class="op-leg">'+
     st.map(function(x){return '<li><i style="background:'+opCorStatus(x.rotulo)+'"></i>'+esc(tcase(x.rotulo))+' <b>'+fmt(x.qtd)+'</b></li>'}).join('')+'</ul></div></div>';
   var cats=o.categorias||[], cm=o.custoMedio||[], tr=o.tempoReposicao||[], abertas=o.lojasEmAberto||[];
-  var motivos='<div class="card"><h2 class="centro">Vagas do dia por motivo</h2><div class="op-ch alto"><canvas id="opChMotivos" role="img" aria-label="Vagas do dia por motivo"></canvas></div></div>';
-  var custo='<div class="card"><h2>Custo médio</h2><div class="op-ch"><canvas id="opChCusto" role="img" aria-label="Custo médio por tipo de contrato"></canvas></div></div>';
+  var motivos='<div class="card"><h2 class="centro">Vagas do dia por motivo</h2><div class="op-ch alto"><canvas id="opChMotivos" role="img" aria-label="Vagas do dia por motivo"></canvas></div><div class="op-ml">'+cats.map(function(x){return '<div class="op-ml-i"><span>'+esc(tcase(x.rotulo))+'</span><i style="--w:'+Math.round(x.qtd/Math.max.apply(null,cats.map(function(c){return c.qtd}).concat([1]))*100)+'%"></i><b>'+fmt(x.qtd)+'</b></div>'}).join('')+'</div></div>';
+  var custo='<div class="card op-custo"><h2>Custo médio</h2><div class="op-ch"><canvas id="opChCusto" role="img" aria-label="Custo médio por tipo de contrato"></canvas></div></div>';
   var repos='<div class="card"><h2>Tempo de reposição</h2>'+(o.metaReposicao?'<p class="sub">Meta '+esc(o.metaReposicao)+'h</p>':'')+'<div class="op-ch"><canvas id="opChRepos" role="img" aria-label="Tempo de reposição"></canvas></div></div>';
-  var lojas='<div class="card"><h2>Lojas há mais tempo em aberto</h2><div class="op-ch fixo" style="height:'+(abertas.length*36+16)+'px"><canvas id="opChLojas" role="img" aria-label="Lojas há mais tempo em aberto"></canvas></div></div>';
-  var ret='<div class="card"><h2>Próximos retornos</h2><div class="op-rows">'+opLista(o.retornos,'Nenhum retorno previsto.',function(x){
-    return '<div class="op-row3"><span>'+esc(tcase(x.nome))+'</span><span class="pill '+(norm(x.quando)==='amanha'?'t-vermelho':'programado')+'">'+esc(tcase(x.quando))+'</span><b>'+(x.data?esc(x.data):'')+'</b></div>';
+  var lojas='<div class="card"><h2>Lojas há mais tempo em aberto</h2><div class="op-scroll"><div class="op-ch fixo" style="height:'+(abertas.length*36+16)+'px"><canvas id="opChLojas" role="img" aria-label="Lojas há mais tempo em aberto"></canvas></div></div></div>';
+  var ret='<div class="card"><h2>Próximos retornos</h2><div class="op-rows">'+opLista(retSort(o.retornos),'Nenhum retorno previsto.',function(x){
+    return '<div class="op-row3"><span>'+esc(tcase(x.nome))+'</span><span class="pill '+({hoje:'t-verde',amanha:'t-vermelho'}[norm(x.quando)]||'programado')+'">'+esc(tcase(x.quando))+'</span><b>'+(x.data?esc(x.data):'')+'</b></div>';
   })+'</div></div>';
   var avisos='<div class="card"><h2>Quadro de avisos</h2><div class="op-rows">'+opLista(av,'Sem avisos.',function(x){return '<p class="op-aviso">'+esc(x)+'</p>'})+'</div></div>';
   var port='<div class="card"><h2>Portaria</h2><div class="op-rows">'+opLista(o.portaria,'Ninguém na portaria agora.',function(x){
@@ -1282,14 +1556,14 @@ function renderOperacao(){
     var m=/(\d{1,2}):(\d{2}).*?(\d{1,2}):(\d{2})/.exec(x.horario||''), s='';
     if(m){
       var a=+m[1]*60+ +m[2], b=+m[3]*60+ +m[4];
-      if(b<a){s=(nowM>=a||nowM<b)?'serv':'enc'}else s=nowM<a?'entrar':nowM>=b?'enc':'serv';
+      if(plan)s='';else if(b<a){s=(nowM>=a||nowM<b)?'serv':'enc'}else s=nowM<a?'entrar':nowM>=b?'enc':'serv';
     }
     if(s==='serv')nServ++;else if(s==='entrar')nEntrar++;else if(s==='enc')nEnc++;
     return {x:x,s:s,ini:m?(+m[1]*60+ +m[2]):99999,fim:m?(+m[3]*60+ +m[4]):99999};
   });
   dispLinhas.sort(function(p,q){return p.ini-q.ini||p.fim-q.fim});
   var lDisp='<div class="card op-lista"><div class="op-cab"><h2>Disponíveis <span class="pill programado">'+disp.length+'</span></h2>'+
-    '<p class="sub"><span class="op-dot verde"></span>Em serviço <span class="op-dot amarelo"></span>A entrar <span class="op-dot rosa"></span>Encerrado</p></div><div class="op-rows">'+
+    (plan?'':'<p class="sub"><span class="op-dot verde"></span>Em serviço <span class="op-dot amarelo"></span>A entrar <span class="op-dot rosa"></span>Encerrado</p>')+'</div>'+((k.elites!=null||k.bases!=null)?'<p class="op-kpi-fit">'+(k.disponiveis!=null?'Disponíveis '+fmt(k.disponiveis)+' · ':'')+(k.elites!=null?'Elites '+fmt(k.elites):'')+(k.bases!=null?' · Bases '+fmt(k.bases):'')+'</p>':'')+'<div class="op-rows">'+
     opLista(dispLinhas,'Ninguém disponível.',function(l){
       var t=l.x.tipo||'';
       return '<div class="op-row3 rw-'+({serv:'verde',entrar:'amarelo',enc:'rosa'}[l.s]||'')+'"><span>'+esc(tcase(l.x.nome))+'</span><span class="pill '+({serv:'t-verde',entrar:'t-amarelo',enc:'t-vermelho'}[l.s]||'programado')+'">'+esc(tcase(t))+'</span><b>'+esc(l.x.horario||'')+'</b></div>';
@@ -1303,15 +1577,21 @@ function renderOperacao(){
   var tem=function(a){return a&&a.length};
   var avisosFim=av.length?av:[];
   avisos='<div class="card"><h2>Quadro de avisos</h2><div class="op-rows">'+(avisosFim.length?avisosFim.map(function(x){return '<p class="op-aviso">'+esc(x)+'</p>'}).join(''):'<p class="aviso-empty">Sem avisos.</p>')+'</div></div>';
-  corpo.innerHTML='<section class="op-cards">'+cards+'</section>'+(tem(cats)?'<section class="op-linha l1">'+motivos+'</section>':'')+'<section class="op-duas"><div class="op-col">'+(tem(abertas)?lojas:'')+'</div><div class="op-col">'+(tem(st)?rosca:'')+(tem(tr)?repos:'')+(tem(cm)?custo:'')+'</div></section><section class="op-linha l3">'+ret+avisos+port+'</section><section class="op-grid op-grid2">'+listas+'</section>';
+  document.getElementById('viewOperacao').classList.remove('plan');
+  var diaTxt='';
+  if(plan&&o.dia){var dd=new Date(o.dia+'T12:00:00');if(!isNaN(dd))diaTxt=dd.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})}
+  var nota='';
+  corpo.innerHTML=nota+'<section class="op-cards">'+cards+'</section>'+'<section class="op-linha l1">'+motivos+'</section><section class="op-duas"><div class="op-col">'+lojas+'</div><div class="op-col">'+rosca+repos+custo+'</div><div class="op-kpi-lado">'+cards+'</div></section><section class="op-linha l3">'+ret+avisos+port+'</section><section class="op-grid op-grid2">'+listas+'</section>';
   window.requestAnimationFrame(opGraficos);
 }
 var AREAS_BREVE={frota:'Frota',ti:'T.I',rh:'Recursos Humanos'};
 function mostrarView(v){
-  var views={painel:'viewPainel',operacao:'viewOperacao',motoristas:'viewMotoristas',funcionarios:'viewFuncionarios'};
+  var views={painel:'viewPainel',operacao:'viewOperacao',planejamento:'viewOperacao',motoristas:'viewMotoristas',funcionarios:'viewFuncionarios'};
   var breve=!!AREAS_BREVE[v];
   if(!views[v]&&!breve)v='painel';
-  Object.keys(views).forEach(function(k){document.getElementById(views[k]).style.display=k===v?'':'none'});
+  Object.keys(views).forEach(function(k){document.getElementById(views[k]).style.display='none'});
+  if(views[v])document.getElementById(views[v]).style.display='';
+  if(v==='operacao'||v==='planejamento'){opModo=v;renderOperacao()}
   document.getElementById('viewEmBreve').style.display=breve?'':'none';
   if(breve)document.getElementById('embreveTitulo').textContent=AREAS_BREVE[v];
   document.querySelector('.filters').style.display=v==='painel'?'':'none';
@@ -1322,11 +1602,57 @@ function mostrarView(v){
     a.classList.toggle('active',a.getAttribute('data-view')===v);
   });
   document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas');
-  document.getElementById('navOperacao').classList.toggle('active',v==='operacao');
+  document.getElementById('navOperacao').classList.toggle('active',v==='operacao'||v==='planejamento');
   try{history.replaceState(null,'',v==='painel'?location.pathname+location.search:'#'+v)}catch(e){}
   if(v==='painel'&&DADOS)requestAnimationFrame(buildCharts);
-  if(v==='operacao'&&DADOS)requestAnimationFrame(opGraficos);
+  if((v==='operacao'||v==='planejamento')&&DADOS)requestAnimationFrame(opGraficos);
+  if(typeof ajustarTela==='function'){ajustarTela();ajustarTelaDepois()}
 }
+// === modo "tudo em uma tela": reduz a escala da tela atual ate caber sem rolar ===
+var fitOn=false, fitView=null;
+try{fitOn=localStorage.getItem('tuf-fit')==='1'}catch(e){}
+function fitReset(){
+  if(!fitView)return;
+  fitView.style.transform='';fitView.style.transformOrigin='';fitView.style.width='';fitView.style.marginBottom='';
+  document.documentElement.style.removeProperty('--u');document.documentElement.style.removeProperty('--fs');
+  fitView=null;
+}
+function ajustarTela(){
+  fitReset();
+  var btn=document.getElementById('fitBtn');
+  var el=['viewOperacao'].map(function(i){return document.getElementById(i)}).filter(function(e){return e.style.display!=='none'})[0];
+  btn.style.display=el?'flex':'none';
+  btn.setAttribute('aria-pressed',fitOn?'true':'false');
+  document.documentElement.classList.toggle('fit-modo',!!(fitOn&&el));
+  if(!fitOn||!el)return;
+  var tl=document.querySelector('.topline'), disp=window.innerHeight-(/fixed|absolute/.test(getComputedStyle(tl).position)?0:tl.offsetHeight)-24;
+  el.style.transformOrigin='top left';
+  // altura da tela em escala s = altura natural na largura 100/s, vezes s (cresce com s): busca binaria
+  function alturaEm(s){el.style.transform='';el.style.width=(100/s)+'%';return el.scrollHeight*s}
+  var s=1, de=document.documentElement;
+  de.style.setProperty('--u','6.2px');
+  if(alturaEm(1)<=disp){
+    var ulo=6.2, uhi=16;
+    for(var j=0;j<12;j++){var um=(ulo+uhi)/2;de.style.setProperty('--u',um+'px');if(alturaEm(1)<=disp)ulo=um;else uhi=um}
+    de.style.setProperty('--u',ulo+'px');
+  }
+  if(alturaEm(1)>disp){
+    var lo=0.3, hi=1;
+    for(var i=0;i<12;i++){var mid=(lo+hi)/2;if(alturaEm(mid)<=disp)lo=mid;else hi=mid}
+    s=lo;
+  }
+  el.style.width=(100/s)+'%';
+  el.style.transform='scale('+s+')';
+  document.documentElement.style.setProperty('--fs',s);
+  el.style.marginBottom=(-(el.scrollHeight*(1-s)))+'px';
+  fitView=el;
+}
+function ajustarTelaDepois(){setTimeout(ajustarTela,60);setTimeout(ajustarTela,500)}
+document.getElementById('fitBtn').addEventListener('click',function(){
+  fitOn=!fitOn;try{localStorage.setItem('tuf-fit',fitOn?'1':'0')}catch(e){}
+  ajustarTela();ajustarTelaDepois();
+});
+(function(){var t;window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(ajustarTela,150)})})();
 Array.prototype.forEach.call(document.querySelectorAll('.rail a[data-view]'),function(a){
   a.addEventListener('click',function(e){e.preventDefault();mostrarView(a.getAttribute('data-view'))});
 });
