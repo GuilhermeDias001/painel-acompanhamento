@@ -1,0 +1,9 @@
+# gerados ou abertos só durante a execução: nunca vão para o repositório
+gerador/senha.txt
+gerador/fixos.json
+gerador/.sal.json
+gerador/.estado.json
+gerador/dados.js
+gerador/dados.json
+gerador/publicar/
+_site/

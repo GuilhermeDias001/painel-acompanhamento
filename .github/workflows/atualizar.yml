@@ -1,0 +1,59 @@
+# Gera os dados do painel a partir das planilhas (Microsoft Graph) e publica no Pages.
+# Horários em UTC: de 10 em 10 min, das 06h às 23h50 de São Paulo, fora do minuto 0
+# (o GitHub atrasa os agendamentos no começo de cada hora).
+name: Atualizar painel
+
+on:
+  schedule:
+    - cron: '7,17,27,37,47,57 9-23 * * *'
+    - cron: '7,17,27,37,47,57 0-2 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: atualizar-painel
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      TZ: America/Sao_Paulo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Gerar dados
+        env:
+          CHAVE_CI: ${{ secrets.CHAVE_CI }}
+        run: node gerador/ci.mjs
+
+      - name: Guardar token renovado
+        if: always()
+        run: |
+          git add segredos.enc
+          if ! git diff --cached --quiet; then
+            git -c user.name=GuilhermeDias001 -c user.email=GuilhermeDias001@users.noreply.github.com commit -q -m "Renova token"
+            git pull -q --rebase origin main
+            git push -q origin main
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
