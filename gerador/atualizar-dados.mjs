@@ -10,6 +10,7 @@ import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
+import { montarMapa } from './mapa.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 // no GitHub Actions o ci.mjs aponta para uma cópia temporária do token
@@ -314,6 +315,13 @@ try {
   const ent = await entradaOperacao(tk);
   dados.operacao = calcOperacao(ent);
   dados.planejamento = calcPlanejamento(ent, dados.operacao);
+  // Mapa: lojas da Contratos (B nome, R endereço, T bairro, U região) com coordenadas em cache
+  try {
+    const b = await lerAcomp(tk, 'Contratos', 'B2:B500', NOVA_OP);
+    const rtu = await lerAcomp(tk, 'Contratos', 'R2:U500', NOVA_OP);
+    const contratos = b.map((l, i) => [l[0], rtu[i][0], rtu[i][2], rtu[i][3]]);
+    dados.mapa = await montarMapa({ contratos, dia: ent.dia, operacao: dados.operacao, cacheArq: join(AQUI, 'geocache.json') });
+  } catch (e) { console.log(`FALHA mapa: ${String(e.message).slice(0, 200)}`); }
 } catch (e) { console.log(`FALHA operação: ${String(e.message).slice(0, 200)}`); }
 if (existsSync(join(AQUI, 'fixos.json'))) dados.fixos = JSON.parse(readFileSync(join(AQUI, 'fixos.json'), 'utf8'));
 

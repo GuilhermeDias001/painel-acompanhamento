@@ -47,8 +47,9 @@ jobs:
         if: always()
         run: |
           git add segredos.enc
+          if [ -f geocache.enc ]; then git add geocache.enc; fi
           if ! git diff --cached --quiet; then
-            git -c user.name=GuilhermeDias001 -c user.email=GuilhermeDias001@users.noreply.github.com commit -q -m "Renova token"
+            git -c user.name=GuilhermeDias001 -c user.email=GuilhermeDias001@users.noreply.github.com commit -q -m "Renova token / coordenadas"
             git pull -q --rebase origin main
             git push -q origin main
           fi

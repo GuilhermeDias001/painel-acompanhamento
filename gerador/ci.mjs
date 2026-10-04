@@ -20,6 +20,10 @@ writeFileSync(TOKEN, JSON.stringify(s.token));
 writeFileSync(join(AQUI, 'senha.txt'), s.senha);
 writeFileSync(join(AQUI, '.sal.json'), JSON.stringify(s.sal));
 if (s.fixos) writeFileSync(join(AQUI, 'fixos.json'), JSON.stringify(s.fixos));
+// cache das coordenadas das lojas (mapa): cifrado no repositório, aberto só durante a execução
+const GEO = join(RAIZ, 'geocache.enc'), GEO_JSON = join(AQUI, 'geocache.json');
+const geoAntes = existsSync(GEO) ? JSON.stringify(decifrar(readFileSync(GEO, 'utf8'), CHAVE)) : '{}';
+writeFileSync(GEO_JSON, geoAntes);
 
 try {
   execFileSync(process.execPath, [join(AQUI, 'atualizar-dados.mjs')], {
@@ -33,6 +37,9 @@ try {
     console.log('cofre: token renovado');
   }
 }
+
+const geoDepois = existsSync(GEO_JSON) ? readFileSync(GEO_JSON, 'utf8') : '{}';
+if (geoDepois !== geoAntes) { writeFileSync(GEO, cifrar(JSON.parse(geoDepois), CHAVE)); console.log('cofre: coordenadas novas guardadas'); }
 
 const enc = join(AQUI, 'publicar', 'dados.enc.json');
 if (!existsSync(enc)) throw new Error('dados.enc.json não foi gerado');
