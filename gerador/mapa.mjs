@@ -25,24 +25,31 @@ const tipoDe = (nome) => {
 const ehGrupo = (nome) => /\//.test(nome) || /\d\s*(,|\bE\b)\s*\d/.test(semAcento(nome));
 
 const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
-// "Rua X, 123 - Bairro, Cidade - UF, 00000-000" -> pedido ao Nominatim com rua+número e cidade.
-// O CEP (BrasilAPI) só entra se o Nominatim não achar: ele costuma devolver o centro da
-// cidade (em 04/10, 58 lojas caíram no mesmo ponto).
+// Pedidos ao Nominatim só dentro da Grande SP (viewbox), do mais preciso ao menos:
+// rua+número+cidade, rua+cidade, e por fim o CEP (BrasilAPI), que costuma ser o centro da
+// cidade (em 04/10, 58 lojas caíram no mesmo ponto). Endereço com várias lojas ("... / LOJA 2 - ...")
+// usa o primeiro.
+const GRANDE_SP = '-47.2,-23.0,-45.9,-24.2';
+async function nominatim(q) {
+  await espera(1100); // no máximo 1 pedido por segundo e identificação obrigatória
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&viewbox=${GRANDE_SP}&bounded=1&q=${encodeURIComponent(q)}`;
+  const r = await fetch(url, { headers: { 'User-Agent': 'painel-tuf/1.0 (github.com/GuilhermeDias001/painel-acompanhamento)' } });
+  if (!r.ok) return null;
+  const j = await r.json();
+  return j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : null;
+}
 async function geocodificar(endereco) {
-  const limpo = endereco.replace(/^Endere[cç]o:\s*/i, '').trim();
-  const cep = (limpo.match(/(\d{5})-?(\d{3})/) || []).slice(1).join('');
-  const semCep = limpo.replace(/,?\s*\d{5}-?\d{3}\s*$/, '');
-  const m = semCep.match(/^(.+?)\s*-\s*([^,]+),\s*(.+?)\s*-\s*([A-Z]{2})\s*$/); // rua nº - bairro, cidade - UF
-  const q = m ? `${m[1]}, ${m[3]}, ${m[4]}, Brasil` : `${semCep}, Brasil`;
-  await espera(1100); // Nominatim: no máximo 1 pedido por segundo e identificação obrigatória
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(q)}`;
-    const r = await fetch(url, { headers: { 'User-Agent': 'painel-tuf/1.0 (github.com/GuilhermeDias001/painel-acompanhamento)' } });
-    if (r.ok) {
-      const j = await r.json();
-      if (j[0]) return { lat: +j[0].lat, lng: +j[0].lon, fonte: j[0].addresstype === 'building' || j[0].class === 'place' && j[0].type === 'house' ? 'numero' : 'rua' };
-    }
-  } catch { /* cai no CEP */ }
+  const primeiro = endereco.replace(/^Endere[cç]o:\s*/i, '').split(/\s\/\s/)[0].trim();
+  const cep = (primeiro.match(/(\d{5})-?(\d{3})/) || []).slice(1).join('');
+  const semCep = primeiro.replace(/,?\s*\d{5}-?\d{3}.*$/, '');
+  const m = semCep.match(/^(.+?),\s*(\d+)\s*-\s*([^,]+),\s*(.+?)\s*-\s*([A-Z]{2})\s*$/); // rua, nº - bairro, cidade - UF
+  const tentativas = m
+    ? [[`${m[1]}, ${m[2]}, ${m[4]}, ${m[5]}`, 'numero'], [`${m[1]}, ${m[4]}, ${m[5]}`, 'rua']]
+    : [[semCep, 'rua']];
+  for (const [q, precisao] of tentativas) {
+    const g = await nominatim(q).catch(() => null);
+    if (g) return { ...g, fonte: precisao };
+  }
   if (cep.length === 8) {
     try {
       const r = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`);
@@ -83,7 +90,7 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   const aberto = new Map((operacao?.lojasEmAberto || []).map((x) => [semAcento(x.loja), x.tempo]));
   const saida = [];
   for (const l of lojas.values()) {
-    const ck = 'v2|' + l.endereco; // v2: rua+número no Nominatim (04/10)
+    const ck = 'v3|' + l.endereco; // v3: Nominatim rua+número na Grande SP (04/10)
     if (!(ck in cache)) {
       if (novos >= 100) continue; // limita cada execução; o resto entra nas próximas
       cache[ck] = await geocodificar(l.endereco).catch(() => null);
@@ -100,5 +107,5 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
     saida.push(o);
   }
   if (novos) writeFileSync(cacheArq, JSON.stringify(cache));
-  return { lojas: saida, semCoordenada: [...lojas.values()].filter((l) => cache['v2|' + l.endereco] === null).map((l) => l.nome) };
+  return { lojas: saida, semCoordenada: [...lojas.values()].filter((l) => cache['v3|' + l.endereco] === null).map((l) => l.nome) };
 }
