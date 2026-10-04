@@ -431,8 +431,9 @@ async function cadastroMotoristas(tk) {
   return [...reg.values()].sort((a, b) => (b.ativo - a.ativo) || a.nome.localeCompare(b.nome));
 }
 
-// rh.json = [A1:K1500, N1:N1500, P1:T1500, AB1:AC1500] no formato do Excel Services
-// ({rows: [[{v, fv}]]}), nessa ordem. Remonta as linhas na grade A:AC (sensíveis vazias).
+// rh.json = [A1:E1500, F1:K1500, N1:N1500, P1:T1500, AB1:AC1500] no formato do Excel
+// Services ({rows: [[{v, fv}]]}), nessa ordem (o serviço recusa mais de ~10 mil células por
+// pedido). Remonta as linhas na grade A:AC, com as colunas sensíveis vazias.
 async function rhDoFluxo(tk) {
   const base = 'https://graph.microsoft.com/v1.0/me/drive/root:/' + encodeURI('Painel TUF - copias/rh.json');
   const meta = await (await fetch(base + '?$select=lastModifiedDateTime', { headers: { Authorization: 'Bearer ' + tk } })).json();
@@ -441,7 +442,7 @@ async function rhDoFluxo(tk) {
   const r = await fetch(base + ':/content', { headers: { Authorization: 'Bearer ' + tk } });
   if (!r.ok) return null;
   const partes = JSON.parse(await r.text());
-  const inicio = [0, 13, 15, 27]; // A, N, P, AB
+  const inicio = [0, 5, 13, 15, 27]; // A, F, N, P, AB
   const linhas = Array.from({ length: 1500 }, () => Array(29).fill(''));
   partes.forEach((p, k) => (p.rows || []).forEach((row, i) => row.forEach((c, j) => {
     // número/data vem em v; texto pode vir só em fv
