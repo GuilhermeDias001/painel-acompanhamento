@@ -670,6 +670,22 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
 /* calendario: dia atual = so a tarja superior em amarelo neon, um pouco mais grossa */
 .cal-day.hoje{border-top:5px solid var(--n-amarelo)}
 .cal-day.hoje{border-top:5px solid #fff200;box-shadow:0 -3px 10px rgba(255,242,0,.65)}
+.esc-dia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.esc-dia h2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-transform:none}
+.esc-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 14px;margin-top:8px}
+.esc-item{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--border)}
+.esc-item i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--n-verde)}
+@media (max-width:900px){.esc-dia{grid-template-columns:1fr}}
+.esc-dia .esc-lista{display:grid;margin-top:6px}
+.esc-grupo+.esc-grupo{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-strong)}
+.esc-grupo h3{margin:0;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--fg-faint)}
+#escHoje,#escAmanha{display:block!important}
+.esc-grupo .esc-lista{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 14px}
+/* escala do dia: card dividido ao meio (motoboys | motoristas) */
+#escHoje,#escAmanha{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:8px}
+.esc-grupo{min-width:0;padding-right:14px}
+.esc-grupo+.esc-grupo{margin-top:0;padding-top:0;border-top:0;border-left:1px solid var(--border-strong);padding-left:16px;padding-right:0}
+.esc-grupo .esc-lista{grid-template-columns:1fr!important}
 </style>
 <div class="auth-screen" id="authScreen" style="display:none">
   <div class="auth-card">
@@ -787,6 +803,17 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
       <h2>Escala do mês</h2>
       <p class="sub">Folgas por motorista · setembro/2026</p>
       <div class="cal-grid" id="calGrid"></div>
+    </section>
+
+    <section class="esc-dia">
+      <div class="card">
+        <h2 id="escHojeT">Hoje</h2>
+        <div class="esc-lista" id="escHoje"></div>
+      </div>
+      <div class="card">
+        <h2 id="escAmanhaT">Amanhã</h2>
+        <div class="esc-lista" id="escAmanha"></div>
+      </div>
     </section>
 
     <section class="grid">
@@ -1022,7 +1049,28 @@ function aplicarPeriodo(){
   buildCharts();
 }
 
+function folgaNoDia(r,d){
+  var wd=d.getDay(), sem=Math.min(4,Math.floor((d.getDate()-1)/7)+1);
+  return wd===0?(r.domFixo===true||r.grupoDom===sem):r.fixos.indexOf(wd)!==-1;
+}
+function renderEscalaDia(){
+  var regras=FIXOS.escala||{}, nomes=Object.keys(regras);
+  var hoje=new Date(), amanha=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()+1);
+  function monta(d,idT,idL,rot){
+    var trab=nomes.filter(function(n){return !folgaNoDia(regras[n],d)});
+    var dia=d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});
+    document.getElementById(idT).innerHTML=rot+' · '+esc(dia)+' <span class="pill programado">'+trab.length+'</span>';
+    function grupo(titulo,lista){
+      return '<div class="esc-grupo"><h3>'+titulo+' <span class="pill programado">'+lista.length+'</span></h3>'+(lista.length?'<div class="esc-lista">'+lista.map(function(n){return '<div class="esc-item"><i></i>'+esc(tcase(n))+'</div>'}).join('')+'</div>':'<p class="aviso-empty">Ninguém escalado.</p>')+'</div>';
+    }
+    var boys=trab.filter(function(n){return regras[n].tipo==='motoboy'}), mots=trab.filter(function(n){return regras[n].tipo!=='motoboy'});
+    document.getElementById(idL).innerHTML=nomes.length?grupo('Motoboys',boys)+grupo('Motoristas',mots):'<p class="aviso-empty">Escala ainda não carregada.</p>';
+  }
+  monta(hoje,'escHojeT','escHoje','Hoje');
+  monta(amanha,'escAmanhaT','escAmanha','Amanhã');
+}
 function renderEscala(){
+  renderEscalaDia();
   // dado real da aba Escalas (Assistente Farmoterapica.xlsx): folga fixa por dia da
   // semana (1=seg...6=sab) + rodizio de domingo por grupo (grupo N folga no domingo
   // da semana N do mes, semana = min(4, floor((dia-1)/7)+1)). Vem de fixos.json -
@@ -1048,7 +1096,7 @@ function renderEscala(){
     var semanaDom=Math.min(4,Math.floor((diaMes-1)/7)+1);
     var offNomes=dentro?nomesComEscala.filter(function(n){
       var r=folgaRegras[n];
-      if(weekday===0)return r.grupoDom===semanaDom;
+      if(weekday===0)return r.domFixo===true||r.grupoDom===semanaDom;
       return r.fixos.indexOf(weekday)!==-1;
     }):[];
     var chips=offNomes.slice(0,3).map(function(n){return '<span class="cal-chip">'+n.split(' ')[0]+'</span>'}).join('');
@@ -1691,6 +1739,21 @@ Array.prototype.forEach.call(document.querySelectorAll('.rail a[data-view]'),fun
   rail.addEventListener('mouseleave',function(){grupos.forEach(function(g){definir(g,false)})});
 })();
 if(location.hash.length>1)mostrarView(location.hash.slice(1));
+
+// === virada do dia: quem deixa a pagina aberta ve tudo que depende da data se atualizar sozinho ===
+(function(){
+  function chave(){var d=new Date();return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()}
+  var atual=chave();
+  setInterval(function(){
+    var k=chave();
+    if(k===atual||!DADOS)return;
+    atual=k;
+    // o seletor volta ao mes de hoje (se houver dado dele) e tudo que usa a data e redesenhado
+    var h=new Date(), info=DADOS.anos.filter(function(a){return a.ano===h.getFullYear()})[0];
+    if(info&&info.meses.indexOf(h.getMonth()+1)!==-1){estado.ano=h.getFullYear();estado.mes=h.getMonth()+1;estado.semana=0}
+    montarSelects();renderEscala();renderAvisos();renderFuncionarios();renderOperacao();aplicarPeriodo();
+  },60000);
+})();
 
 // === boot: window.DADOS direto (local/artefato) ou senha + dados.enc.json (GitHub Pages) ===
 function tentarChaveGuardada(enc){
