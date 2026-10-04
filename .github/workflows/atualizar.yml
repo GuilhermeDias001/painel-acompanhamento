@@ -1,12 +1,14 @@
 # Gera os dados do painel a partir das planilhas (Microsoft Graph) e publica no Pages.
-# Horários em UTC: de 10 em 10 min, das 06h às 23h50 de São Paulo, fora do minuto 0
-# (o GitHub atrasa os agendamentos no começo de cada hora).
+# O agendamento (schedule) do GitHub não disparou em 04/10 — ele é "melhor esforço" e
+# atrasa ou pula execuções. Por isso cada execução, no job "encadear", espera até o
+# próximo múltiplo de 10 min e dispara a seguinte (workflow_dispatch). Só a execução mais
+# nova continua a corrente: se houver duas, a mais antiga para. Um push ou o schedule
+# (quando funcionar) religam a corrente se ela cair.
 name: Atualizar painel
 
 on:
   schedule:
-    - cron: '7,17,27,37,47,57 9-23 * * *'
-    - cron: '7,17,27,37,47,57 0-2 * * *'
+    - cron: '7,17,27,37,47,57 * * * *'
   push:
     branches: [main]
   workflow_dispatch:
@@ -15,15 +17,15 @@ permissions:
   contents: write
   pages: write
   id-token: write
-
-concurrency:
-  group: atualizar-painel
-  cancel-in-progress: false
+  actions: write
 
 jobs:
   atualizar:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: atualizar-painel
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -57,3 +59,25 @@ jobs:
 
       - id: deploy
         uses: actions/deploy-pages@v4
+
+  encadear:
+    needs: atualizar
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Esperar o próximo horário e disparar a próxima execução
+        run: |
+          agora=$(date +%s)
+          proximo=$(( (agora / 600 + 1) * 600 + 120 ))   # próximo múltiplo de 10 min, +2 min
+          sleep $(( proximo - agora ))
+          mais_nova=$(gh run list --workflow atualizar.yml --limit 1 --json databaseId --jq '.[0].databaseId')
+          if [ "$mais_nova" = "${{ github.run_id }}" ]; then
+            gh workflow run atualizar.yml --ref main
+            echo "próxima execução disparada"
+          else
+            echo "há execução mais nova ($mais_nova): esta corrente para aqui"
+          fi
