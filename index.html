@@ -654,6 +654,22 @@ html.fit-modo .op-kpi-lado .op-card:not(:first-child) .value{font-size:20px}
 html.fit-modo .op-kpi-lado{display:none!important}
 html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner banner lists lists lists lists lists lists lists" "nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota nota lists lists lists lists lists lists lists" "vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas vagas lists lists lists lists lists lists lists" "port port port port port status status status status status status lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "port port port port port status status status status status status lojas lojas lojas lojas lojas lojas lists lists lists lists lists lists lists" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas ret ret ret ret ret ret ret" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi" "custo custo custo custo custo repos repos repos repos repos repos lojas lojas lojas lojas lojas lojas avi avi avi avi avi avi avi";
   grid-template-rows:auto 0 calc(var(--u)*17) calc(var(--u)*17) calc(var(--u)*18) calc(var(--u)*14) calc(var(--u)*10) calc(var(--u)*10)}
+/* funcionarios: botoes de filtro e ordem em cima das proprias colunas */
+.func-filtros th{padding:0 8px 10px 0!important;border-bottom:1px solid var(--border);font-weight:400;text-transform:none;letter-spacing:0}
+.func-filtros .seg{margin:0;height:30px}
+.func-filtros .seg button{padding:0 10px;font-size:11.5px}
+.func-filtros th:nth-child(1){text-align:left}
+.func-filtros th:nth-child(3),.func-filtros th:nth-child(5){text-align:center}
+.func-filtros th:nth-child(5) .seg,.func-filtros th:nth-child(3) .seg{display:inline-flex}
+.func-filtros th:last-child{text-align:right}
+#funcHead th{border-bottom:0!important}
+.func-filtros th:last-child{text-align:center!important}
+.func-filtros th:last-child .seg{display:inline-flex}
+.func-wrap th:last-child,.func-wrap td:last-child,.func-wrap td.sit{text-align:center!important}
+.func-wrap th:last-child,.func-wrap td:last-child{padding-right:8px}
+/* calendario: dia atual = so a tarja superior em amarelo neon, um pouco mais grossa */
+.cal-day.hoje{border-top:5px solid var(--n-amarelo)}
+.cal-day.hoje{border-top:5px solid #fff200;box-shadow:0 -3px 10px rgba(255,242,0,.65)}
 </style>
 <div class="auth-screen" id="authScreen" style="display:none">
   <div class="auth-card">
@@ -736,7 +752,6 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
     <section class="grid-top">
       <div class="card">
         <h2>Devoluções</h2>
-        <p class="sub">Situação de hoje · não muda com o filtro</p>
         <div class="scroll-clean scrollbox" style="overflow-y:auto;margin-top:4px">
           <table>
             <thead><tr><th>Motorista</th><th>Dias pendentes</th><th>Situação</th></tr></thead>
@@ -753,7 +768,6 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
       </div>
       <div class="card">
         <h2>Entregas por região</h2>
-        <p class="sub">Contribuição de cada motorista, empilhado</p>
         <div class="chartbox"><canvas id="chRegiao" role="img" aria-label="Entregas por região, dividido por motorista"></canvas></div>
       </div>
     </section>
@@ -828,23 +842,18 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
         <p class="sub" id="funcSub">Cadastro</p>
         <div class="func-top">
           <input type="search" class="busca" id="funcBusca" style="margin-bottom:14px" placeholder="Pesquisar por nome, função, local ou registro" autocomplete="off" aria-label="Pesquisar funcionários">
-          <div class="seg" id="funcSit" role="group" aria-label="Situação">
-            <button type="button" data-sit="ATIVO" class="on">Ativos</button>
-            <button type="button" data-sit="INATIVO">Inativos</button>
-            <button type="button" data-sit="">Todos</button>
-          </div>
-          <div class="seg" id="funcOrd" role="group" aria-label="Ordenar de A a Z">
-            <button type="button" data-ord="nome" aria-pressed="false">A–Z Nome</button>
-            <button type="button" data-ord="local" aria-pressed="false">A–Z Empresa</button>
-          </div>
-          <div class="seg" id="funcHoje" role="group" aria-label="Filtro de hoje">
-            <button type="button" data-hoje="sim" aria-pressed="false">Trabalhando hoje</button>
-            <button type="button" data-hoje="nao" aria-pressed="false">De folga hoje</button>
-          </div>
         </div>
         <div class="mot-cad-wrap func-wrap">
           <table class="mot-cad">
-            <thead><tr id="funcHead"></tr></thead>
+            <thead><tr id="funcHead"></tr>
+              <tr class="func-filtros" id="funcFiltros">
+                <th><div class="seg"><button type="button" data-ord="nome" aria-pressed="false">A–Z Nome</button></div></th>
+                <th></th>
+                <th><div class="seg"><button type="button" data-ord="local" aria-pressed="false">A–Z Empresa</button></div></th>
+                <th></th>
+                <th><div class="seg" id="funcHoje" role="group" aria-label="Filtro de hoje"><button type="button" data-hoje="sim" aria-pressed="false" title="Trabalhando hoje">Trabalhando</button><button type="button" data-hoje="nao" aria-pressed="false" title="De folga hoje">Folga</button></div></th>
+                <th><div class="seg" id="funcSit" role="group" aria-label="Situação"><button type="button" data-sit="ATIVO" class="on">Ativos</button><button type="button" data-sit="INATIVO">Inativos</button></div></th>
+              </tr></thead>
             <tbody id="funcBody"></tbody>
           </table>
           <p class="aviso-empty" id="funcVazio" style="display:none"></p>
@@ -966,6 +975,7 @@ function renderAno(){
 }
 
 function aplicarPeriodo(){
+  renderEscala();
   var key=estado.ano+'-'+estado.mes+'-'+estado.semana;
   var bloco=DADOS.periodos[key]||BLOCO_VAZIO;
   var lbl=labelPeriodo(estado.ano,estado.mes,estado.semana);
@@ -1022,8 +1032,13 @@ function renderEscala(){
   var folgaRegras=FIXOS.escala||{};
   var nomesComEscala=Object.keys(folgaRegras);
   var dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  var startWeekday=2, diasNoMes=30; // 1/set/2026 cai numa terca
+  var agora=new Date(), anoCal=estado.ano||agora.getFullYear();
+  var mesCal=estado.mes?estado.mes-1:(anoCal===agora.getFullYear()?agora.getMonth():0);
+  var ehMesAtual=(anoCal===agora.getFullYear()&&mesCal===agora.getMonth());
+  var startWeekday=new Date(anoCal,mesCal,1).getDay(), diasNoMes=new Date(anoCal,mesCal+1,0).getDate();
   var cal=document.getElementById('calGrid');
+  var subCal=cal.previousElementSibling;
+  if(subCal&&subCal.classList.contains('sub'))subCal.textContent='Folgas por motorista · '+new Date(anoCal,mesCal,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(' de ','/');
   var html=dow.map(function(d){return '<div class="cal-dow">'+d+'</div>'}).join('');
   var totalCel=Math.ceil((startWeekday+diasNoMes)/7)*7;
   for(var c=0;c<totalCel;c++){
@@ -1039,7 +1054,7 @@ function renderEscala(){
     var chips=offNomes.slice(0,3).map(function(n){return '<span class="cal-chip">'+n.split(' ')[0]+'</span>'}).join('');
     if(offNomes.length>3)chips+='<span class="cal-chip more">+'+(offNomes.length-3)+'</span>';
     var numLabel=dentro?diaMes:'';
-    var cls='cal-day'+(dentro?'':' out')+(offNomes.length?' off':'');
+    var cls='cal-day'+(dentro?'':' out')+(offNomes.length?' off':'')+(dentro&&ehMesAtual&&diaMes===agora.getDate()?' hoje':'');
     html+='<div class="'+cls+'" data-count="'+(dentro?offNomes.length+' de folga':'')+'"><div class="d-num">'+numLabel+'</div><div class="d-off">'+chips+'</div></div>';
   }
   cal.innerHTML=html;
@@ -1173,6 +1188,8 @@ function startApp(dadosObj){
   if(pn)pn.textContent=(FIXOS.perfil&&FIXOS.perfil.nome)||'';
   if(primeiraCarga){
     estado.ano=DADOS.padrao.ano;estado.mes=DADOS.padrao.mes;estado.semana=DADOS.padrao.semana;
+    var hojeD=new Date(), anoInfoHoje=DADOS.anos.filter(function(a){return a.ano===hojeD.getFullYear()})[0];
+    if(anoInfoHoje&&anoInfoHoje.meses.indexOf(hojeD.getMonth()+1)!==-1){estado.ano=hojeD.getFullYear();estado.mes=hojeD.getMonth()+1;estado.semana=0}
     primeiraCarga=false;
   }
   montarSelects();
@@ -1428,11 +1445,11 @@ document.getElementById('funcBody').addEventListener('keydown',function(e){
 document.getElementById('fichaFechar').addEventListener('click',fecharFicha);
 document.getElementById('fichaModal').addEventListener('click',function(e){if(e.target===this)fecharFicha()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')fecharFicha()});
-document.getElementById('funcOrd').addEventListener('click',function(e){
+document.getElementById('funcFiltros').addEventListener('click',function(e){
   var b=e.target.closest('button[data-ord]');
   if(!b)return;
   funcOrd=funcOrd===b.getAttribute('data-ord')?'':b.getAttribute('data-ord');
-  Array.prototype.forEach.call(this.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x.getAttribute('data-ord')===funcOrd?'true':'false')});
+  Array.prototype.forEach.call(this.querySelectorAll('button[data-ord]'),function(x){x.setAttribute('aria-pressed',x.getAttribute('data-ord')===funcOrd?'true':'false')});
   renderFuncionarios();
 });
 document.getElementById('funcHoje').addEventListener('click',function(e){
