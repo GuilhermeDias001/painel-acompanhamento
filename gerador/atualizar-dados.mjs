@@ -431,6 +431,25 @@ async function cadastroMotoristas(tk) {
   return [...reg.values()].sort((a, b) => (b.ativo - a.ativo) || a.nome.localeCompare(b.nome));
 }
 
+// rh.json = [A1:K1500, N1:N1500, P1:T1500, AB1:AC1500] no formato do Excel Services
+// ({rows: [[{v, fv}]]}), nessa ordem. Remonta as linhas na grade A:AC (sensíveis vazias).
+async function rhDoFluxo(tk) {
+  const base = 'https://graph.microsoft.com/v1.0/me/drive/root:/' + encodeURI('Painel TUF - copias/rh.json');
+  const meta = await (await fetch(base + '?$select=lastModifiedDateTime', { headers: { Authorization: 'Bearer ' + tk } })).json();
+  if (!meta.lastModifiedDateTime) return null;
+  if (Date.now() - Date.parse(meta.lastModifiedDateTime) > 6 * 3600000) { console.log('rh.json com mais de 6 h: usando a aba RH'); return null; }
+  const r = await fetch(base + ':/content', { headers: { Authorization: 'Bearer ' + tk } });
+  if (!r.ok) return null;
+  const partes = JSON.parse(await r.text());
+  const inicio = [0, 13, 15, 27]; // A, N, P, AB
+  const linhas = Array.from({ length: 1500 }, () => Array(29).fill(''));
+  partes.forEach((p, k) => (p.rows || []).forEach((row, i) => row.forEach((c, j) => {
+    // número/data vem em v; texto pode vir só em fv
+    if (i < 1500) linhas[i][inicio[k] + j] = c.v ?? c.fv ?? '';
+  })));
+  return linhas;
+}
+
 // Cadastro do RH: aba RH do Acompanhamento, que espelha por vínculo a aba Ativos do
 // "CADASTRO DE NOVOS FUNCIONARIOS" (mesmas colunas A:AC). E-mail, CPF, placa, celulares,
 // parentesco, endereço, bairro, CEP e PIN não são vinculados (decisão do Guilherme, 03/10).
@@ -445,6 +464,13 @@ async function cadastroRH(tk) {
     if (![429, 502, 503, 504].includes(r.status) || tentativa === 3) throw new Error(`RH: HTTP ${r.status}`);
     await new Promise((ok) => setTimeout(ok, tentativa * 10000));
   }
+  // Preferência: o rh.json que o fluxo "Painel TUF - Ler RH" (Power Automate, de hora em hora)
+  // grava no OneDrive. Ele pede ao Excel do RH só as faixas liberadas (A:K, N, P:T, AB:AC da
+  // aba Ativos), então CPF, e-mail, telefones, endereço, placa e PIN nunca saem de lá.
+  // Sem o arquivo (ou com ele velho), fica a aba RH do Acompanhamento, que só renova quando
+  // alguém abre o arquivo.
+  const viaFluxo = await rhDoFluxo(tk);
+  if (viaFluxo) vals = viaFluxo;
   if (txt(vals[0][0]).trim().toUpperCase() !== 'NOME COMPLETO') throw new Error('aba RH sem o título NOME COMPLETO em A1 (vínculo bloqueado ou fora do lugar)');
   const data = (v) => { const d = dataDe(v); return d && v > 20000 ? `${d.a}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}` : txt(v).trim(); };
   const hora = (v) => {
