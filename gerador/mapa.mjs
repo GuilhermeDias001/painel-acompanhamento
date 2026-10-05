@@ -15,6 +15,17 @@ const TIPOS = [
   ['petshop', ['DOGS DAY', 'BENIPET', 'BLUE PETS', 'PET SHOP SAO JOSE']],
   ['autopecas', ['4I AUTO PECA', 'ATN AUTO PECAS', 'AUTO PECAS PLACIN', 'IKEHARA', 'JMC', 'SP25', 'DIVAUTO', 'MASTECAR', 'MUNDIAL TRACTOR']],
 ];
+// Rede = prefixo da lista TIPOS, com nome de exibição (Droga Leste 33 -> 'Droga Leste')
+const NOME_REDE = { 'DROGA LESTE': 'Droga Leste', 'NOVA FARMA': 'Nova Farma', DROGANITA: 'Droganita', 'DROGARIA KOBAYASHI': 'Kobayashi',
+  'RS DROGARIA': 'RS Drogaria', ADG: 'ADG Drogarias', DROGALIS: 'Drogalis', 'CENTER DROGARIA TIBURCIO': 'Center Tiburcio',
+  FARMOTERAPICA: 'Farmoterápica', 'RD MANIPULAE': 'RD Manipulae', 'DOGS DAY': 'Dogs Day', BENIPET: 'Benipet', 'BLUE PETS': 'Blue Pets',
+  'PET SHOP SAO JOSE': 'Pet Shop São José', '4I AUTO PECA': '4I Auto Peça', 'ATN AUTO PECAS': 'ATN Auto Peças',
+  'AUTO PECAS PLACIN': 'Placin', IKEHARA: 'Ikehara', JMC: 'JMC', SP25: 'SP25', DIVAUTO: 'Divauto', MASTECAR: 'Mastecar', 'MUNDIAL TRACTOR': 'Mundial Tractor' };
+const redeDe = (nome) => {
+  const n = semAcento(nome);
+  for (const [, redes] of TIPOS) for (const r of redes) if (n.startsWith(r)) return NOME_REDE[r] || r;
+  return '';
+};
 const tipoDe = (nome) => {
   const n = semAcento(nome);
   if (n.startsWith('ESCRITORIO')) return null;
@@ -101,7 +112,7 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
     const chave = semAcento(l.nome);
     const v = vagas.get(chave);
     const status = !v ? 'cadastrada' : v.abertas || aberto.has(chave) ? 'aberta' : 'fechada';
-    const o = { nome: l.nome, tipo: l.tipo, lat: g.lat, lng: g.lng, status, endereco: l.endereco, precisao: g.fonte };
+    const o = { nome: l.nome, rede: redeDe(l.nome), tipo: l.tipo, lat: g.lat, lng: g.lng, status, endereco: l.endereco, precisao: g.fonte };
     if (status === 'aberta' && aberto.get(chave)) o.tempo = aberto.get(chave);
     if (l.regiao) o.regiao = l.regiao;
     saida.push(o);
