@@ -24,8 +24,12 @@ export async function gravarSupabase(dados, segredo) {
     .filter(([, v]) => v !== undefined)
     .map(([area, v]) => ({ area, dados: v, versao: createHash('sha256').update(JSON.stringify(v)).digest('hex').slice(0, 16), atualizado_em: new Date().toISOString() }));
   // só regrava as áreas que mudaram: compara com as versões guardadas
-  const h = { apikey: segredo, Authorization: 'Bearer ' + segredo, 'Content-Type': 'application/json' };
-  const atuais = await (await fetch(`${SUPABASE_URL}/rest/v1/painel?select=area,versao`, { headers: h })).json();
+  // chave nova (sb_secret_...) vai só no apikey; a antiga (service_role, um JWT) vai também no Authorization
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const ra = await fetch(`${SUPABASE_URL}/rest/v1/painel?select=area,versao`, { headers: h });
+  if (!ra.ok) throw new Error(`Supabase leitura HTTP ${ra.status}: ${(await ra.text()).slice(0, 200)}`);
+  const atuais = await ra.json();
   const ver = new Map((Array.isArray(atuais) ? atuais : []).map((x) => [x.area, x.versao]));
   const mudaram = linhas.filter((l) => ver.get(l.area) !== l.versao);
   if (!mudaram.length) return 'Supabase: nada mudou';
