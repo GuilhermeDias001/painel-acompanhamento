@@ -1,14 +1,11 @@
 # Gera os dados do painel a partir das planilhas (Microsoft Graph) e publica no Pages.
-# O agendamento (schedule) do GitHub não disparou em 04/10 — ele é "melhor esforço" e
-# atrasa ou pula execuções. Por isso cada execução, no job "encadear", espera até o
+# Sem schedule: em 04/10 ele não disparou e em 05/10 uma execução agendada ficou presa na
+# fila por 3 h, travando as demais. Por isso cada execução, no job "encadear", espera até o
 # próximo múltiplo de 10 min e dispara a seguinte (workflow_dispatch). Só a execução mais
-# nova continua a corrente: se houver duas, a mais antiga para. Um push ou o schedule
-# (quando funcionar) religam a corrente se ela cair.
+# nova continua a corrente: se houver duas, a mais antiga para. Um push (ou disparo manual) religa a corrente se ela cair.
 name: Atualizar painel
 
 on:
-  schedule:
-    - cron: '7,17,27,37,47,57 * * * *'
   push:
     branches: [main]
   workflow_dispatch:
