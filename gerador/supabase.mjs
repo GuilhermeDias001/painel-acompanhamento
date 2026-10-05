@@ -8,7 +8,9 @@ export const SUPABASE_URL = 'https://jetujppwmyzyfkaflplj.supabase.co';
 
 export function areasDe(d) {
   return {
-    farmo: { geradoEm: d.geradoEm, ultimoRegistro: d.ultimoRegistro, padrao: d.padrao, anos: d.anos,
+    // meta muda a cada execução e é pequena; as outras só mudam quando o conteúdo muda
+    meta: { geradoEm: d.geradoEm },
+    farmo: { ultimoRegistro: d.ultimoRegistro, padrao: d.padrao, anos: d.anos,
       entregasMes: d.entregasMes, devolucoes: d.devolucoes, periodos: d.periodos },
     motoristas: d.cadastroMotoristas,
     rh: d.cadastroRH,
