@@ -41,6 +41,7 @@ jobs:
       - name: Gerar dados
         env:
           CHAVE_CI: ${{ secrets.CHAVE_CI }}
+          SUPABASE_SECRET: ${{ secrets.SUPABASE_SECRET }}
         run: node gerador/ci.mjs
 
       - name: Guardar token renovado

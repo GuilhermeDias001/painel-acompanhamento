@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cifrar, decifrar } from './cofre.mjs';
+import { gravarSupabase } from './supabase.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..');
@@ -43,6 +44,12 @@ if (geoDepois !== geoAntes) { writeFileSync(GEO, cifrar(JSON.parse(geoDepois), C
 
 const enc = join(AQUI, 'publicar', 'dados.enc.json');
 if (!existsSync(enc)) throw new Error('dados.enc.json não foi gerado');
+// Supabase (Fase 3): só grava se o segredo SUPABASE_SECRET existir; falha aqui não derruba o site
+if (process.env.SUPABASE_SECRET) {
+  try {
+    console.log(await gravarSupabase(JSON.parse(readFileSync(join(AQUI, 'dados.json'), 'utf8')), process.env.SUPABASE_SECRET));
+  } catch (e) { console.log('FALHA Supabase: ' + String(e.message).slice(0, 200)); }
+}
 const SITE = join(RAIZ, '_site');
 mkdirSync(SITE, { recursive: true });
 copyFileSync(join(RAIZ, 'index.html'), join(SITE, 'index.html'));
