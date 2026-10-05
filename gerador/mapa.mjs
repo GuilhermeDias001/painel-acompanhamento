@@ -109,3 +109,44 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   if (novos) writeFileSync(cacheArq, JSON.stringify(cache));
   return { lojas: saida, semCoordenada: [...lojas.values()].filter((l) => cache['v3|' + l.endereco] === null).map((l) => l.nome) };
 }
+
+// Vagas e equipes por loja + loja/tipo/posição no cadastro do RH (casamento por nome sem acento).
+// vagas: linhas [A funcionário, B loja, C posição] da Contratos; cadastro: [B nome, C status, D tipo].
+const POSICAO = { TITULAR: 'Titular', FOLGUISTA: 'Folguista', 'ESPORADICO FIXO': 'Esporádico fixo', 'FIXO LOJA': 'Fixo loja',
+  ELITE: 'Elite', BASE: 'Base', MOTO: 'Moto', MOTORISTA: 'Motorista', AJUDANTE: 'Ajudante' };
+const TIPO = { CLT: 'CLT', MEI: 'MEI', PRESTADOR: 'Prestador', BASE: 'CLT', ELITE: 'CLT', SUPERVISOR: 'CLT' };
+export function vincularEquipes({ mapa, vagas, cadastro, rh }) {
+  const tipoDe = new Map(), ativo = new Map();
+  for (const [n, st, t] of cadastro) {
+    const k = semAcento(txt(n));
+    if (!k || tipoDe.has(k)) continue;
+    tipoDe.set(k, txt(t).toUpperCase());
+    ativo.set(k, txt(st) !== 'Inativo');
+  }
+  const porLoja = new Map(), lojaDe = new Map();
+  for (const [f, b, c] of vagas) {
+    const loja = txt(b);
+    if (!loja) continue;
+    const e = porLoja.get(loja) || { vagas: 0, equipe: [] };
+    e.vagas++;
+    const nome = txt(f), k = semAcento(nome);
+    if (nome) {
+      const t = tipoDe.get(k) || '';
+      const pos = POSICAO[semAcento(txt(c))] || (t === 'ELITE' ? 'Elite' : t === 'BASE' ? 'Base' : txt(c));
+      e.equipe.push({ nome, posicao: pos, tipo: TIPO[t] || '', ativo: ativo.get(k) !== false });
+      if (!lojaDe.has(k)) lojaDe.set(k, { loja, posicao: pos });
+    }
+    porLoja.set(loja, e);
+  }
+  for (const l of mapa?.lojas || []) {
+    const e = porLoja.get(l.nome);
+    if (e) { l.vagas = e.vagas; l.equipe = e.equipe; }
+  }
+  for (const p of rh) {
+    const k = semAcento(txt(p.nome)), v = lojaDe.get(k), t = tipoDe.get(k);
+    if (v) p.loja = v.loja;
+    if (t) p.tipo = TIPO[t] || '';
+    // posição só para CLT (pedido do ENG-A); Base/Elite vêm do próprio tipo
+    if (TIPO[t] === 'CLT') p.posicao = t === 'BASE' ? 'Base' : t === 'ELITE' ? 'Elite' : v?.posicao || '';
+  }
+}
