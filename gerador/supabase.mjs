@@ -19,6 +19,8 @@ export function areasDe(d) {
     mapa: d.mapa,
     contratos: d.contratos,
     colaboradores: d.colaboradores,
+    quadro: d.quadro,
+    historico_quadro: d.historicoQuadro,
     fixos: d.fixos,
   };
 }

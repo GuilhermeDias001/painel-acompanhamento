@@ -23,9 +23,10 @@ writeFileSync(join(AQUI, '.sal.json'), JSON.stringify(s.sal));
 if (s.fixos) writeFileSync(join(AQUI, 'fixos.json'), JSON.stringify(s.fixos));
 if (s.extras) writeFileSync(join(AQUI, 'lojas-extra.json'), JSON.stringify(s.extras));
 // cache das coordenadas das lojas (mapa): cifrado no repositório, aberto só durante a execução
-const GEO = join(RAIZ, 'geocache.enc'), GEO_JSON = join(AQUI, 'geocache.json');
-const geoAntes = existsSync(GEO) ? JSON.stringify(decifrar(readFileSync(GEO, 'utf8'), CHAVE)) : '{}';
-writeFileSync(GEO_JSON, geoAntes);
+// caches cifrados no repositório, abertos só durante a execução: coordenadas das lojas e histórico do quadro
+const CACHES = [['geocache.enc', 'geocache.json', 'coordenadas'], ['historico-quadro.enc', 'historico-quadro.json', 'histórico do quadro']]
+  .map(([enc, json, nome]) => ({ enc: join(RAIZ, enc), json: join(AQUI, json), nome }));
+for (const c of CACHES) { c.antes = existsSync(c.enc) ? JSON.stringify(decifrar(readFileSync(c.enc, 'utf8'), CHAVE)) : '{}'; writeFileSync(c.json, c.antes); }
 
 try {
   execFileSync(process.execPath, [join(AQUI, 'atualizar-dados.mjs')], {
@@ -40,8 +41,10 @@ try {
   }
 }
 
-const geoDepois = existsSync(GEO_JSON) ? readFileSync(GEO_JSON, 'utf8') : '{}';
-if (geoDepois !== geoAntes) { writeFileSync(GEO, cifrar(JSON.parse(geoDepois), CHAVE)); console.log('cofre: coordenadas novas guardadas'); }
+for (const c of CACHES) {
+  const depois = existsSync(c.json) ? readFileSync(c.json, 'utf8') : '{}';
+  if (depois !== c.antes) { writeFileSync(c.enc, cifrar(JSON.parse(depois), CHAVE)); console.log(`cofre: ${c.nome} atualizado`); }
+}
 
 const enc = join(AQUI, 'publicar', 'dados.enc.json');
 if (!existsSync(enc)) throw new Error('dados.enc.json não foi gerado');

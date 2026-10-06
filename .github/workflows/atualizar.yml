@@ -44,6 +44,7 @@ jobs:
         run: |
           git add segredos.enc
           if [ -f geocache.enc ]; then git add geocache.enc; fi
+          if [ -f historico-quadro.enc ]; then git add historico-quadro.enc; fi
           if ! git diff --cached --quiet; then
             git -c user.name=GuilhermeDias001 -c user.email=GuilhermeDias001@users.noreply.github.com commit -q -m "Renova token / coordenadas"
             git pull -q --rebase origin main
