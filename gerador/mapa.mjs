@@ -54,7 +54,7 @@ const GRANDE_SP = '-47.2,-23.0,-45.9,-24.2';
 async function nominatim(q) {
   await espera(1100); // no máximo 1 pedido por segundo e identificação obrigatória
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&viewbox=${GRANDE_SP}&bounded=1&q=${encodeURIComponent(q)}`;
-  const r = await fetch(url, { headers: { 'User-Agent': 'painel-tuf/1.0 (github.com/GuilhermeDias001/painel-acompanhamento)' } });
+  const r = await fetch(url, { headers: { 'User-Agent': 'painel-tuf/1.0 (github.com/GuilhermeDias001/painel-acompanhamento)' }, signal: AbortSignal.timeout(15000) });
   if (!r.ok) return null;
   const j = await r.json();
   return j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : null;
@@ -73,7 +73,7 @@ async function geocodificar(endereco) {
   }
   if (cep.length === 8) {
     try {
-      const r = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`);
+      const r = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`, { signal: AbortSignal.timeout(15000) });
       if (r.ok) {
         const c = (await r.json()).location?.coordinates || {};
         if (c.latitude && c.longitude) return { lat: +c.latitude, lng: +c.longitude, fonte: 'cep-aproximado' };
