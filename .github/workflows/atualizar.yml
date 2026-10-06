@@ -20,9 +20,7 @@ jobs:
   atualizar:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    concurrency:
-      group: atualizar-painel
-      cancel-in-progress: false
+    # sem 'concurrency': em 05 e 06/10 uma execução presa na fila segurou todas as seguintes
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
