@@ -209,7 +209,7 @@ export function montarContratos({ linhas, alt, mapa }) {
   });
   // Nome de loja que junta várias Droga Leste ("02 E 14", "70,73,74 E 75", "82/91", "64/65") não é uma loja:
   // é vaga de FOLGUISTA, que roda entre elas (Guilherme, 06/10: marcar apenas como Folguista).
-  const grupoDL = (nome) => { const m = /^DROGA LESTE\s+(\d+(?:\s*(?:,|\/|E)\s*\d+)+)\s*$/i.exec(txt(nome)); return m ? [...m[1].matchAll(/\d+/g)].map((x) => 'DROGA LESTE ' + x[0].padStart(2, '0')) : null; };
+  const grupoDL = (nome) => { const m = /^DROGA LESTE\s+(\d+(?:\s*(?:,|\/|E)\s*\d+)+)\s*$/i.exec(txt(nome)); return m ? [...m[1].matchAll(/\d+/g)].map((x) => 'DROGA LESTE ' + x[0].padStart(2, '0')) : null; };
   for (const e of porLoja.values()) {
     const g = grupoDL(e.nome);
     if (!g) continue;
