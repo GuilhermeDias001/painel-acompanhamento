@@ -10,7 +10,7 @@ import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
-import { montarMapa, vincularEquipes, montarContratos } from './mapa.mjs';
+import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 // no GitHub Actions o ci.mjs aponta para uma cópia temporária do token
@@ -327,6 +327,10 @@ try {
     // Nunca R (endereço), Y (contato) e Z (telefone) entram aqui.
     const ac = await lerAcomp(tk, 'Contratos', 'A2:X760', NOVA_OP);
     const cad = await lerAcomp(tk, 'Cadastro Colaboradores', 'B3:D1500', NOVA_OP);
+    // cadastro de colaboradores: A:D e F:L — a coluna E (telefone) e G (chave Pix) nunca são lidas
+    const cadAD = await lerAcomp(tk, 'Cadastro Colaboradores', 'A3:D1500', NOVA_OP);
+    const cadFL = await lerAcomp(tk, 'Cadastro Colaboradores', 'F3:L1500', NOVA_OP);
+    dados.colaboradores = montarColaboradores(cadAD.map((l, i) => [l[0], l[1], l[2], l[3], '', ...(cadFL[i] || [])]));
     vincularEquipes({ mapa: dados.mapa, vagas: ac, cadastro: cad, rh: dados.cadastroRH || [] });
     // Contratos completo (todas as lojas/vagas, não só as do mapa) + escalas alternadas (AR:AU)
     const alt = await lerAcomp(tk, 'Contratos', 'AR2:AU760', NOVA_OP);

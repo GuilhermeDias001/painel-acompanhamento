@@ -18,6 +18,7 @@ export function areasDe(d) {
     planejamento: d.planejamento,
     mapa: d.mapa,
     contratos: d.contratos,
+    colaboradores: d.colaboradores,
     fixos: d.fixos,
   };
 }

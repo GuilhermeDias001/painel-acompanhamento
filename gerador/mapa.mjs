@@ -203,3 +203,18 @@ export function montarContratos({ linhas, alt, mapa }) {
   });
   return { lojas, totais: { lojas: lojas.length, vagas: lojas.reduce((a, l) => a + l.vagas, 0) } };
 }
+
+// Cadastro de colaboradores da Nova Operação (aba Cadastro Colaboradores, cabeçalho na linha 2).
+// Pedido do ENG-A/Guilherme 06/10. SEM telefone (E) e SEM chave Pix (G): entram só as colunas
+// A cod, B nome, C status, D contrato, F admissão, H TUF Log, I status do TUF Log, J região,
+// K trabalhando, L remanejamento. `linhas` = A3:L1500.
+export function montarColaboradores(linhas) {
+  const iso = (v) => { if (typeof v !== 'number' || v < 20000) return txt(v); return new Date((v - 25569) * 86400000).toISOString().slice(0, 10); };
+  const tufStatus = (v) => { const s = txt(v).toLowerCase(); return s === 'aprovado' ? 'Aprovado' : s === 'pendente' ? 'Pendente' : ''; };
+  const norm = (v, ...ok) => { const s = txt(v); return ok.find((o) => semAcento(o) === semAcento(s)) || s; };
+  return linhas.filter((l) => txt(l[1])).map((l) => ({
+    cod: txt(l[0]), nome: txt(l[1]), status: txt(l[2]) || 'Ativo', contrato: txt(l[3]).toUpperCase(), admissao: iso(l[5]),
+    tufLog: txt(l[7]), tufLogStatus: tufStatus(l[8]), regiao: txt(l[9]) === 'Não informado' ? '' : txt(l[9]),
+    trabalhando: norm(l[10], 'Sim', 'Não'), remanejamento: txt(l[11]).toUpperCase(),
+  }));
+}
