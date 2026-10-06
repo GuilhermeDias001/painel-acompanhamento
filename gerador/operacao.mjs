@@ -197,7 +197,8 @@ export function operacao({ dia, dataRef, contratos, cabContratos, cadastro, meta
 // Operação (`entrada.diaAmanha`), todos os blocos saem dela, olhando amanhã às 12:00.
 // Sem a aba, vai só a escala de amanhã; os demais blocos são omitidos (a página os esconde).
 export function planejamento(entrada, op, agora = serialSP()) {
-  const ref = Math.floor(agora) + 1 + 0.5;
+  // dia operacional vira às 04:00: antes disso o 'hoje' ainda é o dia anterior, então o 'amanhã' é o dia corrente
+  const ref = Math.floor(agora - 4 / 24) + 1 + 0.5;
   const dia = new Date((Math.floor(ref) - 25569) * 86400000).toISOString().slice(0, 10);
   if (entrada.diaAmanha) {
     const p = operacao({ ...entrada, dia: entrada.diaAmanha, dataRef: Math.floor(ref), portaria: null }, ref);

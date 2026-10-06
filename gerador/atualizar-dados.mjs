@@ -338,12 +338,18 @@ try {
     // Nunca lê Valor nem Chave Pix (ver quadro.mjs).
     try {
       const rotulo = (await lerAcomp(tk, 'DIA ATUAL', 'P1:P1', NOVA_OP))[0][0]; // dd-mm-aaaa da Central
-      const hojeNome = /^\d\d-\d\d-\d{4}$/.test(txt(rotulo)) ? txt(rotulo) : nomeDaAba(new Date(Date.now() - 3 * 3600000));
+      // O dia operacional vira às 04:00 de São Paulo (decisão do Guilherme 06/10: a operação vai até 23h e
+      // em dia atípico passaria da meia-noite). Antes das 04:00 ainda vale o dia anterior.
+      const opNome = nomeDaAba(new Date(Date.now() - 7 * 3600000)); // -3h (SP) -4h (virada)
+      const abasNO = (await (await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${NOVA_OP}/workbook/worksheets?$select=name`, { headers: { Authorization: 'Bearer ' + tk } })).json()).value.map((x) => x.name);
+      const hojeNome = abasNO.includes(opNome) ? opNome : /^\d\d-\d\d-\d{4}$/.test(txt(rotulo)) ? txt(rotulo) : opNome;
+      dados.diaOperacional = dataDaAba(hojeNome);
+      dados.viradaDoDia = '04:00';
       const [dd, mm, aa] = hojeNome.split('-').map(Number);
       const amanha = new Date(Date.UTC(aa, mm - 1, dd + 1));
       const lerNO = (aba, end) => lerAcomp(tk, aba, end, NOVA_OP);
       dados.quadro = await montarQuadro(lerNO, hojeNome, nomeDaAba(amanha));
-      const abas = (await (await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${NOVA_OP}/workbook/worksheets?$select=name`, { headers: { Authorization: 'Bearer ' + tk } })).json()).value.map((x) => x.name);
+      const abas = abasNO;
       const cacheHQ = join(AQUI, 'historico-quadro.json');
       const cache = existsSync(cacheHQ) ? JSON.parse(readFileSync(cacheHQ, 'utf8')) : {};
       const hq = await montarHistorico(lerNO, abas, dataDaAba(hojeNome), cache);

@@ -1,6 +1,7 @@
 // Quadro do dia real (aba dd-mm-aaaa do Nova Operação) e histórico para a sugestão por lâmpada.
 // Pedido do ENG-A/Guilherme 06/10. Colunas achadas pelo CABEÇALHO (o layout das abas mudou 3 vezes).
-// NUNCA lê Chave Pix nem Valor (pagamento fica fora do site até existir perfil financeiro).
+// Valor entra a partir de 06/10 (Guilherme: o valor é visto na hora do pagamento, todos podem editar).
+// NUNCA lê Chave Pix.
 const txt = (v) => (v == null ? '' : String(v)).trim();
 const semAcento = (s) => txt(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 const letra = (i) => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
@@ -8,18 +9,18 @@ const hhmm = (v) => { if (typeof v !== 'number') return txt(v); const m = Math.r
 export const nomeDaAba = (d) => `${String(d.getUTCDate()).padStart(2, '0')}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${d.getUTCFullYear()}`;
 export const dataDaAba = (nome) => { const m = /^(\d\d)-(\d\d)-(\d{4})$/.exec(nome); return m ? `${m[3]}-${m[2]}-${m[1]}` : null; };
 
-// Lê uma aba de dia e devolve as linhas que têm loja. `ler(aba, 'A1:Z1')` -> matriz de valores.
+// Lê uma aba de dia e devolve as linhas que têm loja (cada linha com `valor` numérico ou null). `ler(aba, 'A1:Z1')` -> matriz de valores.
 export async function lerDia(ler, aba, ate = 300) {
   let cab;
   try { cab = (await ler(aba, 'A1:AB1'))[0]; } catch { return null; }
   const idx = {}; // título normalizado -> lista de colunas (títulos repetem: SAIDA, SALDO)
   cab.forEach((t, i) => { const k = semAcento(t); if (k) (idx[k] ||= []).push(i); });
   const um = (k) => idx[k]?.[0] ?? -1;
-  const colab = um('COLABORADOR/REPOSICAO'), status = um('STATUS'), tipo = um('TIPO'), loja = um('LOJA'),
+  const colab = um('COLABORADOR/REPOSICAO'), valor = um('VALOR'), status = um('STATUS'), tipo = um('TIPO'), loja = um('LOJA'),
     entrada = um('ENTRADA'), motivo = um('MOTIVO'), faltante = um('FALTANTE'), obs = um('OBSERVACAO');
   // a SAIDA do turno é a que vem DEPOIS de ENTRADA (a anterior é a saída real do titular)
   const saida = (idx.SAIDA || []).find((i) => i > entrada) ?? -1;
-  const quer = [colab, status, tipo, loja, entrada, saida, motivo, faltante, obs].filter((i) => i >= 0).sort((a, b) => a - b);
+  const quer = [colab, valor, status, tipo, loja, entrada, saida, motivo, faltante, obs].filter((i) => i >= 0).sort((a, b) => a - b);
   if (loja < 0 || !quer.length) return [];
   // uma leitura por faixa contínua de colunas necessárias (pula Valor e Chave Pix)
   const faixas = []; for (const i of quer) { const f = faixas.at(-1); if (f && i === f[1] + 1) f[1] = i; else faixas.push([i, i]); }
@@ -32,7 +33,8 @@ export async function lerDia(ler, aba, ate = 300) {
   for (let r = 0; r < ate - 1; r++) {
     const d = dados[r]; if (!d || !txt(d[loja])) continue;
     const g = (i) => (i >= 0 ? d[i] : '');
-    linhas.push({ colab: txt(g(colab)), status: txt(g(status)), tipo: txt(g(tipo)), loja: txt(g(loja)),
+    const vl = g(valor);
+    linhas.push({ colab: txt(g(colab)), status: txt(g(status)), valor: typeof vl === 'number' ? vl : null, tipo: txt(g(tipo)), loja: txt(g(loja)),
       entrada: hhmm(g(entrada)), saida: hhmm(g(saida)), motivo: txt(g(motivo)), faltante: txt(g(faltante)), obs: txt(g(obs)) });
   }
   return linhas;
@@ -55,7 +57,7 @@ export async function montarHistorico(ler, nomesAbas, hojeIso, cache, dias = 60,
   for (const [nome, data] of alvo) {
     if (cache[data] || lidos >= limite) continue; // `limite`: no máximo N abas novas por execução
     const l = await lerDia(ler, nome);
-    cache[data] = (l || []).filter((x) => x.colab && x.loja).map(({ loja, colab, entrada, saida, status }) => ({ data, loja, colab, entrada, saida, status }));
+    cache[data] = (l || []).filter((x) => x.colab && x.loja).map(({ loja, colab, entrada, saida, status }) => ({ data, loja, colab, entrada, saida, status })); // sem valor
     lidos++;
   }
   const manter = new Set(alvo.map(([, d]) => d));
