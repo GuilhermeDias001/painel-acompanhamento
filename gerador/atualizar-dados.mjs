@@ -10,7 +10,7 @@ import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
-import { montarMapa, vincularEquipes } from './mapa.mjs';
+import { montarMapa, vincularEquipes, montarContratos } from './mapa.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 // no GitHub Actions o ci.mjs aponta para uma cópia temporária do token
@@ -328,6 +328,9 @@ try {
     const ac = await lerAcomp(tk, 'Contratos', 'A2:X760', NOVA_OP);
     const cad = await lerAcomp(tk, 'Cadastro Colaboradores', 'B3:D1500', NOVA_OP);
     vincularEquipes({ mapa: dados.mapa, vagas: ac, cadastro: cad, rh: dados.cadastroRH || [] });
+    // Contratos completo (todas as lojas/vagas, não só as do mapa) + escalas alternadas (AR:AU)
+    const alt = await lerAcomp(tk, 'Contratos', 'AR2:AU760', NOVA_OP);
+    dados.contratos = montarContratos({ linhas: ac, alt, mapa: dados.mapa });
   } catch (e) { console.log(`FALHA mapa: ${String(e.message).slice(0, 200)}`); }
 } catch (e) { console.log(`FALHA operação: ${String(e.message).slice(0, 200)}`); }
 if (existsSync(join(AQUI, 'fixos.json'))) dados.fixos = JSON.parse(readFileSync(join(AQUI, 'fixos.json'), 'utf8'));

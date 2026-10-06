@@ -171,3 +171,35 @@ export function vincularEquipes({ mapa, vagas, cadastro, rh }) {
     if (TIPO[t] === 'CLT') p.posicao = t === 'BASE' ? 'Base' : t === 'ELITE' ? 'Elite' : v?.posicao || '';
   }
 }
+
+// Contratos COMPLETO (todas as lojas e vagas da aba Contratos, com ou sem ponto no mapa).
+// Pedido do Guilherme 06/10: "com escalas e tudo mais?". Colunas lidas: A:X e AR:AU (alternância).
+// NUNCA Y (contato) e Z (telefone). `linhas` = A2:X760, `alt` = AR2:AU760 (mesmas linhas).
+export function montarContratos({ linhas, alt, mapa }) {
+  const hora = (v) => (typeof v === 'number' ? '' : txt(v));
+  const pausa = (v) => { if (typeof v !== 'number' || v <= 0) return ''; const m = Math.round(v * 1440); return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
+  const noMapa = new Map((mapa?.lojas || []).map((l) => [l.nome, l]));
+  const porLoja = new Map();
+  linhas.forEach((l, i) => {
+    const nome = txt(l[1]);
+    if (!nome) return;
+    const e = porLoja.get(nome) || { nome, endereco: '', bairro: '', regiao: '', vagasDetalhe: [] };
+    if (!e.endereco && txt(l[17])) e.endereco = txt(l[17]);
+    if (!e.bairro && txt(l[19])) e.bairro = txt(l[19]);
+    if (!e.regiao && txt(l[20])) e.regiao = txt(l[20]);
+    const a = alt[i] || [];
+    const v = { titular: txt(l[0]), tipoVaga: txt(l[2]).toUpperCase(),
+      horarios: { seg: hora(l[3]), ter: hora(l[4]), qua: hora(l[5]), qui: hora(l[6]), sex: hora(l[7]), sab: hora(l[8]), dom: [9, 10, 11, 12, 13].map((k) => hora(l[k])) },
+      pausa: pausa(l[14]), pausaExcecao: txt(l[15]), obs: txt(l[16]), modalidade: txt(l[22]), funcao: txt(l[23]) };
+    // escalas alternadas (semana par/ímpar, domingo relativo): AR horário alt., AS sábado alt., AT fase, AU domingo relativo
+    if (txt(a[0]) || txt(a[1]) || txt(a[2]) || txt(a[3])) v.alternancia = { horario: txt(a[0]), sabado: txt(a[1]), fase: txt(a[2]), domingo: txt(a[3]) };
+    e.vagasDetalhe.push(v);
+    porLoja.set(nome, e);
+  });
+  const lojas = [...porLoja.values()].map((e) => {
+    const m = noMapa.get(e.nome);
+    return { nome: e.nome, rede: m?.rede || redeDe(e.nome) || '', tipo: m?.tipo || tipoDe(e.nome) || '', endereco: e.endereco, bairro: e.bairro, regiao: e.regiao,
+      vagas: e.vagasDetalhe.length, vagasDetalhe: e.vagasDetalhe, noMapa: !!m };
+  });
+  return { lojas, totais: { lojas: lojas.length, vagas: lojas.reduce((a, l) => a + l.vagas, 0) } };
+}

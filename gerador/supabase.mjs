@@ -17,6 +17,7 @@ export function areasDe(d) {
     operacao: d.operacao,
     planejamento: d.planejamento,
     mapa: d.mapa,
+    contratos: d.contratos,
     fixos: d.fixos,
   };
 }
