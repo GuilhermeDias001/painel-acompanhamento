@@ -20,6 +20,7 @@ const TENANT = '02670113-3dae-4a0a-8126-b9aca8ccf481';
 const CLIENT = 'eb414536-78be-458a-8d66-ae7d2be31de7';
 const FARMO = '01ULVECMUZCJO7HE75ONDZSEFUOJV6BLY3';
 const BLOCO = 3000;
+const sessoesLeitura = new Map(); // item -> id da sessão de leitura (ver lerAcomp)
 
 async function token() {
   const salvo = JSON.parse(readFileSync(TOKEN_FILE, 'utf8'));
@@ -536,12 +537,21 @@ async function cadastroRH(tk) {
   return lista;
 }
 
+// Uma sessão de leitura (persistChanges:false) por arquivo: sem ela cada pedido recalcula a
+// planilha toda e a Nova Operação (INDIRECT, vínculos) passa de 10 s por leitura.
 async function lerAcomp(tk, aba, end, item = ACOMP) {
   // item = id do arquivo, ou caminho no OneDrive ("root:/pasta/arquivo.xlsx")
   const arq = item.startsWith('root:') ? encodeURI(item) + ':' : `items/${item}`;
-  const url = `https://graph.microsoft.com/v1.0/me/drive/${arq}/workbook/worksheets('${encodeURIComponent(aba)}')/range(address='${end}')?$select=values`;
+  const prefixo = `https://graph.microsoft.com/v1.0/me/drive/${arq}`;
+  if (!sessoesLeitura.has(item)) {
+    const r = await fetch(`${prefixo}/workbook/createSession`, { method: 'POST', headers: { Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json' }, body: JSON.stringify({ persistChanges: false }) });
+    sessoesLeitura.set(item, r.ok ? (await r.json()).id : null);
+  }
+  const headers = { Authorization: 'Bearer ' + tk };
+  if (sessoesLeitura.get(item)) headers['workbook-session-id'] = sessoesLeitura.get(item);
+  const url = `${prefixo}/workbook/worksheets('${encodeURIComponent(aba)}')/range(address='${end}')?$select=values`;
   for (let tentativa = 1; ; tentativa++) {
-    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + tk } });
+    const r = await fetch(url, { headers });
     if (r.ok) return (await r.json()).values;
     if (![429, 502, 503, 504].includes(r.status) || tentativa === 3) throw new Error(`${aba}!${end}: HTTP ${r.status}`);
     await new Promise((ok) => setTimeout(ok, tentativa * 10000));
