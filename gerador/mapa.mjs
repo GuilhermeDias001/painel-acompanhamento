@@ -118,7 +118,9 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
     saida.push(o);
   }
   if (novos) writeFileSync(cacheArq, JSON.stringify(cache));
-  return { lojas: saida, semCoordenada: [...lojas.values()].filter((l) => cache['v3|' + l.endereco] === null).map((l) => l.nome) };
+  // base da TUF (linha TUF LOGISTICA da aba Contratos do site; pedido do ENG-A 05/10)
+  const base = { nome: 'TUF LOGISTICA', endereco: 'Rua Marcelo Müller, 434 - São Lucas, São Paulo - SP, 03222-020', lat: -23.5890937, lng: -46.5604703, regiao: 'Leste' };
+  return { base, lojas: saida, semCoordenada: [...lojas.values()].filter((l) => cache['v3|' + l.endereco] === null).map((l) => l.nome) };
 }
 
 // Vagas e equipes por loja + loja/tipo/posição no cadastro do RH (casamento por nome sem acento).
