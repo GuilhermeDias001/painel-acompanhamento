@@ -137,11 +137,19 @@ export function vincularEquipes({ mapa, vagas, cadastro, rh }) {
     ativo.set(k, txt(st) !== 'Inativo');
   }
   const porLoja = new Map(), lojaDe = new Map();
-  for (const [f, b, c] of vagas) {
+  const hora = (v) => (typeof v === 'number' ? '' : txt(v));
+  const pausa = (v) => { if (typeof v !== 'number' || v <= 0) return ''; const m = Math.round(v * 1440); return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
+  for (const linha of vagas) {
+    const [f, b, c] = linha;
     const loja = txt(b);
     if (!loja) continue;
-    const e = porLoja.get(loja) || { vagas: 0, equipe: [] };
+    const e = porLoja.get(loja) || { vagas: 0, equipe: [], detalhe: [] };
     e.vagas++;
+    // vaga a vaga (colunas: D..I seg-sáb, J..N 1º-5º domingo, O pausa, Q obs, W modalidade, X função)
+    e.detalhe.push({ titular: txt(f), tipoVaga: txt(c).toUpperCase(),
+      horarios: { seg: hora(linha[3]), ter: hora(linha[4]), qua: hora(linha[5]), qui: hora(linha[6]), sex: hora(linha[7]), sab: hora(linha[8]),
+        dom: [9, 10, 11, 12, 13].map((i) => hora(linha[i])) },
+      pausa: pausa(linha[14]), obs: txt(linha[16]), modalidade: txt(linha[22]), funcao: txt(linha[23]) });
     const nome = txt(f), k = semAcento(nome);
     if (nome) {
       const t = tipoDe.get(k) || '';
@@ -153,7 +161,7 @@ export function vincularEquipes({ mapa, vagas, cadastro, rh }) {
   }
   for (const l of mapa?.lojas || []) {
     const e = porLoja.get(l.nome);
-    if (e) { l.vagas = e.vagas; l.equipe = e.equipe; }
+    if (e) { l.vagas = e.vagas; l.equipe = e.equipe; l.vagasDetalhe = e.detalhe; }
   }
   for (const p of rh) {
     const k = semAcento(txt(p.nome)), v = lojaDe.get(k), t = tipoDe.get(k);

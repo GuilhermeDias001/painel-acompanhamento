@@ -323,7 +323,9 @@ try {
     dados.mapa = await montarMapa({ contratos, dia: ent.dia, operacao: dados.operacao, cacheArq: join(AQUI, 'geocache.json') });
     // Equipes (aba Contratos do site, pedido do ENG-A 05/10): cada linha da Contratos é uma vaga —
     // A funcionário, B loja, C posição. O tipo (CLT/MEI/Prestador) vem do Cadastro Colaboradores!D.
-    const ac = await lerAcomp(tk, 'Contratos', 'A2:C500', NOVA_OP);
+    // A:X da Contratos (funcionário, loja, tipo, horários D:N, pausa O, obs Q, modalidade W, função X).
+    // Nunca R (endereço), Y (contato) e Z (telefone) entram aqui.
+    const ac = await lerAcomp(tk, 'Contratos', 'A2:X760', NOVA_OP);
     const cad = await lerAcomp(tk, 'Cadastro Colaboradores', 'B3:D1500', NOVA_OP);
     vincularEquipes({ mapa: dados.mapa, vagas: ac, cadastro: cad, rh: dados.cadastroRH || [] });
   } catch (e) { console.log(`FALHA mapa: ${String(e.message).slice(0, 200)}`); }
