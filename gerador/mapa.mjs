@@ -23,11 +23,21 @@ const NOME_REDE = { 'DROGA LESTE': 'Droga Leste', 'NOVA FARMA': 'Nova Farma', DR
   'AUTO PECAS PLACIN': 'Placin', IKEHARA: 'Ikehara', JMC: 'JMC', SP25: 'SP25', DIVAUTO: 'Divauto', MASTECAR: 'Mastecar', 'MUNDIAL TRACTOR': 'Mundial Tractor' };
 const redeDe = (nome) => {
   const n = semAcento(nome);
+  if (EXTRAS[n]?.rede) return EXTRAS[n].rede;
   for (const [, redes] of TIPOS) for (const r of redes) if (n.startsWith(r)) return NOME_REDE[r] || r;
   return '';
 };
+// Correcoes pesquisadas na web (lojas-extra.json, vem do cofre no CI): so confianca alta/media vale
+const EXTRAS = (() => {
+  try {
+    const j = JSON.parse(readFileSync(new URL('./lojas-extra.json', import.meta.url), 'utf8'));
+    return Object.fromEntries(Object.entries(j).filter(([k, v]) => !k.startsWith('_') && v.confianca !== 'baixa').map(([k, v]) => [semAcento(k), v]));
+  } catch { return {}; }
+})();
+export const extraDe = (nome) => EXTRAS[semAcento(nome)] || null;
 const tipoDe = (nome) => {
   const n = semAcento(nome);
+  if (EXTRAS[n]?.tipo) return EXTRAS[n].tipo;
   if (n.startsWith('ESCRITORIO')) return null;
   for (const [tipo, redes] of TIPOS) if (redes.some((r) => n.startsWith(r))) return tipo;
   return null;
@@ -79,10 +89,10 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   let novos = 0;
   const lojas = new Map();
   for (const [b, r, t, u] of contratos) {
-    const nome = txt(b), endereco = txt(r);
+    const nome = txt(b), endereco = txt(r) || extraDe(b)?.endereco || '';
     if (!nome || !endereco || lojas.has(nome) || ehGrupo(nome)) continue;
     const tipo = tipoDe(nome);
-    if (!tipo) continue;
+    if (!tipo || tipo === 'outro') continue; // 'outro' (banco de sangue, grafica...) nao vai no mapa
     lojas.set(nome, { nome, tipo, endereco, bairro: txt(t), regiao: txt(u) });
   }
   // Status (Guilherme, 04/10): 'cadastrada' = sem vaga hoje na DIA ATUAL; 'fechada' = tem vaga e
@@ -185,6 +195,7 @@ export function montarContratos({ linhas, alt, mapa }) {
     if (!nome) return;
     const e = porLoja.get(nome) || { nome, endereco: '', bairro: '', regiao: '', vagasDetalhe: [] };
     if (!e.endereco && txt(l[17])) e.endereco = txt(l[17]);
+    if (!e.endereco && extraDe(nome)?.endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'web'; }
     if (!e.bairro && txt(l[19])) e.bairro = txt(l[19]);
     if (!e.regiao && txt(l[20])) e.regiao = txt(l[20]);
     const a = alt[i] || [];
@@ -199,7 +210,7 @@ export function montarContratos({ linhas, alt, mapa }) {
   const lojas = [...porLoja.values()].map((e) => {
     const m = noMapa.get(e.nome);
     return { nome: e.nome, rede: m?.rede || redeDe(e.nome) || '', tipo: m?.tipo || tipoDe(e.nome) || '', endereco: e.endereco, bairro: e.bairro, regiao: e.regiao,
-      vagas: e.vagasDetalhe.length, vagasDetalhe: e.vagasDetalhe, noMapa: !!m };
+      ramo: extraDe(e.nome)?.ramo || '', enderecoFonte: e.enderecoFonte || '', vagas: e.vagasDetalhe.length, vagasDetalhe: e.vagasDetalhe, noMapa: !!m };
   });
   return { lojas, totais: { lojas: lojas.length, vagas: lojas.reduce((a, l) => a + l.vagas, 0) } };
 }

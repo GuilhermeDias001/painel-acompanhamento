@@ -21,6 +21,7 @@ writeFileSync(TOKEN, JSON.stringify(s.token));
 writeFileSync(join(AQUI, 'senha.txt'), s.senha);
 writeFileSync(join(AQUI, '.sal.json'), JSON.stringify(s.sal));
 if (s.fixos) writeFileSync(join(AQUI, 'fixos.json'), JSON.stringify(s.fixos));
+if (s.extras) writeFileSync(join(AQUI, 'lojas-extra.json'), JSON.stringify(s.extras));
 // cache das coordenadas das lojas (mapa): cifrado no repositório, aberto só durante a execução
 const GEO = join(RAIZ, 'geocache.enc'), GEO_JSON = join(AQUI, 'geocache.json');
 const geoAntes = existsSync(GEO) ? JSON.stringify(decifrar(readFileSync(GEO, 'utf8'), CHAVE)) : '{}';
