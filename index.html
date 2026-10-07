@@ -3977,6 +3977,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.rail a[data-view]'),fun
   rail.addEventListener('mouseleave',function(){grupos.forEach(function(g){definir(g,false)})});
 })();
 if(location.hash.length>1)mostrarView(location.hash.slice(1));
+else document.documentElement.classList.add("v-painel"); // abrir sem #: a tela inicial e o Painel
 
 // === MAPA: MapLibre + estilo vetorial (OpenFreeMap) repintado na estetica do site; lojas como icones ===
 /*MAPA-DADOS-INI*/
