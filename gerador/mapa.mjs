@@ -221,11 +221,27 @@ export function montarContratos({ linhas, alt, mapa }) {
     if (!g) continue;
     e.lojasDoGrupo = g;
     e.vagasDetalhe.forEach((v) => { v.tipoVaga = 'FOLGUISTA ROTATIVO'; });
+    // Como o rotativo cobre as lojas (decisão do Guilherme 08/10; definido em lojas-extra.json -> modoCobertura):
+    //  simultanea = cobre as lojas do grupo AO MESMO TEMPO (ex.: 82/91, o motoboy atende as 2);
+    //  rodizio    = cada dia cobre UMA loja, na folga do titular daquela loja (ex.: 70,73,74 e 75).
+    e.modoCobertura = extraDe(e.nome)?.modoCobertura || '';
+    if (e.modoCobertura === 'rodizio') {
+      // dia -> lojas do grupo cujo titular folga naquele dia (= quem o rotativo cobre); domingos do mês como dom1..dom5
+      const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab'], r = {}, add = (d, lj) => { (r[d] ||= []).includes(lj) || r[d].push(lj); };
+      for (const lj of g) {
+        for (const v of porLoja.get(lj)?.vagasDetalhe || []) {
+          if (v.tipoVaga !== 'TITULAR') continue;
+          dias.forEach((d) => { if (/FOLGA/i.test(v.horarios[d])) add(d, lj); });
+          v.horarios.dom.forEach((h, i) => { if (/FOLGA/i.test(h)) add('dom' + (i + 1), lj); });
+        }
+      }
+      e.coberturaPorFolga = r;
+    }
   }
   const lojas = [...porLoja.values()].map((e) => {
     const m = noMapa.get(e.nome);
     return { nome: e.nome, rede: m?.rede || redeDe(e.nome) || '', tipo: m?.tipo || tipoDe(e.nome) || '', endereco: e.endereco, bairro: e.bairro, regiao: e.regiao,
-      ...(e.lojasDoGrupo ? { folguistaRotativo: true, folguistaEntreLojas: e.lojasDoGrupo } : {}),
+      ...(e.lojasDoGrupo ? { folguistaRotativo: true, folguistaEntreLojas: e.lojasDoGrupo, modoCobertura: e.modoCobertura || 'a definir', ...(e.coberturaPorFolga ? { coberturaPorFolga: e.coberturaPorFolga } : {}) } : {}),
       ramo: extraDe(e.nome)?.ramo || '', enderecoFonte: e.enderecoFonte || '', vagas: e.vagasDetalhe.length, vagasDetalhe: e.vagasDetalhe, noMapa: !!m };
   });
   return { lojas, totais: { lojas: lojas.length, vagas: lojas.reduce((a, l) => a + l.vagas, 0) } };
