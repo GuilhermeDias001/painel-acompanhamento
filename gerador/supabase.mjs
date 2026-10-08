@@ -88,12 +88,12 @@ export async function ingerirDiasFechados(ler, nomesAbas, hojeIso, segredo, limi
   const post = async (tabela, corpo) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} HTTP ${r.status}: ${(await r.text()).slice(0, 150)}`); };
   const cfg = (await get('painel?select=dados&area=eq.ingestao'))[0]?.dados;
   if (!cfg?.de) return 'Ingestão do quadro: desligada';
-  const { lerDia, dataDaAba } = await import('./quadro.mjs');
+  const { lerDiaCompleto, dataDaAba } = await import('./quadro.mjs');
   const ja = new Set((await get(`quadro_dia?select=dia&dia=gte.${cfg.de}&dia=lt.${hojeIso}&limit=1000`)).map((x) => x.dia));
   const alvo = nomesAbas.map((n) => [n, dataDaAba(n)]).filter(([, d]) => d && d >= cfg.de && d < hojeIso && !ja.has(d)).sort((a, b) => a[1].localeCompare(b[1]));
   const feitos = [], vazios = [];
   for (const [nome, dia] of alvo.slice(0, limite)) {
-    const linhas = await lerDia(ler, nome);
+    const linhas = await lerDiaCompleto(ler, nome, nomesAbas);
     if (!linhas?.length) { vazios.push(dia); continue; }
     const [ya, ma, da] = dia.split('-').map(Number);
     const inst = (v) => (typeof v !== 'number' ? null : new Date(v >= 1 ? (v - 25569) * 86400000 + 3 * 3600000 : Date.UTC(ya, ma - 1, da) + v * 86400000 + 3 * 3600000).toISOString());

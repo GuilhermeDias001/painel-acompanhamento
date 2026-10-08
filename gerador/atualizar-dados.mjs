@@ -350,7 +350,7 @@ try {
       const [dd, mm, aa] = hojeNome.split('-').map(Number);
       const amanha = new Date(Date.UTC(aa, mm - 1, dd + 1));
       const lerNO = (aba, end) => lerAcomp(tk, aba, end, NOVA_OP);
-      dados.quadro = await montarQuadro(lerNO, hojeNome, nomeDaAba(amanha));
+      dados.quadro = await montarQuadro(lerNO, hojeNome, nomeDaAba(amanha), abasNO);
       const abas = abasNO;
       const cacheHQ = join(AQUI, 'historico-quadro.json');
       const cache = existsSync(cacheHQ) ? JSON.parse(readFileSync(cacheHQ, 'utf8')) : {};

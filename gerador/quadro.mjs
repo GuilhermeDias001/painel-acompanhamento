@@ -43,11 +43,40 @@ export async function lerDia(ler, aba, ate = 300) {
   return linhas;
 }
 
-export async function montarQuadro(ler, hojeNome, amanhaNome) {
+// Aba "DOMINGO dd-mm-aaaa": lista à parte de quem trabalha só aos domingos (colunas: A loja, B "HH:MM as HH:MM", C frequência, D CHAVE PIX,
+// E colaborador, F tipo, G valor, H cadastro). NUNCA lê a coluna D (Pix). Devolve as linhas no mesmo formato de lerDia, para juntar ao dia.
+export async function lerDomingo(ler, aba, ate = 300) {
+  let a, b;
+  try { a = await ler(aba, `A2:C${ate}`); b = await ler(aba, `E2:H${ate}`); } catch { return null; }
+  const tipos = new Set(['CLT', 'MEI', 'PRESTADOR', 'ELITE', 'BASE']);
+  const linhas = [];
+  a.forEach((l, i) => {
+    const loja = txt(l[0]); if (!loja) return;
+    const r = b[i] || [];
+    const m = /(\d{1,2}):(\d{2})\s*(?:as|às|a|-)\s*(\d{1,2}):(\d{2})/i.exec(txt(l[1]));
+    const tipo = txt(r[1]).toUpperCase();
+    linhas.push({ colab: txt(r[0]), status: '', valor: typeof r[2] === 'number' ? r[2] : null, tipo: tipos.has(tipo) ? tipo : '', loja,
+      entrada: m ? `${m[1].padStart(2, '0')}:${m[2]}` : '', saida: m ? `${m[3].padStart(2, '0')}:${m[4]}` : '', motivo: 'ESPORADICO FIXO',
+      faltante: '', obs: `DOMINGO (${txt(l[2]) || 'frequência não informada'})${txt(r[3]) ? ' · cadastro: ' + txt(r[3]) : ''}`, inicio: null, fim: null });
+  });
+  return linhas;
+}
+const ehDomingo = (iso) => !!iso && new Date(iso + 'T12:00:00Z').getUTCDay() === 0;
+// Dia completo: aba do dia + (aos domingos, quando existir) a aba "DOMINGO dd-mm-aaaa" juntada ao final
+export async function lerDiaCompleto(ler, nome, abas) {
+  const l = await lerDia(ler, nome);
+  if (!l || !abas || !ehDomingo(dataDaAba(nome))) return l;
+  const d = abas.find((x) => x.trim().toUpperCase() === `DOMINGO ${nome}`);
+  if (!d) return l;
+  const dom = await lerDomingo(ler, d);
+  return dom?.length ? [...l, ...dom] : l;
+}
+
+export async function montarQuadro(ler, hojeNome, amanhaNome, abas) {
   const q = {};
-  const h = await lerDia(ler, hojeNome);
+  const h = await lerDiaCompleto(ler, hojeNome, abas);
   if (h) q.hoje = { data: dataDaAba(hojeNome), linhas: h };
-  const a = await lerDia(ler, amanhaNome);
+  const a = await lerDiaCompleto(ler, amanhaNome, abas);
   if (a) q.planejamento = { data: dataDaAba(amanhaNome), linhas: a };
   return q;
 }
