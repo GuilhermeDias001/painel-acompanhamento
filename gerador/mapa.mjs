@@ -43,6 +43,12 @@ const tipoDe = (nome) => {
   return null;
 };
 // vagas que juntam várias lojas ("82/91", "02, 12 E 14", "ORATORIO/JUVENTUS") não são um ponto
+// Nome de loja que junta várias Droga Leste ("02 E 14", "70,73,74 E 75", "82/91", "64/65") não é uma loja: é vaga de
+// FOLGUISTA ROTATIVO, que roda entre elas (Guilherme, 08/10: criar a categoria "Folguista rotativo").
+const grupoDL = (nome) => { const m = /^DROGA LESTE\s+(\d+(?:\s*(?:,|\/|E)\s*\d+)+)\s*$/i.exec(txt(nome)); return m ? [...m[1].matchAll(/\d+/g)].map((x) => 'DROGA LESTE ' + x[0].padStart(2, '0')) : null; };
+// Entradas da aba Contratos que não são loja nem vaga real (erro de cadastro, decisão do Guilherme 08/10): saem do sistema
+const IGNORAR = new Set(['ASSISTENTE OPERACIONAL']);
+const ignorada = (nome) => IGNORAR.has(semAcento(txt(nome)));
 const ehGrupo = (nome) => /\//.test(nome) || /\d\s*(,|\bE\b)\s*\d/.test(semAcento(nome));
 
 const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
@@ -153,18 +159,19 @@ export function vincularEquipes({ mapa, vagas, cadastro, rh }) {
   for (const linha of vagas) {
     const [f, b, c] = linha;
     const loja = txt(b);
-    if (!loja) continue;
+    if (!loja || ignorada(loja)) continue;
+    const rot = !!grupoDL(loja);
     const e = porLoja.get(loja) || { vagas: 0, equipe: [], detalhe: [] };
     e.vagas++;
     // vaga a vaga (colunas: D..I seg-sáb, J..N 1º-5º domingo, O pausa, Q obs, W modalidade, X função)
-    e.detalhe.push({ titular: txt(f), tipoVaga: txt(c).toUpperCase(),
+    e.detalhe.push({ titular: txt(f), tipoVaga: rot ? 'FOLGUISTA ROTATIVO' : txt(c).toUpperCase(),
       horarios: { seg: hora(linha[3]), ter: hora(linha[4]), qua: hora(linha[5]), qui: hora(linha[6]), sex: hora(linha[7]), sab: hora(linha[8]),
         dom: [9, 10, 11, 12, 13].map((i) => hora(linha[i])) },
       pausa: pausa(linha[14]), obs: txt(linha[16]), modalidade: txt(linha[22]), funcao: txt(linha[23]) });
     const nome = txt(f), k = semAcento(nome);
     if (nome) {
       const t = tipoDe.get(k) || '';
-      const pos = POSICAO[semAcento(txt(c))] || (t === 'ELITE' ? 'Elite' : t === 'BASE' ? 'Base' : txt(c));
+      const pos = rot ? 'Folguista rotativo' : POSICAO[semAcento(txt(c))] || (t === 'ELITE' ? 'Elite' : t === 'BASE' ? 'Base' : txt(c));
       e.equipe.push({ nome, posicao: pos, tipo: TIPO[t] || '', ativo: ativo.get(k) !== false });
       if (!lojaDe.has(k)) lojaDe.set(k, { loja, posicao: pos });
     }
@@ -193,7 +200,7 @@ export function montarContratos({ linhas, alt, mapa }) {
   const porLoja = new Map();
   linhas.forEach((l, i) => {
     const nome = txt(l[1]);
-    if (!nome) return;
+    if (!nome || ignorada(nome)) return;
     const e = porLoja.get(nome) || { nome, endereco: '', bairro: '', regiao: '', vagasDetalhe: [] };
     if (!e.endereco && txt(l[17])) e.endereco = txt(l[17]);
     if (extraDe(nome)?.corrigeEndereco && extraDe(nome).endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'sistema'; }
@@ -209,19 +216,16 @@ export function montarContratos({ linhas, alt, mapa }) {
     e.vagasDetalhe.push(v);
     porLoja.set(nome, e);
   });
-  // Nome de loja que junta várias Droga Leste ("02 E 14", "70,73,74 E 75", "82/91", "64/65") não é uma loja:
-  // é vaga de FOLGUISTA, que roda entre elas (Guilherme, 06/10: marcar apenas como Folguista).
-  const grupoDL = (nome) => { const m = /^DROGA LESTE\s+(\d+(?:\s*(?:,|\/|E)\s*\d+)+)\s*$/i.exec(txt(nome)); return m ? [...m[1].matchAll(/\d+/g)].map((x) => 'DROGA LESTE ' + x[0].padStart(2, '0')) : null; };
   for (const e of porLoja.values()) {
     const g = grupoDL(e.nome);
     if (!g) continue;
     e.lojasDoGrupo = g;
-    e.vagasDetalhe.forEach((v) => { v.tipoVaga = 'FOLGUISTA'; });
+    e.vagasDetalhe.forEach((v) => { v.tipoVaga = 'FOLGUISTA ROTATIVO'; });
   }
   const lojas = [...porLoja.values()].map((e) => {
     const m = noMapa.get(e.nome);
     return { nome: e.nome, rede: m?.rede || redeDe(e.nome) || '', tipo: m?.tipo || tipoDe(e.nome) || '', endereco: e.endereco, bairro: e.bairro, regiao: e.regiao,
-      ...(e.lojasDoGrupo ? { folguistaEntreLojas: e.lojasDoGrupo } : {}),
+      ...(e.lojasDoGrupo ? { folguistaRotativo: true, folguistaEntreLojas: e.lojasDoGrupo } : {}),
       ramo: extraDe(e.nome)?.ramo || '', enderecoFonte: e.enderecoFonte || '', vagas: e.vagasDetalhe.length, vagasDetalhe: e.vagasDetalhe, noMapa: !!m };
   });
   return { lojas, totais: { lojas: lojas.length, vagas: lojas.reduce((a, l) => a + l.vagas, 0) } };
