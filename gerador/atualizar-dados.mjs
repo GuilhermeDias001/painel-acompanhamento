@@ -10,6 +10,7 @@ import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
+import { montarFarmoOp } from './farmoop.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
 
@@ -357,6 +358,10 @@ try {
       dados.historicoQuadro = { linhas: hq.linhas, dias: hq.dias };
       if (hq.pendentes) console.log(`historicoQuadro: faltam ${hq.pendentes} dias (entram nas próximas execuções)`);
     } catch (e) { console.log(`FALHA quadro: ${String(e.message).slice(0, 200)}`); }
+    // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
+    try {
+      dados.farmoOp = await montarFarmoOp((aba, end) => lerAcomp(tk, aba, end, FARMO));
+    } catch (e) { console.log(`FALHA farmo operacional: ${String(e.message).slice(0, 200)}`); }
     // Contratos completo (todas as lojas/vagas, não só as do mapa) + escalas alternadas (AR:AU)
     const alt = await lerAcomp(tk, 'Contratos', 'AR2:AU760', NOVA_OP);
     dados.contratos = montarContratos({ linhas: ac, alt, mapa: dados.mapa });
