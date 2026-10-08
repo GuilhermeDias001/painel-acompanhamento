@@ -18,9 +18,11 @@ export async function lerDia(ler, aba, ate = 300) {
   const um = (k) => idx[k]?.[0] ?? -1;
   const colab = um('COLABORADOR/REPOSICAO'), valor = um('VALOR'), status = um('STATUS'), tipo = um('TIPO'), loja = um('LOJA'),
     entrada = um('ENTRADA'), motivo = um('MOTIVO'), faltante = um('FALTANTE'), obs = um('OBSERVACAO');
+  const comeca = (p) => cab.findIndex((t) => semAcento(t).startsWith(p)); // TEMPO INICIO / TEMPO FINAL: carimbo do tempo em aberto (só leitura)
+  const tIni = comeca('TEMPO INIC'), tFim = comeca('TEMPO FIN');
   // a SAIDA do turno é a que vem DEPOIS de ENTRADA (a anterior é a saída real do titular)
   const saida = (idx.SAIDA || []).find((i) => i > entrada) ?? -1;
-  const quer = [colab, valor, status, tipo, loja, entrada, saida, motivo, faltante, obs].filter((i) => i >= 0).sort((a, b) => a - b);
+  const quer = [colab, valor, status, tipo, loja, entrada, saida, motivo, faltante, obs, tIni, tFim].filter((i) => i >= 0).sort((a, b) => a - b);
   if (loja < 0 || !quer.length) return [];
   // uma leitura por faixa contínua de colunas necessárias (pula Valor e Chave Pix)
   const faixas = []; for (const i of quer) { const f = faixas.at(-1); if (f && i === f[1] + 1) f[1] = i; else faixas.push([i, i]); }
@@ -35,7 +37,8 @@ export async function lerDia(ler, aba, ate = 300) {
     const g = (i) => (i >= 0 ? d[i] : '');
     const vl = g(valor);
     linhas.push({ colab: txt(g(colab)), status: txt(g(status)), valor: typeof vl === 'number' ? vl : null, tipo: txt(g(tipo)), loja: txt(g(loja)),
-      entrada: hhmm(g(entrada)), saida: hhmm(g(saida)), motivo: txt(g(motivo)), faltante: txt(g(faltante)), obs: txt(g(obs)) });
+      entrada: hhmm(g(entrada)), saida: hhmm(g(saida)), motivo: txt(g(motivo)), faltante: txt(g(faltante)), obs: txt(g(obs)),
+      inicio: typeof g(tIni) === 'number' ? g(tIni) : null, fim: typeof g(tFim) === 'number' ? g(tFim) : null });
   }
   return linhas;
 }

@@ -44,8 +44,11 @@ export async function semearQuadro(dados, segredo) {
     if ((await get(`quadro_dia?select=dia&dia=eq.${q.data}`)).length) continue;
     const rd = await fetch(`${SUPABASE_URL}/rest/v1/quadro_dia`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify({ dia: q.data, fonte: 'sistema' }) });
     if (!rd.ok) throw new Error(`quadro_dia HTTP ${rd.status}: ${(await rd.text()).slice(0, 150)}`);
+    // carimbos do Excel (serial de data/hora, ou só hora no layout antigo) -> instante em UTC (SP = UTC-3)
+    const [ya, ma, da] = q.data.split('-').map(Number);
+    const inst = (v) => (typeof v !== 'number' ? null : new Date(v >= 1 ? (v - 25569) * 86400000 + 3 * 3600000 : Date.UTC(ya, ma - 1, da) + v * 86400000 + 3 * 3600000).toISOString());
     const rows = q.linhas.map((l, i) => ({ dia: q.data, ordem: i, loja: l.loja || '', colab: l.colab || '', status: l.status || '', motivo: l.motivo || '', tipo: l.tipo || '',
-      valor: typeof l.valor === 'number' ? l.valor : null, entrada: l.entrada || '', saida: l.saida || '', faltante: l.faltante || '', obs: l.obs || '', origem_edicao: 'seed' }));
+      valor: typeof l.valor === 'number' ? l.valor : null, entrada: l.entrada || '', saida: l.saida || '', faltante: l.faltante || '', obs: l.obs || '', origem_edicao: 'seed', inicio_em: inst(l.inicio), fim_em: inst(l.fim), status_anterior: l.status || '' }));
     const rl = await fetch(`${SUPABASE_URL}/rest/v1/quadro_linha`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(rows) });
     if (!rl.ok) throw new Error(`quadro_linha HTTP ${rl.status}: ${(await rl.text()).slice(0, 150)}`);
     feitos.push(`${q.data} (${rows.length} linhas)`);
