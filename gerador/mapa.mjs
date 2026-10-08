@@ -89,7 +89,8 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   let novos = 0;
   const lojas = new Map();
   for (const [b, r, t, u] of contratos) {
-    const nome = txt(b), endereco = txt(r) || extraDe(b)?.endereco || '';
+    // corrigeEndereco: a correção feita aqui vale mais que o endereço da planilha (decisão do Guilherme 08/10: as correções ficam no sistema)
+    const ex = extraDe(b), nome = txt(b), endereco = (ex?.corrigeEndereco && ex.endereco) || txt(r) || ex?.endereco || '';
     if (!nome || !endereco || lojas.has(nome) || ehGrupo(nome)) continue;
     const tipo = tipoDe(nome);
     if (!tipo || tipo === 'outro') continue; // 'outro' (banco de sangue, grafica...) nao vai no mapa
@@ -195,7 +196,8 @@ export function montarContratos({ linhas, alt, mapa }) {
     if (!nome) return;
     const e = porLoja.get(nome) || { nome, endereco: '', bairro: '', regiao: '', vagasDetalhe: [] };
     if (!e.endereco && txt(l[17])) e.endereco = txt(l[17]);
-    if (!e.endereco && extraDe(nome)?.endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'web'; }
+    if (extraDe(nome)?.corrigeEndereco && extraDe(nome).endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'sistema'; }
+    else if (!e.endereco && extraDe(nome)?.endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'web'; }
     if (!e.bairro && txt(l[19])) e.bairro = txt(l[19]);
     if (!e.regiao && txt(l[20])) e.regiao = txt(l[20]);
     const a = alt[i] || [];
