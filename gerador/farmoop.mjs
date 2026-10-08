@@ -58,7 +58,13 @@ export async function montarFarmoOp(ler) {
   out.escalaSemanal = semana;
   const sem = await ler('Escalas', 'S1:S1'); out.semanaNumero = sem[0]?.[0] ?? null;
 
-  // --- dia fechado = a data de hoje já consta no Historico (coluna A)
+  // --- Motorista: SÓ as colunas A:B (rota -> motorista); C:H têm usuário, CNH, CPF e placa e não são lidas
+  const M = pad(await ler('Motorista', 'A2:B40'), 39, 2);
+  const por = (r) => txt((M.find((l) => txt(l[0]).toUpperCase() === r) || [])[1]);
+  out.folguista = por('FOLGUISTA');
+  out.coringa = por('CORINGA');
+
+  // --- dia fechado =a data de hoje já consta no Historico (coluna A)
   const H = await ler('Historico', 'A2:A20000');
   const datas = new Set(H.map((l) => iso(l[0])).filter(Boolean));
   out.diasFechados = [...datas].sort().slice(-90);
