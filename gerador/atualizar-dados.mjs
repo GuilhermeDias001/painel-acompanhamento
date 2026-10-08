@@ -11,6 +11,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
 import { montarFarmoOp } from './farmoop.mjs';
+import { ingerirDiasFechados } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
 
@@ -357,6 +358,11 @@ try {
       writeFileSync(cacheHQ, JSON.stringify(cache));
       dados.historicoQuadro = { linhas: hq.linhas, dias: hq.dias };
       if (hq.pendentes) console.log(`historicoQuadro: faltam ${hq.pendentes} dias (entram nas próximas execuções)`);
+      // só no Actions (precisa da chave secreta do Supabase): copia os dias fechados do Excel para o banco
+      if (process.env.SUPABASE_SECRET) {
+        try { console.log(await ingerirDiasFechados(lerNO, abas, dataDaAba(hojeNome), process.env.SUPABASE_SECRET)); }
+        catch (e) { console.log(`FALHA ingestão do quadro: ${String(e.message).slice(0, 200)}`); }
+      }
     } catch (e) { console.log(`FALHA quadro: ${String(e.message).slice(0, 200)}`); }
     // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
     try {

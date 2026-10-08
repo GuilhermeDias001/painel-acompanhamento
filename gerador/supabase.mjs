@@ -76,3 +76,34 @@ export async function gravarSupabase(dados, segredo) {
   if (!r.ok) throw new Error(`Supabase HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
   return 'Supabase: ' + mudaram.map((l) => l.area).join(', ');
 }
+
+// Ingestão dos dias FECHADOS do Excel para o banco (Guilherme, 08/10): a cada ciclo, todo dia da aba Nova Operação entre a data de início
+// (painel.area='ingestao' = {de:'AAAA-MM-DD'}) e ontem que ainda não está em quadro_dia é copiado para quadro_dia/quadro_linha (fonte 'excel',
+// origem_edicao 'seed': sem poluir a auditoria). Depois de gravado o banco é a fonte desse dia: o gerador nunca o regrava e as correções
+// são feitas direto no banco. Lê no máximo `limite` dias por execução (o resto entra nas próximas).
+export async function ingerirDiasFechados(ler, nomesAbas, hojeIso, segredo, limite = 15) {
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const get = async (p) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${p}`, { headers: h }); if (!r.ok) throw new Error(`HTTP ${r.status} ${p.slice(0, 40)}`); return r.json(); };
+  const post = async (tabela, corpo) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} HTTP ${r.status}: ${(await r.text()).slice(0, 150)}`); };
+  const cfg = (await get('painel?select=dados&area=eq.ingestao'))[0]?.dados;
+  if (!cfg?.de) return 'Ingestão do quadro: desligada';
+  const { lerDia, dataDaAba } = await import('./quadro.mjs');
+  const ja = new Set((await get(`quadro_dia?select=dia&dia=gte.${cfg.de}&dia=lt.${hojeIso}&limit=1000`)).map((x) => x.dia));
+  const alvo = nomesAbas.map((n) => [n, dataDaAba(n)]).filter(([, d]) => d && d >= cfg.de && d < hojeIso && !ja.has(d)).sort((a, b) => a[1].localeCompare(b[1]));
+  const feitos = [], vazios = [];
+  for (const [nome, dia] of alvo.slice(0, limite)) {
+    const linhas = await lerDia(ler, nome);
+    if (!linhas?.length) { vazios.push(dia); continue; }
+    const [ya, ma, da] = dia.split('-').map(Number);
+    const inst = (v) => (typeof v !== 'number' ? null : new Date(v >= 1 ? (v - 25569) * 86400000 + 3 * 3600000 : Date.UTC(ya, ma - 1, da) + v * 86400000 + 3 * 3600000).toISOString());
+    const rows = linhas.map((l, i) => ({ dia, ordem: i, loja: l.loja || '', colab: l.colab || '', status: l.status || '', motivo: l.motivo || '', tipo: l.tipo || '',
+      valor: typeof l.valor === 'number' ? l.valor : null, entrada: l.entrada || '', saida: l.saida || '', faltante: l.faltante || '', obs: l.obs || '', origem_edicao: 'seed',
+      inicio_em: inst(l.inicio), fim_em: inst(l.fim), status_anterior: l.status || '' }));
+    await post('quadro_dia', { dia, fonte: 'excel' });
+    try { for (let i = 0; i < rows.length; i += 400) await post('quadro_linha', rows.slice(i, i + 400)); }
+    catch (e) { await fetch(`${SUPABASE_URL}/rest/v1/quadro_linha?dia=eq.${dia}`, { method: 'DELETE', headers: h }); await fetch(`${SUPABASE_URL}/rest/v1/quadro_dia?dia=eq.${dia}`, { method: 'DELETE', headers: h }); throw e; }
+    feitos.push(`${dia}(${rows.length})`);
+  }
+  return `Ingestão do quadro: ${feitos.length ? feitos.join(' ') : 'nada novo'}${vazios.length ? ' | abas sem linhas: ' + vazios.join(' ') : ''}${alvo.length > limite ? ` | faltam ${alvo.length - limite}` : ''}`;
+}
