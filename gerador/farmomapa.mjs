@@ -15,7 +15,10 @@ const tokensRua = (s) => sem(String(s).split(',')[0]).replace(/[^A-Z0-9 ]/g, ' '
   .filter((t, i) => !(i === 0 && TIPO.has(t))).map((t) => EXP[t] || t)
   .filter((t) => !/^[0-9]+[A-Z]?$/.test(t) && t !== 'SN' && t !== 'S')
   .map((t) => t.replace(/([A-Z])\1/g, '$1')); // letras dobradas viram uma (MOTTA = MOTA)
-const sim = (a, b) => { const A = new Set(a), B = new Set(b); if (!A.size || !B.size) return 0; let i = 0; for (const t of A) if (B.has(t)) i++; return i / Math.min(A.size, B.size); };
+// token igual, ou parecido (1 letra de diferença em palavras longas: ABRAMOWICH x ABRAMOWICZ)
+const parecido = (x, y) => x === y || (x.length >= 6 && y.length >= 6 && Math.abs(x.length - y.length) <= 1 && dist1(x, y));
+const dist1 = (x, y) => { if (x.length === y.length) { let d = 0; for (let i = 0; i < x.length; i++) if (x[i] !== y[i] && ++d > 1) return false; return true; } const [c, l] = x.length < y.length ? [x, y] : [y, x]; let i = 0, j = 0, d = 0; while (i < c.length && j < l.length) { if (c[i] === l[j]) { i++; j++; } else if (++d > 1) return false; else j++; } return true; };
+const sim = (a, b) => { const A = [...new Set(a)], B = [...new Set(b)]; if (!A.length || !B.length) return 0; let i = 0; for (const t of A) if (B.some((u) => parecido(t, u))) i++; return i / Math.min(A.length, B.length); };
 let COMPLETOS = null;
 function carregarCompletos() {
   if (COMPLETOS) return COMPLETOS;
@@ -48,12 +51,17 @@ export function completarEnderecos(farmoOp) {
 async function acharCompletoGeo(completo) {
   const p = completo.split(',').map((v) => v.trim());
   const cidade = (p[p.length - 1] || '').replace(/-([A-Z]{2})$/, ', $1');
-  const rua = p[0].replace(/\s+(S\/N|SN)$/i, '');
-  for (const [q, precisao] of [[`${rua}, ${cidade}`, 'numero'], [`${rua.replace(/\s+[0-9]+[A-Z]?$/, '')}, ${cidade}`, 'rua']]) {
+  const rua = p[0].replace(/\s+(S\/N|SN)$/i, '').replace(/(\d+[A-Z]?)\/\d+[A-Z]?$/, '$1'); // 914/904 -> 914
+  const semNum = rua.replace(/\s+[0-9]+[A-Z]?$/, '');
+  const tent = [[`${rua}, ${cidade}`, 'numero'], [`${rua}, ${p[1] || ''}, ${cidade}`, 'numero'], [`${semNum}, ${cidade}`, 'rua'], [`${semNum}, ${p[1] || ''}, ${cidade}`, 'rua']];
+  for (const [q, precisao] of tent) {
     const g = await nominatim(q).catch(() => null);
     if (g) return { ...g, fonte: precisao };
   }
-  return achar(p[0], p[1] || '');
+  const r = await achar(p[0], p[1] || '');
+  if (r) return r;
+  if (p[1]) { const g = await nominatim(`${p[1]}, ${cidade}`).catch(() => null); if (g) return { ...g, fonte: 'bairro' }; } // último recurso: centro do bairro
+  return null;
 }
 
 async function achar(endereco, bairro) {
