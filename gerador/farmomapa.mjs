@@ -38,7 +38,7 @@ export async function montarFarmoMapa({ farmoOp, base, cacheArq, limite = 100 })
     paradas.push({ ...p, lat: g.lat, lng: g.lng, precisao: g.fonte });
   }
   if (novos) writeFileSync(cacheArq, JSON.stringify(cache));
-  // origem: a base (a Farmoterápica fica no mesmo local da Base, segundo o Guilherme). confirmada:false até ele dizer qual dos dois endereços de Base vale.
-  const origem = base ? { endereco: base.endereco, lat: base.lat, lng: base.lng, confirmada: false } : null;
+  // origem: a base (a Farmoterápica fica no mesmo local da Base, segundo o Guilherme). confirmada: o Guilherme definiu em 10/10 que a Base e a Farmoterápica ficam em Rua Marcelo Müller, 434.
+  const origem = base ? { endereco: base.endereco, lat: base.lat, lng: base.lng, confirmada: true } : null;
   return { origem, paradas, semCoordenada, geradoEm: new Date().toISOString() };
 }
