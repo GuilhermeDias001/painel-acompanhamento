@@ -1,10 +1,9 @@
 // Cópia fiel das abas legadas das planilhas para o banco (Guilherme, 10/10: "puxar todos os dados, menos Pix e PIN").
 // Cada aba vira linhas em legado_linha {arquivo, aba, linha, dados:{coluna: valor}} + um registro em legado_aba. Só roda uma vez por aba.
-// FICAM DE FORA: qualquer coluna cujo título case com PIX ou PIN e, por serem dado bancário (mesma natureza do Pix), BANCO, AGENCIA, CONTA e FAVORECIDO;
-// também a coluna Login da aba TUF Log (credencial de sistema). Liga com painel.area='importacao_legado' = {ativo:true}. Só no Actions (chave secreta).
+// FICAM DE FORA: só as colunas cujo título case com PIX ou PIN (decisão do Guilherme, 10/10; ele liberou banco/agência/conta/favorecido e o Login do TUF Log). Liga com painel.area='importacao_legado' = {ativo:true}. Só no Actions (chave secreta).
 import { SUPABASE_URL } from './supabase.mjs';
 
-const EXCLUIR = /(^|[^a-z])(pix|pin|banco|agencia|agência|conta|favorecido|login)([^a-z]|$)/i;
+const EXCLUIR = /(^|[^a-z])(pix|pin)([^a-z]|$)/i; // Guilherme, 10/10: só Pix e PIN ficam de fora (banco/agência/conta/favorecido e Login foram liberados)
 const LETRA = (i) => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
 const col = (l) => l.split('').reduce((n, c) => n * 26 + c.charCodeAt(0) - 64, 0) - 1;
 const iso = (s) => new Date((s - 25569) * 86400000).toISOString().slice(0, 10);
