@@ -6917,9 +6917,22 @@ document.getElementById('lgBusca').addEventListener('input',function(){if(LG.cac
     if(vazio){msg.textContent='Preencha pelo menos um campo.';return}
     var prox=(d.nums.length?Math.max.apply(null,d.nums):0)+1;
     msg.textContent='Salvando…';
-    sbCliente().from('legado_linha').insert({arquivo:'nova',aba:cfg.aba,linha:prox,dados:dados}).then(function(r){
-      if(r.error)throw r.error;
-      d.linhas.push(dados); d.nums.push(prox); fecha(); lgDesenhar(LG.ver);
+    // outro usuario pode ter criado a mesma linha (unique arquivo+aba+linha): le o maior numero no banco e tenta de novo
+    function tentar(n,linha){
+      return sbCliente().from('legado_linha').insert({arquivo:'nova',aba:cfg.aba,linha:linha,dados:dados}).then(function(r){
+        if(r.error){
+          if((r.error.code==='23505'||/duplicate|unique/i.test(String(r.error.message||'')))&&n<4){
+            return sbCliente().from('legado_linha').select('linha').eq('arquivo','nova').eq('aba',cfg.aba).order('linha',{ascending:false}).limit(1).then(function(q){
+              var mx=q&&q.data&&q.data[0]?+q.data[0].linha:linha; return tentar(n+1,Math.max(mx,linha)+1);
+            });
+          }
+          throw r.error;
+        }
+        return linha;
+      });
+    }
+    tentar(0,prox).then(function(linhaOk){
+      prox=linhaOk; d.linhas.push(dados); d.nums.push(prox); fecha(); lgDesenhar(LG.ver);
       if(window.sqAviso)window.sqAviso('Cadastro salvo em '+cfg.tit+'.');
     }).catch(function(e){msg.textContent='Não foi possível salvar: '+String((e&&e.message)||'erro')+(/permission|policy|denied|403/i.test(String((e&&e.message)||''))?' (o banco ainda não liberou a escrita nesta tela).':'')});
   });
