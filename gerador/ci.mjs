@@ -57,9 +57,20 @@ if (process.env.SUPABASE_SECRET) {
   try {
     console.log(await semearQuadro(JSON.parse(readFileSync(join(AQUI, 'dados.json'), 'utf8')), process.env.SUPABASE_SECRET));
   } catch (e) { console.log('FALHA quadro no banco: ' + String(e.message).slice(0, 200)); }
+  // resultado do backup fica no banco (painel.area='backup_status'): o site pode mostrar "último backup" e alertar se parar
+  const statusBackup = async (corpo) => {
+    const k = process.env.SUPABASE_SECRET, hd = { apikey: k, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' };
+    if (k.startsWith('eyJ')) hd.Authorization = 'Bearer ' + k;
+    await fetch('https://jetujppwmyzyfkaflplj.supabase.co/rest/v1/painel?on_conflict=area', { method: 'POST', headers: hd, body: JSON.stringify([{ area: 'backup_status', dados: corpo, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) }).catch(() => {});
+  };
   try {
-    console.log(await backupDiario(process.env.SUPABASE_SECRET, JSON.parse(readFileSync(TOKEN, 'utf8')).access_token));
-  } catch (e) { console.log('FALHA backup: ' + String(e.message).slice(0, 200)); }
+    const msg = await backupDiario(process.env.SUPABASE_SECRET, JSON.parse(readFileSync(TOKEN, 'utf8')).access_token);
+    console.log(msg);
+    if (!msg.includes('já existe')) await statusBackup({ ok: true, em: new Date().toISOString(), resumo: msg });
+  } catch (e) {
+    console.log('FALHA backup: ' + String(e.message).slice(0, 200));
+    await statusBackup({ ok: false, em: new Date().toISOString(), erro: String(e.message).slice(0, 200) });
+  }
 }
 const SITE = join(RAIZ, '_site');
 mkdirSync(SITE, { recursive: true });
