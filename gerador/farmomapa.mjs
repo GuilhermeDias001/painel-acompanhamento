@@ -42,7 +42,7 @@ export function completarEnderecos(farmoOp) {
   const codPor = new Map();
   for (const l of farmoOp.operacaoHoje || []) if (l.codigoPnet && !codPor.has(sem(l.endereco))) codPor.set(sem(l.endereco), l.codigoPnet);
   let n = 0;
-  const aplica = (o, cod) => { const c = acharCompleto(o.endereco, cod); if (!c) return; o.enderecoCompleto = c.completo; o.bairroCompleto = c.bairro; o.cidade = c.cidade; n++; };
+  const aplica = (o, cod) => { const c = acharCompleto(o.endereco, cod) || (cod ? null : acharCompleto(o.endereco, null)); if (!c) return; o.enderecoCompleto = c.completo; o.bairroCompleto = c.bairro; o.cidade = c.cidade; n++; };
   for (const l of farmoOp.operacaoHoje || []) aplica(l, l.codigoPnet);
   for (const x of farmoOp.enderecosPorRota || []) aplica(x, codPor.get(sem(x.endereco)));
   return n;
@@ -94,7 +94,7 @@ export async function montarFarmoMapa({ farmoOp, base, cacheArq, limite = 100 })
   let novos = 0; const paradas = [], semCoordenada = [];
   for (const p of lista) {
     const ck = p.enderecoCompleto ? `fm2|${sem(p.enderecoCompleto)}` : `fm1|${sem(p.endereco)}|${sem(p.bairro)}`;
-    if (!(ck in cache)) {
+    if (cache[ck] == null) { // inclui falhas anteriores (null): tenta de novo com as buscas melhoradas
       if (novos >= limite) { semCoordenada.push({ ...p, pendente: true }); continue; }
       cache[ck] = p.enderecoCompleto ? await acharCompletoGeo(p.enderecoCompleto) : await achar(p.endereco, p.bairro); novos++;
     }
