@@ -704,19 +704,24 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
 /* calendario: dia atual = so a tarja superior em amarelo neon, um pouco mais grossa */
 .cal-day.hoje{border-top:5px solid var(--n-amarelo)}
 .cal-day.hoje{border-top:5px solid #fff200;box-shadow:0 -3px 10px rgba(255,242,0,.65)}
-.esc-dia{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.esc-dia{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .esc-dia h2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-transform:none}
 .esc-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 14px;margin-top:8px}
 .esc-item{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--border)}
 .esc-item i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--n-verde)}
-@media (max-width:900px){.esc-dia{grid-template-columns:1fr}}
+@media (max-width:1100px){.esc-dia{grid-template-columns:1fr}}
 .esc-dia .esc-lista{display:grid;margin-top:6px}
 .esc-grupo+.esc-grupo{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-strong)}
 .esc-grupo h3{margin:0;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--fg-faint)}
-#escHoje,#escAmanha{display:block!important}
+#escOntem,#escHoje,#escAmanha{display:block!important}
 .esc-grupo .esc-lista{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 14px}
 /* escala do dia: card dividido ao meio (motoboys | motoristas) */
-#escHoje,#escAmanha{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:8px}
+#escOntem,#escHoje,#escAmanha{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:8px}
+.esc-folga{grid-column:1/-1;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-strong)}
+.esc-folga h3{margin:0 0 6px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-faint)}
+.esc-folga .esc-lista{display:flex!important;flex-wrap:wrap;gap:6px 8px}
+.esc-folga .esc-item{border:1px solid var(--border-strong);border-radius:999px;padding:3px 10px;font-size:12.5px;color:var(--n-laranja)}
+.esc-folga .esc-item i{background:var(--n-laranja)}
 .esc-grupo{min-width:0;padding-right:14px}
 .esc-grupo+.esc-grupo{margin-top:0;padding-top:0;border-top:0;border-left:1px solid var(--border-strong);padding-left:16px;padding-right:0}
 .esc-grupo .esc-lista{grid-template-columns:1fr!important}
@@ -751,6 +756,28 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
 html.mapa-modo,html.mapa-modo body{overflow:hidden}
 html.mapa-modo main{padding-bottom:0}
 .mapa-wrap{height:calc(100dvh - 190px);margin-top:-6px}
+.lg-wrap{max-height:calc(100dvh - 330px);overflow:auto}
+.lg-tab thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
+.lg-tab td{vertical-align:top;max-width:360px;overflow-wrap:anywhere}
+#fmEl{position:absolute;inset:0;background:var(--surface)}
+.fm-wrap{grid-template-columns:minmax(0,1fr) 380px!important}
+.fm-lado{font-size:14px}
+.fm-m{padding:11px 12px}
+.fm-m b{font-size:14.5px}
+.fm-m small{font-size:12.5px}
+.fm-pin{width:26px;height:26px;font-size:12.5px}
+.fm-sel{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-faint)}
+.fm-sel select{height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:600 13px var(--font-sys);text-transform:none;letter-spacing:0}
+.fm-m{display:flex;flex-direction:column;gap:2px;padding:9px 10px;margin-bottom:6px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);cursor:pointer;border-left:4px solid var(--cor,#888)}
+.fm-m:hover,.fm-m.on{border-color:var(--cor,#888);background:color-mix(in srgb,var(--cor,#888) 12%,var(--surface-2))}
+.fm-m b{font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.fm-m small{color:var(--fg-muted);font-size:11.5px}
+.fm-m .km{color:var(--cor,var(--fg));font-weight:800;white-space:nowrap}
+.fm-pin{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:800 11px var(--font-sys);color:#0b0b0b;background:var(--cor,#888);border:2px solid rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
+.fm-pin.sem{width:12px;height:12px;background:#8a8f9c;border-width:1px;opacity:.7}
+.fm-pin.apagado{opacity:.25}
+.fm-orig{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:800 15px var(--font-sys);color:#fff;background:var(--n-vermelho);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+@media (max-width:900px){.fm-wrap{height:auto}.fm-wrap .mapa-card{min-height:420px}}
 #viewMapa{gap:14px}
 #viewMapa .banner{padding:16px 24px}
 /* credito do mapa: so o botao (i), texto aparece ao clicar */
@@ -1302,6 +1329,8 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="nav-sub">
           <a class="nav-subitem" href="#" data-view="sisoperacao"><span class="nav-label">Operação</span></a>
           <a class="nav-subitem" href="#" data-view="sisplanejamento"><span class="nav-label">Planejamento</span></a>
+          <a class="nav-subitem" href="#" data-view="tuflog"><span class="nav-label">TUF Log</span></a>
+          <a class="nav-subitem" href="#" data-view="proibidos"><span class="nav-label">Proibidos</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
           <a class="nav-subitem" href="#" data-view="sisconsulta"><span class="nav-label">Consulta</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
@@ -1316,6 +1345,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <a class="nav-subitem" href="#" data-view="farmoop"><span class="nav-label">Operação</span></a>
           <a class="nav-subitem" href="#" data-view="farmobm"><span class="nav-label">Bolsa Multi</span></a>
           <a class="nav-subitem" href="#" data-view="farmodev"><span class="nav-label">Devolução</span></a>
+          <a class="nav-subitem" href="#" data-view="farmomapa"><span class="nav-label">Mapa</span></a>
           <a class="nav-subitem" href="#" data-view="motoristas"><span class="nav-label">Motoristas</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
           <a class="nav-subitem" href="#" data-view="farmocons"><span class="nav-label">Consulta</span></a>
@@ -1391,6 +1421,10 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     </section>
 
     <section class="esc-dia">
+      <div class="card">
+        <h2 id="escOntemT">Ontem</h2>
+        <div class="esc-lista" id="escOntem"></div>
+      </div>
       <div class="card">
         <h2 id="escHojeT">Hoje</h2>
         <div class="esc-lista" id="escHoje"></div>
@@ -1530,6 +1564,29 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="fop-rodape"><span class="aviso-empty" id="fopHoje"></span><button type="button" class="fop-btn sec" id="fopImportar" title="Cola aqui as colunas Endereço, Horário, Bairro e Código PNET copiadas da aba Operação">Importar Endereços</button></div>
         <p class="sub" id="fopSub" style="margin:10px 0 0"></p>
         <p class="est-regra" id="fopNota" style="margin-top:6px"></p>
+      </section>
+    </div>
+    <div class="view" id="viewLegado" style="display:none">
+      <section class="banner"><div><p class="eyebrow" id="lgEyebrow">SISTEMA</p><h1 id="lgTitulo"></h1></div></section>
+      <section class="card">
+        <div class="pf-barra">
+          <label style="flex:1 1 280px">Buscar<input type="search" id="lgBusca" placeholder="Nome, loja, motivo…" autocomplete="off"></label>
+        </div>
+        <p class="sub" id="lgSub" style="margin:10px 0 12px"></p>
+        <div class="mot-cad-wrap lg-wrap"><table class="mot-cad cont-eq lg-tab"><thead id="lgCab"></thead><tbody id="lgCorpo"></tbody></table></div>
+      </section>
+    </div>
+    <div class="view" id="viewFarmoMapa" style="display:none">
+      <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA · MAPA</p><h1>Mapa e rotas do dia</h1></div></section>
+      <section class="mapa-wrap fm-wrap" id="fmWrap">
+        <div class="card mapa-card"><div id="fmEl" role="application" aria-label="Mapa da Farmoterápica"></div><p class="aviso-empty mapa-vazio" id="fmVazio" style="display:none"></p></div>
+        <aside class="card mapa-lado fm-lado">
+          <label class="fm-sel">Turno<select id="fmTurno"><option value="TODOS">Todos</option><option>MANHÃ</option><option>TARDE</option><option>NOITE</option></select></label>
+          <p class="sub" id="fmOrigem" style="margin:10px 0 0"></p>
+          <h2 style="margin-top:14px">Rota de cada motoboy</h2>
+          <div id="fmLista"></div>
+          <p class="sub" id="fmNota" style="margin-top:12px"></p>
+        </aside>
       </section>
     </div>
     <div class="view" id="viewFarmoCons" style="display:none">
@@ -2111,7 +2168,7 @@ function folgaNoDia(r,d){
 }
 function renderEscalaDia(){
   var regras=FIXOS.escala||{}, nomes=Object.keys(regras);
-  var hoje=new Date(), amanha=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()+1);
+  var hoje=new Date(), amanha=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()+1), ontem=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()-1);
   function monta(d,idT,idL,rot){
     var trab=nomes.filter(function(n){return !folgaNoDia(regras[n],d)});
     var dia=d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});
@@ -2120,8 +2177,11 @@ function renderEscalaDia(){
       return '<div class="esc-grupo"><h3>'+titulo+' <span class="pill programado">'+lista.length+'</span></h3>'+(lista.length?'<div class="esc-lista">'+lista.map(function(n){return '<div class="esc-item"><i></i>'+esc(tcase(n))+'</div>'}).join('')+'</div>':'<p class="aviso-empty">Ninguém escalado.</p>')+'</div>';
     }
     var boys=trab.filter(function(n){return regras[n].tipo==='motoboy'}), mots=trab.filter(function(n){return regras[n].tipo!=='motoboy'});
-    document.getElementById(idL).innerHTML=nomes.length?grupo('Motoboys',boys)+grupo('Motoristas',mots):'<p class="aviso-empty">Escala ainda não carregada.</p>';
+    var fol=nomes.filter(function(n){return folgaNoDia(regras[n],d)});
+    var blocoFolga='<div class="esc-folga"><h3>Folgas <span class="pill programado">'+fol.length+'</span></h3>'+(fol.length?'<div class="esc-lista">'+fol.map(function(n){return '<div class="esc-item"><i></i>'+esc(tcase(n))+'</div>'}).join('')+'</div>':'<p class="aviso-empty">Ninguém de folga.</p>')+'</div>';
+    document.getElementById(idL).innerHTML=nomes.length?grupo('Motoboys',boys)+grupo('Motoristas',mots)+blocoFolga:'<p class="aviso-empty">Escala ainda não carregada.</p>';
   }
+  monta(ontem,'escOntemT','escOntem','Ontem');
   monta(hoje,'escHojeT','escHoje','Hoje');
   monta(amanha,'escAmanhaT','escAmanha','Amanhã');
 }
@@ -2350,7 +2410,7 @@ function tentarAtualizar(novoDados){
   // nunca troca por um dado mais antigo (o dados.json local pode ser uma copia velha)
   if(String(novoDados.geradoEm||'')<=String(DADOS.geradoEm||''))return;
   // e nao perde areas que o dado novo ainda nao traz
-  ['quadro','historicoQuadro','contratos','colaboradores','mapa','farmoOp'].forEach(function(k){if(!novoDados[k]&&DADOS[k])novoDados[k]=DADOS[k]});
+  ['quadro','historicoQuadro','contratos','colaboradores','mapa','farmoOp','farmoMapa'].forEach(function(k){if(!novoDados[k]&&DADOS[k])novoDados[k]=DADOS[k]});
   sqSomaHistorico(DADOS,novoDados);
   startApp(novoDados);
 }
@@ -3534,9 +3594,15 @@ function sqEnriquecer(ls,modo){
 }
 // armazenamento do prototipo (neste navegador): planos por data e dias registrados
 var SQ_STORE={planos:{},dias:{}};
-try{var _sq=JSON.parse(localStorage.getItem('tuf-sq-v1')||'null');if(_sq&&_sq.planos&&_sq.dias)SQ_STORE=_sq}catch(e){}
+// a "fonte" de cada dia e uma propriedade do array e o JSON a perde: vai numa tabela a parte (fontes) e volta para o array ao carregar
+try{var _sq=JSON.parse(localStorage.getItem('tuf-sq-v1')||'null');if(_sq&&_sq.planos&&_sq.dias){SQ_STORE=_sq;var _fo=_sq.fontes||{};['dias','planos'].forEach(function(t){Object.keys(SQ_STORE[t]).forEach(function(k){if(Array.isArray(SQ_STORE[t][k])&&_fo[t+'|'+k])SQ_STORE[t][k].fonte=_fo[t+'|'+k]})})}}catch(e){}
 try{if(!localStorage.getItem('tuf-sq-plan-v2')){SQ_STORE.planos={};localStorage.setItem('tuf-sq-plan-v2','1');localStorage.setItem('tuf-sq-v1',JSON.stringify(SQ_STORE))}}catch(e){}
-function sqPersistir(){try{localStorage.setItem('tuf-sq-v1',JSON.stringify(SQ_STORE))}catch(e){}}
+function sqPersistir(){
+  try{
+    var fo={}; ['dias','planos'].forEach(function(t){Object.keys(SQ_STORE[t]).forEach(function(k){var a=SQ_STORE[t][k]; if(a&&a.fonte)fo[t+'|'+k]=a.fonte})});
+    SQ_STORE.fontes=fo; localStorage.setItem('tuf-sq-v1',JSON.stringify(SQ_STORE));
+  }catch(e){}
+}
 function sqIso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function sqHoje(){return sqIso(sqDiaOper())}
 function sqCopia(ls){return ls.map(function(l){return Object.assign({},l)})}
@@ -3560,10 +3626,184 @@ function sqBase(modo){
   var ls=SQ_REAL?sqCopia(SQ_REAL.linhas):sqCriar(modo);
   return sqEnriquecer(ls,modo);
 }
+// ===== QUADRO NO BANCO (tempo real): Operacao e Planejamento lidos e gravados em public.quadro_linha =====
+// Um dia "vive no banco" quando existe quadro_dia com fonte 'sistema'. Nesse caso o banco manda: edicao por CAMPO, Realtime para os colegas,
+// carimbo de tempo calculado pelo proprio banco e auditoria por trigger (o site nao grava em quadro_auditoria). Sem login/banco nada muda.
+var QDB={vivo:{},linhas:{},snap:{},canais:{},visto:{},sujo:{},ocupado:{},rep:{},origem:'',t:null,rt:null,pendRender:false,pronto:false,carregando:false,erro:'',dias:null};
+var QDB_CAMPOS=['loja','colab','status','motivo','valor','entrada','saida','faltante','obs','comentario'];
+function qdbAtivo(){return modoCarregamento==='supabase'&&typeof sbCliente==='function'&&!!sbCliente()}
+function qdbVive(dia){return !!QDB.vivo[dia]}
+function qdbUuid(){
+  try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID()}catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16)});
+}
+function qdbEhUuid(s){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s||''))}
+function qdbHH(v){return String(v||'').slice(0,5)}
+// linha do banco -> linha da tela
+function qdbLinhaDe(r){
+  var v=r.valor==null||r.valor===''?'':String(Number(r.valor));
+  var l={_id:r.id,_ordem:r.ordem,_v:r.versao,loja:r.loja||'',colab:r.colab||'',status:sqNormStatus(r.status),motivo:String(r.motivo||'').toUpperCase(),falt:r.faltante||'',obs:r.obs||'',valor:v==='NaN'?'':v,entrada:qdbHH(r.entrada),saida:qdbHH(r.saida),_tipoReal:r.tipo||'',
+    ini:r.inicio_em?Date.parse(r.inicio_em):null,fim:r.fim_em?Date.parse(r.fim_em):null};
+  if(r.comentario)l.com={t:r.comentario,a:''};
+  return l;
+}
+// campos que o site grava (a linha da tela -> colunas)
+function qdbCamposDe(l){
+  var n=l.valor===''||l.valor==null?null:Number(l.valor);
+  return {loja:l.loja||'',colab:l.colab||'',status:l.status||'',motivo:l.motivo||'',valor:(n==null||isNaN(n))?null:n,entrada:l.entrada||'',saida:l.saida||'',faltante:l.falt||'',obs:l.obs||'',comentario:(l.com&&l.com.t)||''};
+}
+function qdbCamposDeRow(r){
+  var n=r.valor==null||r.valor===''?null:Number(r.valor);
+  return {loja:r.loja||'',colab:r.colab||'',status:sqNormStatus(r.status)||'',motivo:String(r.motivo||'').toUpperCase(),valor:(n==null||isNaN(n))?null:n,entrada:qdbHH(r.entrada),saida:qdbHH(r.saida),faltante:r.faltante||'',obs:r.obs||'',comentario:r.comentario||''};
+}
+function qdbIgual(a,b){return JSON.stringify(a)===JSON.stringify(b)}
+function qdbAplicaCampo(l,k,v){
+  if(k==='faltante')l.falt=v; else if(k==='valor')l.valor=v==null?'':String(v);
+  else if(k==='comentario'){if(v)l.com={t:v,a:(l.com&&l.com.a)||''};else delete l.com}
+  else l[k]=v;
+}
+function qdbErro(e){
+  var m=String((e&&e.message)||e||'');
+  QDB.erro=m||'erro';
+  if(/consolidad|P0001/i.test(m+String(e&&e.code||'')))m='Este dia já foi consolidado: só o banco corrige.';
+  if(window.sqAviso)window.sqAviso('Não foi possível salvar no banco: '+m+' As alterações ficam na tela e seguem na próxima edição.');
+}
+// ---- gravar: so o que mudou, campo a campo ----
+function qdbEmpurrar(dia){
+  QDB.sujo[dia]=1; clearTimeout(QDB.t); QDB.t=setTimeout(function(){Object.keys(QDB.sujo).forEach(function(d){delete QDB.sujo[d];qdbSync(d)})},150);
+}
+function qdbSync(dia){
+  if(!qdbAtivo()||!qdbVive(dia))return Promise.resolve();
+  if(QDB.ocupado[dia]){QDB.rep[dia]=1;return Promise.resolve()}
+  QDB.ocupado[dia]=1;
+  var c=sbCliente(), ls=QDB.linhas[dia], snap=QDB.snap[dia], origem=QDB.origem||'site', ops=[], vistos={}, maxOrd=0;
+  QDB.origem='';
+  ls.forEach(function(l){if(l._ordem!=null&&l._ordem>maxOrd)maxOrd=l._ordem});
+  ls.forEach(function(l){
+    if(!qdbEhUuid(l._id))l._id=qdbUuid();
+    vistos[l._id]=1;
+    var cur=qdbCamposDe(l), ant=snap[l._id];
+    if(!ant){
+      if(l._ordem==null)l._ordem=++maxOrd;
+      ops.push({t:'ins',id:l._id,cur:cur,row:Object.assign({id:l._id,dia:dia,ordem:l._ordem,tipo:l._tipoReal||'',origem_edicao:origem},cur)});
+    }else{
+      var dif={}, n=0; QDB_CAMPOS.forEach(function(k){if(!qdbIgual(cur[k],ant[k])){dif[k]=cur[k];n++}});
+      if(n)ops.push({t:'upd',id:l._id,cur:cur,dif:dif});
+    }
+  });
+  Object.keys(snap).forEach(function(id){if(!vistos[id])ops.push({t:'del',id:id})});
+  if(!ops.length){QDB.ocupado[dia]=0;return Promise.resolve()}
+  var tarefas=ops.map(function(op){
+    var p;
+    if(op.t==='ins')p=c.from('quadro_linha').insert(op.row);
+    else if(op.t==='upd')p=c.from('quadro_linha').update(Object.assign({},op.dif,{origem_edicao:origem})).eq('id',op.id);
+    else p=c.from('quadro_linha').delete().eq('id',op.id);
+    return p.then(function(r){
+      if(r&&r.error)throw r.error;
+      if(op.t==='del')delete snap[op.id]; else snap[op.id]=op.cur;
+    });
+  });
+  return Promise.all(tarefas).then(function(){QDB.erro=''}).catch(function(e){
+    qdbErro(e);
+    if(/consolidad|P0001/i.test(String((e&&e.message)||'')+String((e&&e.code)||'')))qdbCarregarDia(dia); // dia fechado: volta ao que o banco tem
+  }).then(function(){QDB.ocupado[dia]=0;if(QDB.rep[dia]){QDB.rep[dia]=0;qdbEmpurrar(dia)}});
+}
+// ---- ler um dia ----
+function qdbCarregarDia(dia){
+  if(!qdbAtivo())return Promise.resolve();
+  var c=sbCliente();
+  return c.from('quadro_linha').select('*').eq('dia',dia).order('ordem').then(function(r){
+    if(r.error)throw r.error;
+    var ls=QDB.linhas[dia]||(QDB.linhas[dia]=[]), snap={};
+    ls.length=0;
+    (r.data||[]).forEach(function(x){ls.push(qdbLinhaDe(x));snap[x.id]=qdbCamposDeRow(x)});
+    QDB.snap[dia]=snap; ls.fonte='banco';
+    var novo=!QDB.vivo[dia]; QDB.vivo[dia]=1;
+    qdbAssinar(dia);
+    if(novo){delete SQ_DADOS.operacao;delete SQ_DADOS['planejamento|'+dia]}
+    qdbRender(true);
+  }).catch(function(e){QDB.erro=String((e&&e.message)||e)});
+}
+function qdbCarregarDias(){
+  if(!qdbAtivo())return Promise.resolve();
+  var c=sbCliente(), hj=sqHoje();
+  return c.from('quadro_dia').select('dia,fonte').gte('dia',hj).then(function(r){
+    if(r.error)throw r.error;
+    var dias=(r.data||[]).filter(function(x){return x.fonte==='sistema'}).map(function(x){return String(x.dia).slice(0,10)});
+    return Promise.all(dias.filter(function(d){return !QDB.vivo[d]}).map(qdbCarregarDia));
+  }).catch(function(e){QDB.erro=String((e&&e.message)||e)});
+}
+function qdbIniciar(){
+  if(!qdbAtivo()||QDB.pronto)return;
+  QDB.pronto=true; var c=sbCliente();
+  qdbCarregarDias();
+  try{
+    c.channel('quadro-dias').on('postgres_changes',{event:'INSERT',schema:'public',table:'quadro_dia'},function(p){
+      var d=p&&p.new; if(d&&d.fonte==='sistema'&&String(d.dia).slice(0,10)>=sqHoje())qdbCarregarDia(String(d.dia).slice(0,10));
+    }).subscribe();
+  }catch(e){}
+  setInterval(qdbCarregarDias,60000); // rede de seguranca se algum evento se perder
+  window.addEventListener('online',function(){Object.keys(QDB.vivo).forEach(qdbCarregarDia)});
+}
+// ---- tempo real: eventos dos colegas ----
+function qdbAssinar(dia){
+  if(QDB.canais[dia])return;
+  var c=sbCliente();
+  try{
+    QDB.canais[dia]=c.channel('quadro-'+dia).on('postgres_changes',{event:'*',schema:'public',table:'quadro_linha',filter:'dia=eq.'+dia},function(p){qdbEvento(dia,p)})
+      .subscribe(function(st){if(st==='SUBSCRIBED'){if(QDB.visto[dia])qdbCarregarDia(dia);QDB.visto[dia]=1}}); // reconectou: refaz o SELECT (eventos perdidos nao voltam)
+  }catch(e){}
+}
+function qdbEvento(dia,p){
+  var ls=QDB.linhas[dia], snap=QDB.snap[dia]; if(!ls||!snap||!p)return;
+  var tipo=p.eventType, nw=p.new, old=p.old, id=(nw&&nw.id)||(old&&old.id); if(!id)return;
+  var i=-1; ls.forEach(function(l,k){if(l._id===id)i=k});
+  if(tipo==='DELETE'){if(i>=0){ls.splice(i,1);delete snap[id];qdbRender()}return}
+  var novoCampos=qdbCamposDeRow(nw);
+  if(i<0){ // linha nova de outro usuario (ou eco da nossa: ja esta em snap)
+    if(snap[id])return;
+    var l=qdbLinhaDe(nw), pos=ls.length; for(var k=0;k<ls.length;k++){if((ls[k]._ordem||0)>nw.ordem){pos=k;break}}
+    ls.splice(pos,0,l); snap[id]=novoCampos; qdbRender(); return;
+  }
+  var l0=ls[i], antes=JSON.stringify(l0), atual=qdbCamposDe(l0), ant=snap[id]||{};
+  QDB_CAMPOS.forEach(function(k){
+    // so aceita o valor do colega se o campo local nao tem edicao ainda nao enviada (a edicao local pendente vence e e enviada em seguida)
+    if(qdbIgual(atual[k],ant[k])&&!qdbIgual(novoCampos[k],atual[k]))qdbAplicaCampo(l0,k,novoCampos[k]);
+  });
+  l0._v=nw.versao; l0.ini=nw.inicio_em?Date.parse(nw.inicio_em):null; l0.fim=nw.fim_em?Date.parse(nw.fim_em):null; l0._tipoReal=nw.tipo||l0._tipoReal||'';
+  snap[id]=novoCampos;
+  if(JSON.stringify(l0)!==antes)qdbRender();
+}
+// redesenha sem tirar o foco de quem esta digitando
+function qdbRender(agora){
+  clearTimeout(QDB.rt);
+  QDB.rt=setTimeout(function(){
+    QDB.rt=null;
+    var v=document.getElementById('viewSisOp'); if(!v||v.style.display==='none')return;
+    var a=document.activeElement;
+    if(a&&a.closest&&a.closest('#sqCorpo')&&(a.tagName==='INPUT'||a.tagName==='SELECT'||a.tagName==='TEXTAREA')){QDB.pendRender=true;return}
+    try{
+      if(!SQ_LINHAS||QDB.trocaModo){sqSetModo(SQ_MODO)}
+      else{var ch=SQ_MODO==='planejamento'?'planejamento|'+SQ_DATA_PLAN:'operacao'; if(!SQ_DADOS[ch])sqSetModo(SQ_MODO)}
+      sqRender();
+    }catch(e){}
+  },agora?0:250);
+}
+document.addEventListener('focusout',function(e){
+  if(!QDB.pendRender)return;
+  if(!(e.target&&e.target.closest&&e.target.closest('#sqCorpo')))return;
+  setTimeout(function(){
+    var a=document.activeElement;
+    if(a&&a.closest&&a.closest('#sqCorpo'))return;
+    QDB.pendRender=false; try{sqRender()}catch(er){}
+  },200);
+});
+// ===== FIM QUADRO NO BANCO =====
 // salva o que esta na tela no dia certo: Operacao = hoje; Planejamento = a data escolhida
 function sqSalvar(){
   if(!SQ_LINHAS)return;
   var chave=SQ_MODO==='planejamento'?SQ_DATA_PLAN:sqHoje();
+  if(qdbVive(chave)){qdbEmpurrar(chave);return} // dia que vive no banco: grava la, campo a campo
   var alvo=SQ_MODO==='planejamento'?SQ_STORE.planos:SQ_STORE.dias;
   var copia=sqCopia(SQ_LINHAS); copia.fonte=SQ_LINHAS.fonte;
   alvo[chave]=copia; sqPersistir();
@@ -3610,6 +3850,7 @@ function sqQuem(){var a='';try{a=localStorage.getItem('tuf-perfil-nome')||''}cat
 function sqAud(ev){
   ev.t=new Date().toISOString(); ev.quem=sqQuem();
   ev.modo=SQ_MODO; ev.dia=SQ_MODO==='planejamento'?SQ_DATA_PLAN:sqHoje();
+  if(qdbVive(ev.dia)){QDB.origem=(ev.acao==='desfazer'||ev.acao==='refazer')?ev.acao:(ev.origem||'site');return} // o banco audita sozinho (trigger): nao duplicar
   if(ev.linha==null&&ev.l)ev.linha=sqId(ev.l); if(ev.loja==null&&ev.l)ev.loja=ev.l.loja||''; delete ev.l;
   SQ_AUD.push(ev); if(SQ_AUD.length>5000)SQ_AUD=SQ_AUD.slice(-5000);
   try{localStorage.setItem('tuf-sq-aud',JSON.stringify(SQ_AUD))}catch(e){}
@@ -3644,8 +3885,10 @@ function sqSetModo(m){
   var chave=m==='planejamento'?'planejamento|'+SQ_DATA_PLAN:'operacao';
   var temReal=contLista().length>0;
   if(temReal&&!SQ_REAL)sqMontarReal();
-  var fonte=sqQuadroReal(m)?'quadro':(SQ_REAL?'real':'demo');
+  var diaAlvo=m==='planejamento'?SQ_DATA_PLAN:hj, noBanco=qdbVive(diaAlvo);
+  var fonte=noBanco?'banco':(sqQuadroReal(m)?'quadro':(SQ_REAL?'real':'demo'));
   if(SQ_DADOS[chave]&&SQ_DADOS[chave].fonte!==fonte)delete SQ_DADOS[chave];
+  if(noBanco&&!SQ_DADOS[chave]){SQ_DADOS[chave]=QDB.linhas[diaAlvo]} // o array do banco e o da tela: o tempo real atualiza no lugar
   if(!SQ_DADOS[chave]){
     var salvo=m==='planejamento'?SQ_STORE.planos[SQ_DATA_PLAN]:(SQ_STORE.dias[hj]||SQ_STORE.planos[hj]);
     var ls;
@@ -3810,7 +4053,7 @@ function sqAbrirWhats(bt){
   if(WA_LIG.ult.k===tel&&Date.now()-WA_LIG.ult.t<4000)return;
   WA_LIG.ult={k:tel,t:Date.now()};
   try{navigator.clipboard.writeText(txt)}catch(e){}
-  var nome=tcase(l.colab), ab=waAbridor();
+  var nome=tcase(l.colab)||'a pessoa', ab=waAbridor();
   if(ab){
     var id=Date.now().toString(36)+Math.random().toString(36).slice(2,7), respondeu=false, estava=WA_LIG.on;
     WA_LIG.esp[id]=function(ok,nomeAba){
@@ -3869,7 +4112,8 @@ function sqRender(){
   var nomesLojas=SQ_REAL?SQ_REAL.lojas:['Loja 01','Loja 02','Loja 03','Loja 04','Loja 05','Loja 06','Loja 07','Loja 08','Loja 09','Loja 10','Loja 11','Loja 12'];
   document.getElementById('sqLojas').innerHTML=nomesLojas.map(function(n){return '<option value="'+esc(n)+'">'}).join('');
   var plan=SQ_MODO==='planejamento';
-  document.getElementById('sqAviso').textContent=(SQ_REAL?'Lojas de Contratos e colaboradores do cadastro. ':'Dados fictícios. ')+'Protótipo: o que você altera fica guardado só neste navegador. As chaves Pix mostradas são fictícias.';
+  var _vivo=qdbVive(plan?SQ_DATA_PLAN:sqHoje());
+  document.getElementById('sqAviso').textContent=_vivo?'Salvo no banco em tempo real: o que você e os colegas alteram aparece para todos na hora.'+(QDB.erro?' · Sem conexão com o banco no momento.':''):((SQ_REAL?'Lojas de Contratos e colaboradores do cadastro. ':'Dados fictícios. ')+'Protótipo: o que você altera fica guardado só neste navegador. As chaves Pix mostradas são fictícias.');
   document.getElementById('viewSisOp').classList.toggle('sq-plan',plan);
   document.getElementById('sqTitulo').textContent=plan?'Planejamento':'Operação';
   document.getElementById('sqEyebrow').textContent=plan?'SISTEMA · DIA FUTURO':'SISTEMA · HOJE';
@@ -4118,6 +4362,18 @@ function sqEstruturar(o,d){
   m.addEventListener('click',function(e){if(e.target===m)fechar()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden){e.stopPropagation();fechar()}},true);
   document.getElementById('estOk').addEventListener('click',function(){
+    if(qdbAtivo()){
+      var o=document.getElementById('estOrigem').value, d=document.getElementById('estDestino').value, hj0=sqHoje();
+      if(!o||!d){msg.className='est-msg';msg.textContent='Escolha o dia de origem e o de destino.';return}
+      if(d<=hj0){msg.className='est-msg';msg.textContent='O destino precisa ser um dia futuro.';return}
+      if(o===d){msg.className='est-msg';msg.textContent='Origem e destino são o mesmo dia.';return}
+      msg.className='est-msg';msg.textContent='Estruturando…';
+      sbCliente().rpc('estruturar_dia',{p_origem:o,p_destino:d}).then(function(r){
+        if(r.error){msg.className='est-msg';msg.textContent=String(r.error.message||'Não foi possível estruturar o dia.');return}
+        fechar(); SQ_DATA_PLAN=d; return qdbCarregarDia(d).then(function(){delete SQ_DADOS['planejamento|'+d];sqSetModo('planejamento');sqRender();if(window.sqAviso)window.sqAviso('Dia '+d.split('-').reverse().join('/')+' estruturado a partir de '+o.split('-').reverse().join('/')+': '+(typeof r.data==='number'?r.data+' linhas.':'pronto.'))});
+      }).catch(function(e){msg.className='est-msg';msg.textContent=String((e&&e.message)||'Não foi possível estruturar o dia.')});
+      return;
+    }
     var r=sqEstruturar(document.getElementById('estOrigem').value,document.getElementById('estDestino').value);
     if(r.erro){msg.className='est-msg';msg.textContent=r.erro;return}
     fechar(); sqSetModo('planejamento'); sqRender();
@@ -4209,7 +4465,8 @@ document.getElementById('sqNova').addEventListener('click',function(){
       // carimbo igual ao script da planilha (Registrar Horario Status): inicia em qualquer status de operacao real
       // (EM ABERTO, PENDENTE, FOLGA...) se ainda nao tem inicio; so o CONFIRMADO para; ENTRAR EM CONTATO/PRE CONFIRMADO nao mexem;
       // CONFIRMADO -> operacao real reabre (novo inicio). Planejamento nunca carimba.
-      if(SQ_MODO==='planejamento'){l.ini=null;l.fim=null}
+      if(SQ_MODO==='planejamento'){if(!qdbVive(SQ_DATA_PLAN)){l.ini=null;l.fim=null}}
+      else if(qdbVive(sqHoje())){/* dia no banco: o inicio e o fim vem do banco (trigger) e chegam pelo tempo real */}
       else{
         var cn=sqClasseStatus(el.value), ca=sqClasseStatus(l.status);
         if(cn==='real'){
@@ -4223,7 +4480,7 @@ document.getElementById('sqNova').addEventListener('click',function(){
     if(String(ant)!==String(el.value))sqAud({acao:'editar',l:l,campo:c,antes:ant,depois:el.value});
     el.dataset.ant=el.value;
     sqSalvar(); sqCommit();
-    if(c==='colab'){var cd=sqCad(el.value);l.valor=(cd&&SQ_VAL_PADRAO[cd.tipo])||'';sqRender()}
+    if(c==='colab'){var cd=sqCad(el.value);l.valor=(cd&&SQ_VAL_PADRAO[cd.tipo])||'';sqSalvar();sqRender()}
     else if(el.tagName==='SELECT'||c==='entrada'||c==='saida'||c==='loja')sqRender();
   });
   corpo.addEventListener('input',function(e){var c=e.target.getAttribute('data-c');if(c&&e.target.tagName==='INPUT'){e.target.setAttribute('data-sujo','1');var tr=e.target.closest('tr[data-i]');if(tr&&e.target.dataset.ant===undefined){var l0=SQ_LINHAS[+tr.getAttribute('data-i')];e.target.dataset.ant=l0[c]==null?'':l0[c]}if(tr){SQ_LINHAS[+tr.getAttribute('data-i')][c]=e.target.value;sqSalvar()}}});
@@ -4231,6 +4488,17 @@ document.getElementById('sqNova').addEventListener('click',function(){
   filtro.addEventListener('click',function(e){var b=e.target.closest('button[data-st]');if(!b)return;SQ_FILTRO=b.getAttribute('data-st');sqRender()});
   document.getElementById('sisOpMenu').addEventListener('click',function(e){var b=e.target.closest('.sis-card[data-sis]');if(b&&b.getAttribute('data-sis')==='quadro')document.getElementById('sisQuadro').scrollIntoView({behavior:'smooth'})});
 })();
+var SC_DB={};
+function scDoBanco(dia,hj){
+  if(!qdbAtivo())return null;
+  if(QDB.linhas[dia]&&QDB.linhas[dia].length)return QDB.linhas[dia];
+  if(SC_DB[dia]!==undefined)return SC_DB[dia];
+  SC_DB[dia]=null;
+  sbCliente().from('quadro_linha').select('*').eq('dia',dia).order('ordem').then(function(r){
+    SC_DB[dia]=(!r.error&&r.data&&r.data.length)?r.data.map(qdbLinhaDe):null; scRender();
+  }).catch(function(){SC_DB[dia]=null});
+  return undefined; // buscando
+}
 function scRender(){
   var inp=document.getElementById('scData'), hj=sqHoje();
   if(!inp.value)inp.value=hj;
@@ -4245,7 +4513,11 @@ function scRender(){
     function t(v){return v==null||v===''?'<span class="aviso-empty">—</span>':esc(v)}
     return '<tr><td class="sq-t">'+hh+'</td><td>'+esc(e.quem)+'</td><td>'+(e.modo==='planejamento'?'Planejamento':(e.modo==='cadastro'?'Cadastro':'Operação'))+'</td><td>'+t(e.loja)+'</td><td>'+esc(e.acao)+(e.origem?' <small>('+esc(e.origem)+')</small>':'')+'</td><td>'+t(e.campo)+'</td><td>'+t(e.antes)+'</td><td>'+t(e.depois)+'</td></tr>';
   }).join(''):'<tr><td colspan="8" class="aviso-empty">Nenhuma alteração registrada neste dia.</td></tr>';
-  var ls=SQ_STORE.dias[inp.value], corpo=document.getElementById('scCorpo');
+  var ls=null, corpo=document.getElementById('scCorpo');
+  var dbl=scDoBanco(inp.value,hj);
+  if(dbl===undefined){document.getElementById('scSub').textContent='Carregando…';corpo.innerHTML='';return}
+  if(dbl)ls=dbl;
+  if(!ls)ls=SQ_STORE.dias[inp.value];
   if(!ls&&inp.value===hj)ls=(typeof SQ_DADOS!=='undefined'&&SQ_DADOS.operacao&&SQ_DADOS.operacao.length?SQ_DADOS.operacao:null)||sqQuadroReal('operacao');
   if(!ls){
     var hq=window.DADOS&&DADOS.historicoQuadro&&DADOS.historicoQuadro.linhas;
@@ -4589,7 +4861,7 @@ function renderOperacao(){
 }
 var AREAS_BREVE={frota:'Frota',ti:'T.I',rh:'Recursos Humanos',farmobm:'Bolsa Multi'};
 function mostrarView(v){
-  var views={painel:'viewPainel',operacao:'viewOperacao',planejamento:'viewOperacao',mapa:'viewMapa',sisoperacao:'viewSisOp',sisconsulta:'viewSisCons',sisplanejamento:'viewSisOp',contratos:'viewContratos',motoristas:'viewFuncionarios',funcionarios:'viewFuncionarios',remanejamento:'viewRemanejamento',pontofaltas:'viewPontoFaltas',atestados:'viewPfMotivo',sumidos:'viewPfMotivo',farmoop:'viewFarmoOp',farmodev:'viewFarmoDev',farmocons:'viewFarmoCons'};
+  var views={painel:'viewPainel',operacao:'viewOperacao',planejamento:'viewOperacao',mapa:'viewMapa',sisoperacao:'viewSisOp',sisconsulta:'viewSisCons',sisplanejamento:'viewSisOp',contratos:'viewContratos',motoristas:'viewFuncionarios',funcionarios:'viewFuncionarios',remanejamento:'viewRemanejamento',pontofaltas:'viewPontoFaltas',atestados:'viewPfMotivo',sumidos:'viewPfMotivo',farmoop:'viewFarmoOp',farmodev:'viewFarmoDev',farmocons:'viewFarmoCons',farmomapa:'viewFarmoMapa',tuflog:'viewLegado',proibidos:'viewLegado'};
   var breve=!!AREAS_BREVE[v];
   if(!views[v]&&!breve)v='painel';
   Object.keys(views).forEach(function(k){document.getElementById(views[k]).style.display='none'});
@@ -4615,7 +4887,8 @@ function mostrarView(v){
   Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-view]'),function(a){
     a.classList.toggle('active',a.getAttribute('data-view')===v);
   });
-  document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas'||v==='farmoop'||v==='farmodev'||v==='farmocons'||v==='farmobm');
+  document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas'||v==='farmoop'||v==='farmodev'||v==='farmocons'||v==='farmobm'||v==='farmomapa');
+  if(v==='farmomapa')fmMostrar();
   if(v==='farmocons')renderFarmoCons();
   if(v==='farmoop')renderFarmoOp();
   if(v==='farmodev')renderFarmoDev();
@@ -4624,7 +4897,8 @@ function mostrarView(v){
   if(v==='pontofaltas')renderPontoFaltas();
   if(v==='atestados'||v==='sumidos')renderPfMotivo(v);
   document.getElementById('navPonto').classList.toggle('active',v==='pontofaltas'||v==='atestados'||v==='sumidos');
-  document.getElementById('navOperacao').classList.toggle('active',v==='operacao'||v==='planejamento'||v==='mapa');
+  document.getElementById('navOperacao').classList.toggle('active',v==='operacao'||v==='planejamento'||v==='mapa'||v==='tuflog'||v==='proibidos');
+  if(v==='tuflog'||v==='proibidos')lgMostrar(v);
   document.documentElement.classList.toggle('mapa-modo',v==='mapa');
   if(v==='mapa'){setTimeout(mapaMostrar,0)}
   try{history.replaceState(null,'',v==='painel'?location.pathname+location.search:'#'+v)}catch(e){}
@@ -5682,15 +5956,15 @@ function fopCalcula(ls,iso){
   });
   // ocupacao de quem esta com a parada (portador; senao titular) no turno: litros / capacidade
   var occ={}; ls.forEach(function(l,i){if(!hold[i]||!turno[i])return;var k=hold[i]+'|'+turno[i];occ[k]=(occ[k]||0)+litros[i]});
-  var sug=[],efet=[],vol={},cnt={},ord={};
+  var sug=[],efet=[],vol={},cnt={},ord={},par={};
   ls.forEach(function(l,i){
     if(!l.bolsa){sug[i]='';efet[i]='';return}
     var o=(occ[hold[i]+'|'+turno[i]]||0)/cap;
     sug[i]=(troca[i]&&o>=lim)?troca[i]:tit[i];       // a troca so vale quando quem tem a parada passou do limite (85%)
     efet[i]=port[i]||sug[i]||tit[i];                 // portador manda; senao a sugestao (que ja leva a troca so quando passou do limite); senao o titular
-    if(efet[i]&&turno[i]){var kk=efet[i]+'|'+turno[i];if(ord[kk]===undefined)ord[kk]=i;cnt[kk]=(cnt[kk]||0)+Math.max(1,fopPartes(l.bolsa).length);if(litros[i])vol[kk]=(vol[kk]||0)+litros[i]}
+    if(efet[i]&&turno[i]){var kk=efet[i]+'|'+turno[i];if(ord[kk]===undefined)ord[kk]=i;par[kk]=(par[kk]||0)+1;cnt[kk]=(cnt[kk]||0)+Math.max(1,fopPartes(l.bolsa).length);if(litros[i])vol[kk]=(vol[kk]||0)+litros[i]}
   });
-  return {sug:sug,tit:tit,troca:troca,efet:efet,vol:vol,cnt:cnt,ord:ord,cap:cap,lim:lim};
+  return {sug:sug,tit:tit,troca:troca,efet:efet,vol:vol,cnt:cnt,par:par,ord:ord,cap:cap,lim:lim};
 }
 function fopSugestao(l){return ''}
 var FOP_LAY=[];
@@ -5996,7 +6270,7 @@ function fsPreparar(){
         FOD.dias[iso]=d;
         dvs.forEach(function(x){FS.snapDev[x.turno+'|'+x.ordem]=JSON.stringify({dia:iso,turno:x.turno,ordem:x.ordem,bolsa_p:x.bolsa_p,bolsa_m:x.bolsa_m,bolsa_g:x.bolsa_g,termometro1:x.termometro1,termometro2:x.termometro2})});
       }
-      FS.dia=iso; FS.pronto=true; FS.carregando=false; FS.erro='';
+      FS.dia=iso; FS.pronto=true; FS.carregando=false; FS.erro=''; fsAssinar(iso);
       try{localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP));localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}catch(e){}
       FOP_HIST={dia:'',s:[],p:-1};
       try{renderFarmoOp();renderFarmoDev()}catch(e){}
@@ -6009,25 +6283,110 @@ function fsAgendar(){
   if(!FS.pronto||FS.dia!==sqHoje()){fsPreparar();return}
   clearTimeout(FS.t); FS.t=setTimeout(fsSync,600);
 }
+// grava SO o que mudou, campo a campo (duas pessoas em campos diferentes da mesma linha nao se sobrescrevem); linha nova entra por upsert
+var FS_COLS_OP=['rota','endereco','horario','bairro','codigo_pnet','portador','bolsa','termometro'];
+var FS_COLS_DV=['bolsa_p','bolsa_m','bolsa_g','termometro1','termometro2'];
+function fsDif(ant,cur,cols){var d={},n=0;cols.forEach(function(k){if((ant[k]||'')!==(cur[k]||'')){d[k]=cur[k];n++}});return {d:d,n:n}}
 function fsSync(){
   var iso=sqHoje(); if(!fsAtivo()||!FS.pronto||FS.dia!==iso||fopFechado(iso))return Promise.resolve();
   if(FS.ocupado){FS.pend=true;return Promise.resolve()}
-  FS.ocupado=true; var c=sbCliente(), w=fsDesejado(iso);
-  var upOp=w.op.filter(function(r){return FS.snapOp[r.linha]!==JSON.stringify(r)});
-  var upDv=w.dv.filter(function(r){var k=r.turno+'|'+r.ordem,j=JSON.stringify(r);if(k in FS.snapDev)return FS.snapDev[k]!==j;return !!(r.bolsa_p||r.bolsa_m||r.bolsa_g||r.termometro1||r.termometro2)});
-  var sobra=Object.keys(FS.snapOp).some(function(k){return +k>=w.op.length});
-  var tarefas=[];
-  function lotes(tab,rows,conf){for(var i=0;i<rows.length;i+=200)tarefas.push(c.from(tab).upsert(rows.slice(i,i+200),{onConflict:conf}).then(function(r){if(r.error)throw r.error}))}
-  if(upOp.length)lotes('farmo_operacao_linha',upOp,'dia,linha');
-  if(upDv.length)lotes('farmo_devolucao_linha',upDv,'dia,turno,ordem');
-  if(sobra)tarefas.push(c.from('farmo_operacao_linha').delete().eq('dia',iso).gte('linha',w.op.length).then(function(r){if(r.error)throw r.error}));
+  FS.ocupado=true; var c=sbCliente(), w=fsDesejado(iso), tarefas=[], desfazer=[];
+  var novosOp=[], novosDv=[];
+  w.op.forEach(function(r){
+    var js=JSON.stringify(r), antJs=FS.snapOp[r.linha]; if(antJs===js)return;
+    if(antJs===undefined){novosOp.push(r);FS.snapOp[r.linha]=js;desfazer.push(['op',r.linha]);return}
+    var ant=JSON.parse(antJs), df=fsDif(ant,r,FS_COLS_OP);
+    if(!df.n){FS.snapOp[r.linha]=js;return} // so a sugestao (derivada) mudou: nao grava sozinha
+    df.d.sugestao=r.sugestao;
+    FS.snapOp[r.linha]=js; desfazer.push(['op',r.linha,antJs]);
+    tarefas.push(c.from('farmo_operacao_linha').update(df.d).eq('dia',iso).eq('linha',r.linha).then(function(x){if(x.error)throw x.error}));
+  });
+  w.dv.forEach(function(r){
+    var k=r.turno+'|'+r.ordem, js=JSON.stringify(r), antJs=FS.snapDev[k];
+    if(antJs===js)return;
+    if(antJs===undefined){
+      if(!(r.bolsa_p||r.bolsa_m||r.bolsa_g||r.termometro1||r.termometro2))return; // linha vazia nova: nada a gravar
+      novosDv.push(r);FS.snapDev[k]=js;desfazer.push(['dv',k]);return;
+    }
+    var df=fsDif(JSON.parse(antJs),r,FS_COLS_DV); FS.snapDev[k]=js; if(!df.n)return;
+    desfazer.push(['dv',k,antJs]);
+    tarefas.push(c.from('farmo_devolucao_linha').update(df.d).eq('dia',iso).eq('turno',r.turno).eq('ordem',r.ordem).then(function(x){if(x.error)throw x.error}));
+  });
+  function lotes(tab,rows,conf){for(var a=0;a<rows.length;a+=200)tarefas.push(c.from(tab).upsert(rows.slice(a,a+200),{onConflict:conf}).then(function(x){if(x.error)throw x.error}))}
+  if(novosOp.length)lotes('farmo_operacao_linha',novosOp,'dia,linha');
+  if(novosDv.length)lotes('farmo_devolucao_linha',novosDv,'dia,turno,ordem');
+  var sobra=Object.keys(FS.snapOp).filter(function(k){return +k>=w.op.length});
+  if(sobra.length){tarefas.push(c.from('farmo_operacao_linha').delete().eq('dia',iso).gte('linha',w.op.length).then(function(x){if(x.error)throw x.error}));sobra.forEach(function(k){delete FS.snapOp[k]})}
   return Promise.all(tarefas).then(function(){
-    upOp.forEach(function(r){FS.snapOp[r.linha]=JSON.stringify(r)});
-    Object.keys(FS.snapOp).forEach(function(k){if(+k>=w.op.length)delete FS.snapOp[k]});
-    upDv.forEach(function(r){FS.snapDev[r.turno+'|'+r.ordem]=JSON.stringify(r)});
     FS.ultimo=new Date().toTimeString().slice(0,5); FS.erro='';
     try{var h=document.getElementById('fopHoje');if(h)h.textContent=fsRotulo()}catch(e){}
-  }).catch(fsErro).then(function(){FS.ocupado=false;if(FS.pend){FS.pend=false;fsAgendar()}});
+  }).catch(function(e){
+    // nada foi confirmado: volta o retrato anterior para a proxima tentativa reenviar
+    desfazer.forEach(function(d){var m=d[0]==='op'?FS.snapOp:FS.snapDev; if(d[2]!==undefined)m[d[1]]=d[2]; else delete m[d[1]]});
+    fsErro(e);
+  }).then(function(){FS.ocupado=false;if(FS.pend){FS.pend=false;fsAgendar()}});
+}
+// ---- tempo real: o que os colegas alteram no dia aparece aqui sem recarregar ----
+FS.canal=null; FS.canalDia=''; FS.visto=false; FS.pendRender=false; FS.rt=null;
+function fsAssinar(iso){
+  if(!fsAtivo())return;
+  if(FS.canal&&FS.canalDia===iso)return;
+  var c=sbCliente();
+  try{if(FS.canal)c.removeChannel(FS.canal)}catch(e){}
+  FS.canalDia=iso; FS.visto=false;
+  try{
+    FS.canal=c.channel('farmo-'+iso)
+      .on('postgres_changes',{event:'*',schema:'public',table:'farmo_operacao_linha',filter:'dia=eq.'+iso},function(p){fsEvOp(iso,p)})
+      .on('postgres_changes',{event:'*',schema:'public',table:'farmo_devolucao_linha',filter:'dia=eq.'+iso},function(p){fsEvDv(iso,p)})
+      .subscribe(function(st){if(st==='SUBSCRIBED'){if(FS.visto)fsRecarregar();FS.visto=true}});
+  }catch(e){}
+}
+function fsRecarregar(){
+  // linha criada/apagada por outra pessoa, ou rede que voltou: envia o que for meu e refaz a leitura do dia
+  return fsSync().then(function(){FS.pronto=false;return fsPreparar()});
+}
+function fsRender(){
+  clearTimeout(FS.rt);
+  FS.rt=setTimeout(function(){
+    FS.rt=null;
+    var a=document.activeElement;
+    if(a&&a.closest&&(a.closest('#fopCorpo')||a.closest('.fod-tab'))&&(a.tagName==='INPUT'||a.tagName==='SELECT')){FS.pendRender=true;return}
+    try{var vo=document.getElementById('viewFarmoOp'),vd=document.getElementById('viewFarmoDev');if(vo&&vo.style.display!=='none')renderFarmoOp();if(vd&&vd.style.display!=='none')renderFarmoDev()}catch(e){}
+  },250);
+}
+document.addEventListener('focusout',function(e){
+  if(!FS.pendRender)return;
+  if(!(e.target&&e.target.closest&&(e.target.closest('#fopCorpo')||e.target.closest('.fod-tab'))))return;
+  setTimeout(function(){var a=document.activeElement;if(a&&a.closest&&(a.closest('#fopCorpo')||a.closest('.fod-tab')))return;FS.pendRender=false;fsRender()},200);
+});
+function fsEvOp(iso,p){
+  if(FS.dia!==iso||!FS.pronto)return;
+  var nw=p.new||{}, ev=p.eventType;
+  if(ev==='DELETE'){fsRecarregar();return}
+  var d=FOP.dias[iso], l=d&&d.linhas[nw.linha];
+  if(ev==='INSERT'&&FS.snapOp[nw.linha]!==undefined&&l===undefined){fsRecarregar();return}
+  if(!l){fsRecarregar();return} // linha nova de outra pessoa
+  var antJs=FS.snapOp[nw.linha], ant=antJs?JSON.parse(antJs):null, mudou=false;
+  var mapa=[['rota','rota'],['endereco','end'],['horario','hor'],['bairro','bairro'],['codigo_pnet','pnet'],['portador','port'],['bolsa','bolsa'],['termometro','term']];
+  mapa.forEach(function(m){
+    var novo=nw[m[0]]||'', local=l[m[1]]||'', antV=ant?(ant[m[0]]||''):null;
+    // o campo que eu mexi e ainda nao enviei vale mais que o do colega (e segue na proxima gravacao)
+    if(novo!==local&&(antV===null||local===antV)){l[m[1]]=novo;mudou=true}
+  });
+  FS.snapOp[nw.linha]=JSON.stringify(fsLinhaOp({rota:nw.rota,end:nw.endereco,hor:nw.horario,bairro:nw.bairro,pnet:nw.codigo_pnet,port:nw.portador,bolsa:nw.bolsa,term:nw.termometro},nw.linha,iso,nw.sugestao));
+  if(mudou){try{localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP))}catch(e){}fsRender()}
+}
+function fsEvDv(iso,p){
+  if(FS.dia!==iso||!FS.pronto)return;
+  var nw=p.new||{}, ev=p.eventType; if(ev==='DELETE')return;
+  var d=FOD.dias[iso], l=d&&d[nw.turno]&&d[nw.turno][nw.ordem]; if(!l)return;
+  var k=nw.turno+'|'+nw.ordem, antJs=FS.snapDev[k], ant=antJs?JSON.parse(antJs):null, mudou=false;
+  [['bolsa_p','p'],['bolsa_m','m'],['bolsa_g','g'],['termometro1','t1'],['termometro2','t2']].forEach(function(m){
+    var novo=nw[m[0]]||'', local=l[m[1]]||'', antV=ant?(ant[m[0]]||''):'';
+    if(novo!==local&&local===antV){l[m[1]]=novo;mudou=true}
+  });
+  FS.snapDev[k]=JSON.stringify({dia:nw.dia,turno:nw.turno,ordem:nw.ordem,bolsa_p:nw.bolsa_p||'',bolsa_m:nw.bolsa_m||'',bolsa_g:nw.bolsa_g||'',termometro1:nw.termometro1||'',termometro2:nw.termometro2||''});
+  if(mudou){try{localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}catch(e){}fsRender()}
 }
 function fsRotulo(){
   var iso=sqHoje(), t='Hoje · '+iso.split('-').reverse().join('/');
@@ -6078,7 +6437,7 @@ function renderFarmoOp(){
   var cb={}, ct={};
   ls.forEach(function(l){fopPartes(l.bolsa).forEach(function(x){if(!/^ISOPOR/.test(x))cb[x]=(cb[x]||0)+1});fopPartes(l.term).forEach(function(x){ct[x]=(ct[x]||0)+1})});
   var rotas=fopRotasLista(), vistas={}, calc=fopCalcula(ls,iso);
-  var h='', entregas=0, paradas=0;
+  var h='', entregas=0, paradas=0, paradasBolsa=0;
   var selTu=document.getElementById('fopTurno').value, todosTu=selTu==='TODOS', turnosTu=selTu==='NOITE'?['NOITE','LITORAL','VALE']:[selTu];
   function tuOk(r){return todosTu||turnosTu.indexOf(fopTurno(r))>=0}
   function linha(l,i){
@@ -6092,16 +6451,16 @@ function renderFarmoOp(){
     if(!tuOk(r)){vistas[fopRotaChave(r)]=1;return}
     var idx=[]; ls.forEach(function(l,i){if(fopRotaChave(l.rota)===fopRotaChave(r))idx.push(i)});
     h+='<tr class="fop-sec" data-rota="'+esc(r)+'"><td colspan="8">'+esc(fopRotaNome(r))+(fech?'':'<button type="button" data-add="'+esc(r)+'">Adicionar Endereço</button>')+'</td></tr>';
-    idx.forEach(function(i){h+=linha(ls[i],i);paradas++;entregas+=fopPartes(ls[i].bolsa).length});
+    idx.forEach(function(i){h+=linha(ls[i],i);paradas++;if(ls[i].bolsa)paradasBolsa++;entregas+=fopPartes(ls[i].bolsa).length});
     vistas[fopRotaChave(r)]=1;
   });
-  ls.forEach(function(l,i){if(!vistas[fopRotaChave(l.rota)]){vistas[fopRotaChave(l.rota)]=1;if(!tuOk(l.rota))return;h+='<tr class="fop-sec"><td colspan="8">'+esc(l.rota?fopRotaNome(l.rota):'Sem rota')+'</td></tr>';ls.forEach(function(x,j){if(fopRotaChave(x.rota)===fopRotaChave(l.rota)){h+=linha(x,j);paradas++;entregas+=fopPartes(x.bolsa).length}})}});
+  ls.forEach(function(l,i){if(!vistas[fopRotaChave(l.rota)]){vistas[fopRotaChave(l.rota)]=1;if(!tuOk(l.rota))return;h+='<tr class="fop-sec"><td colspan="8">'+esc(l.rota?fopRotaNome(l.rota):'Sem rota')+'</td></tr>';ls.forEach(function(x,j){if(fopRotaChave(x.rota)===fopRotaChave(l.rota)){h+=linha(x,j);paradas++;if(x.bolsa)paradasBolsa++;entregas+=fopPartes(x.bolsa).length}})}});
   document.getElementById('fopCorpo').innerHTML=h;
-  document.getElementById('fopSub').textContent=paradas+' parada'+(paradas===1?'':'s')+' · '+entregas+' entrega'+(entregas===1?'':'s')+(xlF?' · dia fechado na planilha (somente leitura)':'');
+  document.getElementById('fopSub').textContent=paradas+' endereço'+(paradas===1?'':'s')+' · '+entregas+(entregas===1?' item':' itens')+' · '+paradasBolsa+' parada'+(paradasBolsa===1?'':'s')+' com bolsa'+(xlF?' · dia fechado na planilha (somente leitura)':'');
   // controle de volume por turno selecionado: rosca com a capacidade dividida em zonas de cor (acima de 100% e excedente real, nunca truncado)
   var sel=selTu, turnos=todosTu?['MANHÃ','TARDE','NOITE','LITORAL','VALE']:turnosTu;
-  var vk=Object.keys(calc.vol).map(function(k){var q=k.split('|');return {nome:q[0],turno:q[1],l:calc.vol[k],o:calc.ord[k],n:calc.cnt[k]||0,pct:Math.round(calc.vol[k]/calc.cap*100)}}).filter(function(x){return turnos.indexOf(x.turno)>=0}).sort(function(a,b){return a.o-b.o});
-  document.getElementById('fopVol').innerHTML=(vk.length?vk.map(function(x){var cls=x.pct>85?' cheio':(x.pct>50?' medio':' baixo');if(x.pct>100)cls+=' excesso';var et=x.n+(x.n===1?' entrega':' entregas');return '<div class="fop-dc'+cls+'" title="'+esc(tcase(x.nome))+' · '+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'"><b>'+esc(tcase(x.nome))+'</b><div class="n">'+x.pct+'%</div><small>'+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'</small><div class="bar"><i style="width:'+(x.pct>100?Math.min(100,x.pct-100):x.pct)+'%"></i></div></div>'}).join(''):(function(){
+  var vk=Object.keys(calc.vol).map(function(k){var q=k.split('|');return {nome:q[0],turno:q[1],l:calc.vol[k],o:calc.ord[k],n:calc.cnt[k]||0,pa:calc.par[k]||0,pct:Math.round(calc.vol[k]/calc.cap*100)}}).filter(function(x){return turnos.indexOf(x.turno)>=0}).sort(function(a,b){return a.o-b.o});
+  document.getElementById('fopVol').innerHTML=(vk.length?vk.map(function(x){var cls=x.pct>85?' cheio':(x.pct>50?' medio':' baixo');if(x.pct>100)cls+=' excesso';var et=x.n+(x.n===1?' item':' itens')+' · '+x.pa+(x.pa===1?' parada':' paradas');return '<div class="fop-dc'+cls+'" title="'+esc(tcase(x.nome))+' · '+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'"><b>'+esc(tcase(x.nome))+'</b><div class="n">'+x.pct+'%</div><small>'+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'</small><div class="bar"><i style="width:'+(x.pct>100?Math.min(100,x.pct-100):x.pct)+'%"></i></div></div>'}).join(''):(function(){
     var outros={}; Object.keys(calc.vol).forEach(function(k){var t=k.split('|')[1];if(turnos.indexOf(t)<0){var g=(t==='LITORAL'||t==='VALE')?'NOITE':t;outros[g]=(outros[g]||0)+1}});
     var bs=Object.keys(outros).map(function(t){return '<button type="button" class="fop-btn sec" style="height:30px;padding:0 12px;font-size:12px" data-turno="'+esc(t)+'">Ver '+esc(t)+' ('+outros[t]+')</button>'}).join(' ');
     return '<span class="aviso-empty" style="align-self:center">Sem bolsas lançadas '+(todosTu?'no dia.':'no turno '+esc(sel)+'.')+(bs?' Há volume em outro turno:':'')+'</span> '+bs;
@@ -6329,11 +6688,11 @@ function renderFarmoCons(){
     function ent(x){return ((x&&x.op)||[]).reduce(function(t,l){return t+fopPartes(l.bolsa).length},0)}
     if(cmp){
       var c=fcTabelaOpCmp(r.op,r2.op,iso,cmp);
-      document.getElementById('fcSub').textContent=br(iso)+': '+((r.op||[]).length)+' paradas, '+ent(r)+' entregas · '+br(cmp)+': '+((r2.op||[]).length)+' paradas, '+ent(r2)+' entregas · '+c.dif+' parada'+(c.dif===1?'':'s')+' com diferença (em destaque)';
+      document.getElementById('fcSub').textContent=br(iso)+': '+((r.op||[]).length)+' endereços, '+ent(r)+' itens · '+br(cmp)+': '+((r2.op||[]).length)+' endereços, '+ent(r2)+' itens · '+c.dif+' parada'+(c.dif===1?'':'s')+' com diferença (em destaque)';
       corpo.innerHTML='<h3 class="cont-h3">Operação · comparação</h3>'+c.html+fcTabelaDev(r.dv).replace(/Protocolo de devolução/g,'Protocolo de devolução em '+br(iso));
       return;
     }
-    document.getElementById('fcSub').textContent=br(iso)+' · '+((r.op||[]).length)+' paradas · '+ent(r)+' entrega'+(ent(r)===1?'':'s')+' · fonte: '+r.fonte;
+    document.getElementById('fcSub').textContent=br(iso)+' · '+((r.op||[]).length)+' endereços · '+ent(r)+(ent(r)===1?' item':' itens')+' · fonte: '+r.fonte;
     corpo.innerHTML=(r.op?'<h3 class="cont-h3">Operação</h3>'+fcTabelaOp(r.op):'')+fcTabelaDev(r.dv);
   });
   fcRastrear();
@@ -6374,6 +6733,214 @@ function fcRastrear(){
   var cp=document.getElementById('fcComp'); cp.value=''; cp.addEventListener('change',function(){renderFarmoCons()}); // a comparacao sempre comeca zerada ao recarregar
   d.addEventListener('change',function(){renderFarmoCons()});
   b.addEventListener('input',function(){clearTimeout(t);t=setTimeout(fcRastrear,350)});
+})();
+// ===== ABAS DAS PLANILHAS ANTIGAS NO BANCO (legado_aba / legado_linha), SOMENTE LEITURA =====
+// TUF Log (arquivo Nova Operacao) e Proibidos: o Cerebro importou as linhas; aqui so se consulta. Colunas Pix/PIN/Login nunca vem.
+var LG={cfg:{tuflog:{aba:'TUF Log',tit:'TUF Log',eye:'SISTEMA · TUF LOG'},proibidos:{aba:'Proibidos',tit:'Proibidos',eye:'SISTEMA · PROIBIDOS'}},cache:{},ver:'',ger:0};
+function lgData(v){return /^\d{4}-\d{2}-\d{2}/.test(String(v))?String(v).slice(0,10).split('-').reverse().join('/'):String(v)}
+function lgBuscarTudo(aba){
+  var c=sbCliente(), todas=[];
+  function pagina(de){
+    return c.from('legado_linha').select('linha,dados').eq('arquivo','nova').eq('aba',aba).order('linha').range(de,de+999).then(function(r){
+      if(r.error)throw r.error; todas=todas.concat(r.data||[]); return (r.data&&r.data.length===1000)?pagina(de+1000):todas;
+    });
+  }
+  return Promise.all([c.from('legado_aba').select('cabecalho,linhas').eq('arquivo','nova').eq('aba',aba),pagina(0)]).then(function(rs){
+    if(rs[0].error)throw rs[0].error;
+    var ab=(rs[0].data&&rs[0].data[0])||{}, linhas=rs[1];
+    var cab=Array.isArray(ab.cabecalho)?ab.cabecalho.slice():[];
+    if(!cab.length&&linhas.length)cab=Object.keys(linhas[0].dados||{});
+    return {cab:cab.filter(function(k){return !/\b(pix|pin)\b/i.test(String(k))}),linhas:linhas.map(function(l){return l.dados||{}})};
+  });
+}
+function lgDesenhar(v){
+  var d=LG.cache[v], q=norm(document.getElementById('lgBusca').value), ls=d.linhas;
+  if(q)ls=ls.filter(function(l){return norm(d.cab.map(function(k){return l[k]==null?'':l[k]}).join(' ')).indexOf(q)>=0});
+  document.getElementById('lgCab').innerHTML='<tr>'+d.cab.map(function(k){return '<th>'+esc(tcase(String(k)))+'</th>'}).join('')+'</tr>';
+  document.getElementById('lgSub').textContent=ls.length+(ls.length===1?' registro':' registros')+(q?' de '+d.linhas.length:'')+' · somente leitura';
+  document.getElementById('lgCorpo').innerHTML=ls.slice(0,1500).map(function(l){return '<tr>'+d.cab.map(function(k){var x=l[k];return '<td>'+(x==null||x===''?'<span class="aviso-empty">—</span>':esc(lgData(x)))+'</td>'}).join('')+'</tr>'}).join('')||'<tr><td class="aviso-empty" colspan="'+Math.max(1,d.cab.length)+'">Nenhum registro.</td></tr>';
+  if(ls.length>1500)document.getElementById('lgSub').textContent+=' · mostrando os primeiros 1.500; use a busca';
+}
+function lgMostrar(v){
+  var cfg=LG.cfg[v]; LG.ver=v;
+  document.getElementById('lgTitulo').textContent=cfg.tit; document.getElementById('lgEyebrow').textContent=cfg.eye;
+  document.getElementById('lgBusca').value='';
+  if(!qdbAtivo()){document.getElementById('lgCab').innerHTML='';document.getElementById('lgCorpo').innerHTML='<tr><td class="aviso-empty">Disponível no site, depois do login.</td></tr>';document.getElementById('lgSub').textContent='';return}
+  if(LG.cache[v]){lgDesenhar(v);return}
+  var ger=++LG.ger; document.getElementById('lgSub').textContent='Carregando…'; document.getElementById('lgCorpo').innerHTML=''; document.getElementById('lgCab').innerHTML='';
+  lgBuscarTudo(cfg.aba).then(function(d){
+    if(ger!==LG.ger)return; LG.cache[v]=d;
+    if(!d.linhas.length){document.getElementById('lgSub').textContent='';document.getElementById('lgCorpo').innerHTML='<tr><td class="aviso-empty">Ainda sem dados: a importação está em andamento.</td></tr>';return}
+    lgDesenhar(v);
+  }).catch(function(e){if(ger!==LG.ger)return;document.getElementById('lgSub').textContent='';document.getElementById('lgCorpo').innerHTML='<tr><td class="aviso-empty">Não foi possível carregar agora.</td></tr>'});
+}
+document.getElementById('lgBusca').addEventListener('input',function(){if(LG.cache[LG.ver])lgDesenhar(LG.ver)});
+// ===== FARMOTERAPICA · MAPA: enderecos do dia, rota de cada motoboy saindo da Farmo e km por estrada =====
+// Coordenadas dos enderecos vem do banco (area farmo_mapa, feita pelo Cerebro). A ROTA (ordem das paradas, trajeto e km por estrada) e calculada aqui
+// com o servico publico OSRM, mandando so coordenadas (sem nomes, sem bolsas); cada resultado fica guardado no navegador para nao repetir a consulta.
+var FM={mapa:null,marcas:[],orig:null,rotas:{},sel:'',ger:0,cache:null,pronto:false};
+var FM_CORES=['#2bff6a','#ffd60a','#18e6ff','#ff8a1f','#d61fb5','#4d8dff','#ff3030','#b388ff','#00e5a8','#ff7ab8','#c6ff00','#8affd4'];
+function fmCache(){if(FM.cache)return FM.cache;try{FM.cache=JSON.parse(localStorage.getItem('tuf-farmo-rotas')||'{}')||{}}catch(e){FM.cache={}}return FM.cache}
+function fmCacheSalva(){var c=fmCache(),ks=Object.keys(c);if(ks.length>150){ks.slice(0,ks.length-150).forEach(function(k){delete c[k]})}try{localStorage.setItem('tuf-farmo-rotas',JSON.stringify(c))}catch(e){}}
+function fmKm(m){return (m/1000).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' km'}
+function fmMin(s){var m=Math.round(s/60);return m>=60?Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min':m+' min'}
+function fmHav(a,b){var R=6371000,r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lng-a.lng)*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)*Math.sin(dn/2);return 2*R*Math.asin(Math.sqrt(x))}
+function fmOrigem(){
+  var fm=window.DADOS&&DADOS.farmoMapa, o=fm&&fm.origem, b=window.DADOS&&DADOS.mapa&&DADOS.mapa.base;
+  if(o&&o.lat!=null&&o.lng!=null)return {lat:+o.lat,lng:+o.lng,endereco:o.endereco||''};
+  if(b&&b.lat!=null&&b.lng!=null)return {lat:+b.lat,lng:+b.lng,endereco:b.endereco||''};
+  return null;
+}
+function fmCoords(){
+  var fm=window.DADOS&&DADOS.farmoMapa, m={}, soEnd={};
+  ((fm&&fm.paradas)||[]).forEach(function(x){
+    if(x.lat==null||x.lng==null)return;
+    var v={lat:+x.lat,lng:+x.lng,prec:x.precisao||''};
+    m[fopRotaChave(x.rota)+'|'+norm(String(x.endereco||'')).trim()]=v;
+    soEnd[norm(String(x.endereco||'')).trim()]=soEnd[norm(String(x.endereco||'')).trim()]||v;
+  });
+  return {m:m,soEnd:soEnd,tem:Object.keys(m).length};
+}
+// paradas do dia por motoboy e turno (so as que tem bolsa)
+function fmGrupos(turno){
+  var iso=sqHoje(), dia=fopDia(iso), cl=fopCalcula(dia.linhas,iso), co=fmCoords(), g={}, sem=[], semBolsa=[];
+  dia.linhas.forEach(function(l,i){
+    var tu=fopTurno(l.rota); if(turno!=='TODOS'&&tu!==turno)return;
+    var ch=norm(String(l.end||'')).trim(), c=co.m[fopRotaChave(l.rota)+'|'+ch]||co.soEnd[ch];
+    var itens=fopPartes(l.bolsa).length;
+    if(!itens||!cl.efet[i]){if(c)semBolsa.push({end:l.end,rota:l.rota,lat:c.lat,lng:c.lng});return}
+    var k=cl.efet[i]+'|'+tu; if(!g[k])g[k]={nome:cl.efet[i],turno:tu,paradas:[],itens:0,ord:i};
+    var pa={end:l.end,bairro:l.bairro,rota:l.rota,hor:l.hor,itens:itens,bolsa:l.bolsa};
+    if(c){pa.lat=c.lat;pa.lng=c.lng;pa.prec=c.prec}else sem.push({nome:cl.efet[i],end:l.end});
+    g[k].paradas.push(pa); g[k].itens+=itens;
+  });
+  var lista=Object.keys(g).map(function(k){return Object.assign({chave:k},g[k])}).sort(function(a,b){return a.ord-b.ord});
+  lista.forEach(function(m,i){m.cor=FM_CORES[i%FM_CORES.length]});
+  return {lista:lista,sem:sem,semBolsa:semBolsa,coordenadas:co.tem};
+}
+// rota por estrada: OSRM /trip escolhe a melhor ORDEM das paradas saindo e voltando a Farmo, e devolve trajeto, km e tempo
+function fmRotear(m,o){
+  var pts=m.paradas.filter(function(p){return p.lat!=null}); if(!pts.length)return Promise.resolve(null);
+  var coords=[o].concat(pts), chave=coords.map(function(c){return c.lng.toFixed(5)+','+c.lat.toFixed(5)}).join(';'), ca=fmCache();
+  if(ca[chave])return Promise.resolve(Object.assign({chave:chave,pts:pts},ca[chave]));
+  var url='https://router.project-osrm.org/trip/v1/driving/'+chave+'?roundtrip=true&source=first&geometries=geojson&overview=simplified';
+  return fetch(url).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
+    if(j.code!=='Ok'||!j.trips||!j.trips[0])throw new Error(j.code||'sem rota');
+    var t=j.trips[0], ordem=j.waypoints.map(function(w,i){return {i:i,pos:w.waypoint_index}}).filter(function(x){return x.i>0}).sort(function(a,b){return a.pos-b.pos}).map(function(x){return x.i-1});
+    var res={m:Math.round(t.distance),s:Math.round(t.duration),geo:t.geometry.coordinates.map(function(c){return [+c[0].toFixed(5),+c[1].toFixed(5)]}),ordem:ordem};
+    ca[chave]=res; fmCacheSalva();
+    return Object.assign({chave:chave,pts:pts},res);
+  }).catch(function(){
+    // sem o servico de rotas: linha reta (ida e volta) so para nao deixar a tela vazia
+    var d=0,ant=o; pts.forEach(function(p){d+=fmHav(ant,p);ant=p}); d+=fmHav(ant,o);
+    return {chave:chave,pts:pts,m:Math.round(d),s:null,geo:[[o.lng,o.lat]].concat(pts.map(function(p){return [p.lng,p.lat]})).concat([[o.lng,o.lat]]),ordem:pts.map(function(p,i){return i}),reta:true};
+  });
+}
+function fmLimpar(){FM.marcas.forEach(function(m){m.remove()});FM.marcas=[];if(FM.orig){FM.orig.remove();FM.orig=null}}
+function fmDesenhar(grupos,rotas,o){
+  var M=FM.mapa; if(!M)return;
+  fmLimpar();
+  var feats=[], bounds=new maplibregl.LngLatBounds([o.lng,o.lat],[o.lng,o.lat]);
+  var el=document.createElement('div'); el.className='fm-orig'; el.textContent='F'; el.title='Farmoterápica (ponto de saída)';
+  FM.orig=new maplibregl.Marker({element:el}).setLngLat([o.lng,o.lat]).addTo(M);
+  grupos.semBolsa.forEach(function(p){
+    var e=document.createElement('div'); e.className='fm-pin sem'; e.title=p.end+' · sem bolsa hoje';
+    FM.marcas.push(new maplibregl.Marker({element:e}).setLngLat([p.lng,p.lat]).addTo(M));
+  });
+  grupos.lista.forEach(function(m,gi){
+    var r=rotas[m.chave]; if(!r)return;
+    feats.push({type:'Feature',properties:{cor:m.cor,chave:m.chave},geometry:{type:'LineString',coordinates:r.geo}});
+    r.ordem.forEach(function(idx,n){
+      var pa=r.pts[idx]; if(!pa)return; bounds.extend([pa.lng,pa.lat]);
+      var e=document.createElement('div'); e.className='fm-pin'+(FM.sel&&FM.sel!==m.chave?' apagado':''); e.style.setProperty('--cor',m.cor); e.textContent=n+1; e.setAttribute('data-g',m.chave);
+      var html='<b>'+esc(tcase(m.nome))+' · parada '+(n+1)+'</b><br>'+esc(tcase(pa.end))+'<br><small>'+esc(fopRotaNome(pa.rota))+(pa.hor?' · '+esc(pa.hor):'')+'</small><br><small>'+pa.itens+(pa.itens===1?' item: ':' itens: ')+esc(pa.bolsa||'')+'</small>'+(pa.prec&&pa.prec!=='numero'?'<br><small>Localização aproximada ('+esc(pa.prec)+')</small>':'');
+      var mk=new maplibregl.Marker({element:e}).setLngLat([pa.lng,pa.lat]).setPopup(new maplibregl.Popup({offset:16,className:'mapa-pop',maxWidth:'260px'}).setHTML(html)).addTo(M);
+      FM.marcas.push(mk);
+    });
+  });
+  var fc={type:'FeatureCollection',features:feats};
+  function camada(){
+    try{
+      var src=M.getSource('fm-rotas');
+      if(src)src.setData(fc);
+      else{
+        M.addSource('fm-rotas',{type:'geojson',data:fc});
+        M.addLayer({id:'fm-rotas-linha',type:'line',source:'fm-rotas',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':['get','cor'],'line-width':3.5,'line-opacity':0.9}});
+      }
+      M.setFilter('fm-rotas-linha',FM.sel?['==',['get','chave'],FM.sel]:null);
+    }catch(e){FM.camadaPend=fc}
+  }
+  FM.camadaFn=camada; camada();
+  if(!FM._ajustou||FM.refoca){FM._ajustou=true;FM.refoca=false;try{M.fitBounds(bounds,{padding:60,duration:0,maxZoom:14})}catch(e){}}
+}
+function fmListar(grupos,rotas,o){
+  var h='', tot=0;
+  grupos.lista.forEach(function(m){
+    var r=rotas[m.chave], km=r?fmKm(r.m):'…', tempo=r&&r.s?' · '+fmMin(r.s):'', aviso=r&&r.reta?' · linha reta':'';
+    if(r)tot+=r.m;
+    var comCoord=m.paradas.filter(function(p){return p.lat!=null}).length;
+    h+='<div class="fm-m'+(FM.sel===m.chave?' on':'')+'" data-g="'+esc(m.chave)+'" style="--cor:'+m.cor+'"><b><span>'+esc(tcase(m.nome))+(FM_TURNO_TODOS()?' <small>'+esc(tcase(m.turno))+'</small>':'')+'</span><span class="km">'+km+'</span></b><small>'+m.itens+(m.itens===1?' item · ':' itens · ')+m.paradas.length+(m.paradas.length===1?' parada':' paradas')+tempo+aviso+'</small>'+(comCoord<m.paradas.length?'<small style="color:var(--n-amarelo)">'+(m.paradas.length-comCoord)+' sem coordenada</small>':'')+'</div>';
+  });
+  document.getElementById('fmLista').innerHTML=h||'<p class="aviso-empty">Nenhuma parada com bolsa neste turno.</p>';
+  document.getElementById('fmNota').innerHTML=grupos.lista.length?'Total do turno: <b>'+fmKm(tot)+'</b> (ida e volta). O km é por estrada, saindo e voltando à Farmo, na ordem de visita mais curta; o número em cada ponto é a ordem. Clique em um motoboy para ver só a rota dele.':'';
+}
+function FM_TURNO_TODOS(){return document.getElementById('fmTurno').value==='TODOS'}
+function fmAtualizar(){
+  var ger=++FM.ger, o=fmOrigem(), vazio=document.getElementById('fmVazio'), turno=document.getElementById('fmTurno').value;
+  document.getElementById('fmOrigem').innerHTML=o?'Saída: <b>Farmoterápica</b><br>'+esc(o.endereco||''):'<span class="aviso-empty">Endereço da Farmoterápica sem coordenadas.</span>';
+  if(!o){vazio.style.display='';vazio.textContent='A Farmoterápica ainda não tem coordenadas no cadastro.';return}
+  var grupos=fmGrupos(turno);
+  if(!grupos.coordenadas){vazio.style.display='';vazio.textContent='Aguardando as coordenadas dos endereços da Farmoterápica (o Cerebro está preparando).';fmListar({lista:grupos.lista},{},o);return}
+  vazio.style.display='none';
+  fmListar(grupos,{},o);
+  // rotas uma de cada vez (o servico publico e compartilhado): a tela vai preenchendo
+  var rotas={}, fila=grupos.lista.slice();
+  function prox(){
+    if(ger!==FM.ger)return;
+    var m=fila.shift(); if(!m){FM.rotas=rotas;return}
+    fmRotear(m,o).then(function(r){
+      if(ger!==FM.ger)return;
+      if(r)rotas[m.chave]=r;
+      fmListar(grupos,rotas,o); fmDesenhar(grupos,rotas,o);
+      setTimeout(prox,r&&!r.reta&&!fmCache()[r.chave+'x']?120:0);
+    });
+  }
+  FM.grupos=grupos; FM.rotas=rotas; FM.refoca=true; prox();
+}
+// o mapa ocupa tudo o que sobra da tela (inclusive em tela cheia), sem deixar faixa vazia embaixo
+function fmAjustar(){
+  var v=document.getElementById('viewFarmoMapa'), w=document.getElementById('fmWrap'); if(!v||!w||v.style.display==='none')return;
+  if(window.innerWidth>900)w.style.height=Math.max(380,window.innerHeight-w.getBoundingClientRect().top-12)+'px'; else w.style.height='';
+  if(FM.mapa)FM.mapa.resize();
+}
+function fmMostrar(){
+  var vazio=document.getElementById('fmVazio');
+  if(typeof maplibregl==='undefined'){vazio.style.display='';vazio.textContent='Não foi possível carregar o mapa (biblioteca indisponível).';return}
+  fmAjustar();
+  if(FM.mapa){FM.mapa.resize();fmAtualizar();return}
+  var o=fmOrigem()||{lat:-23.55,lng:-46.63};
+  FM.mapa=new maplibregl.Map({container:'fmEl',style:{version:8,sources:{},layers:[{id:'bg',type:'background',paint:{'background-color':mapaVar('--bg','#0b0b0b')}}]},center:[o.lng,o.lat],zoom:10,minZoom:5,maxZoom:17,attributionControl:{compact:true},dragRotate:false,pitchWithRotate:false});
+  FM.mapa.touchZoomRotate.disableRotation();
+  FM.mapa.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
+  var base=mapaEstiloBase?Promise.resolve(mapaEstiloBase):fetch('https://tiles.openfreemap.org/styles/positron').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()});
+  base.then(function(st){
+    if(!mapaEstiloBase)mapaEstiloBase=st;
+    FM.mapa.setStyle(mapaEstiloTema(st,mapaEscuro()));
+    FM.mapa.on('style.load',function(){FM.pronto=true;if(FM.camadaFn)FM.camadaFn()});
+    fmAtualizar(); // a lista e os pontos nao esperam o fundo do mapa terminar de carregar
+  }).catch(function(){vazio.style.display='';vazio.textContent='Não foi possível carregar o mapa agora (sem acesso ao serviço de mapas). Tente de novo em instantes.'});
+}
+(function(){
+  document.getElementById('fmTurno').addEventListener('change',function(){FM.sel='';fmAtualizar()});
+  document.getElementById('fmLista').addEventListener('click',function(e){
+    var m=e.target.closest('.fm-m'); if(!m)return; var k=m.getAttribute('data-g'); FM.sel=(FM.sel===k)?'':k;
+    var g=FM.grupos; if(g){fmListar(g,FM.rotas,fmOrigem());fmDesenhar(g,FM.rotas,fmOrigem());
+      if(FM.sel&&FM.rotas[FM.sel]){var b=new maplibregl.LngLatBounds();FM.rotas[FM.sel].geo.forEach(function(c){b.extend(c)});try{FM.mapa.fitBounds(b,{padding:60,maxZoom:15})}catch(er){}}}
+  });
+  window.addEventListener('resize',fmAjustar);
+  document.addEventListener('fullscreenchange',function(){setTimeout(fmAjustar,150)});
+  try{new ResizeObserver(function(){fmAjustar()}).observe(document.documentElement)}catch(e){}
+  setInterval(function(){var v=document.getElementById('viewFarmoMapa');if(v&&v.style.display!=='none')fmAjustar()},1500); // rede de seguranca: o modo maximizado do app nao dispara resize
 })();
 function renderFarmoDev(){
   var inp=document.getElementById('fodData'), hj=sqHoje(); if(!inp.value)inp.value=hj;
@@ -7097,6 +7664,7 @@ function sbMontarDados(){
   if(sbAreas.rh)d.cadastroRH=sbAreas.rh;
   ['operacao','planejamento','mapa','fixos','contratos','colaboradores','quadro','config'].forEach(function(k){if(sbAreas[k])d[k]=sbAreas[k]});
   if(sbAreas.farmo_op)d.farmoOp=sbAreas.farmo_op;
+  if(sbAreas.farmo_mapa)d.farmoMapa=sbAreas.farmo_mapa;
   if(sbAreas.historico_quadro)d.historicoQuadro=sbAreas.historico_quadro;
   if(sbAreas.config){
     if(sbAreas.config.diaOperacional&&!d.diaOperacional)d.diaOperacional=sbAreas.config.diaOperacional;
@@ -7127,6 +7695,7 @@ function sbCarregar(primeira){
     document.getElementById('authScreen').style.display='none';
     startApp(d);
     try{fsPreparar()}catch(e){}
+    try{qdbIniciar()}catch(e){}
   }).catch(function(err){
     sbOcupado=false;
     var msg=String((err&&err.message)||'');
