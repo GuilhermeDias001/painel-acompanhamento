@@ -13,6 +13,7 @@ import { operacao as calcOperacao, planejamento as calcPlanejamento } from './op
 import { montarFarmoOp } from './farmoop.mjs';
 import { sincronizarFarmo } from './farmohist.mjs';
 import { importarLegado } from './legado.mjs';
+import { montarFarmoMapa } from './farmomapa.mjs';
 import { ingerirDiasFechados } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
@@ -391,6 +392,9 @@ try {
     // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
     try {
       dados.farmoOp = await montarFarmoOp((aba, end) => lerAcomp(tk, aba, end, FARMO));
+      // coordenadas das paradas da Farmoterápica (mapa do site; área logada farmo_mapa)
+      try { dados.farmoMapa = await montarFarmoMapa({ farmoOp: dados.farmoOp, base: dados.mapa && dados.mapa.base, cacheArq: join(AQUI, 'geocache.json') }); if (dados.farmoMapa) console.log(`farmo mapa: ${dados.farmoMapa.paradas.length} paradas com coordenada, ${dados.farmoMapa.semCoordenada.length} sem`); }
+      catch (e) { console.log(`FALHA farmo mapa: ${String(e.message).slice(0, 160)}`); }
       // cópia fiel das abas legadas (sem Pix/PIN/banco): roda uma vez por aba, só no Actions ou em teste local com TUF_LEGADO_SECO=1
       if (process.env.SUPABASE_SECRET || process.env.TUF_LEGADO_SECO) {
         try { console.log(await importarLegado((arq) => (aba, end) => lerAcomp(tk, aba, end, { nova: NOVA_OP, farmo: FARMO, acomp: ACOMP }[arq]), process.env.SUPABASE_SECRET || 'DRY')); }
@@ -414,7 +418,7 @@ const json = JSON.stringify(dados);
 // (dados.js local e dados.enc.json do modo senha) saem SEM os dados pessoais da ficha (Guilherme, 10/10: só na área logada, nunca no arquivo público).
 const PESSOAIS = ['celularProprio', 'celularEmergencia', 'cpf', 'email', 'parentesco', 'endereco', 'bairro', 'cep', 'placa', 'cnh'];
 const semPessoais = (lista) => (Array.isArray(lista) ? lista.map((x) => { const o = { ...x }; for (const k of PESSOAIS) delete o[k]; return o; }) : lista);
-const jsonPublico = JSON.stringify({ ...dados, colaboradores: semPessoais(dados.colaboradores), cadastroRH: semPessoais(dados.cadastroRH), cadastroMotoristas: semPessoais(dados.cadastroMotoristas) });
+const jsonPublico = JSON.stringify({ ...dados, farmoMapa: undefined, colaboradores: semPessoais(dados.colaboradores), cadastroRH: semPessoais(dados.cadastroRH), cadastroMotoristas: semPessoais(dados.cadastroMotoristas) });
 writeFileSync(join(AQUI, 'dados.json'), json);
 writeFileSync(join(AQUI, 'dados.js'), 'window.DADOS = ' + jsonPublico + ';\n');
 

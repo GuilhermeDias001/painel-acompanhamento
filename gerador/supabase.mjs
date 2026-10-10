@@ -23,6 +23,7 @@ export function areasDe(d) {
     historico_quadro: d.historicoQuadro,
     fixos: d.fixos,
     farmo_op: d.farmoOp,
+    farmo_mapa: d.farmoMapa,
     // flags e parâmetros do sistema; auditoria=true liga o INSERT em public.quadro_auditoria no site
     config: { auditoria: true, diaOperacional: d.diaOperacional, viradaDoDia: d.viradaDoDia },
   };

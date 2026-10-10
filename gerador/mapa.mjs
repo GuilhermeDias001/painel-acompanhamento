@@ -57,7 +57,7 @@ const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
 // cidade (em 04/10, 58 lojas caíram no mesmo ponto). Endereço com várias lojas ("... / LOJA 2 - ...")
 // usa o primeiro.
 const GRANDE_SP = '-47.2,-23.0,-45.9,-24.2';
-async function nominatim(q) {
+export async function nominatim(q) {
   await espera(1100); // no máximo 1 pedido por segundo e identificação obrigatória
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&viewbox=${GRANDE_SP}&bounded=1&q=${encodeURIComponent(q)}`;
   const r = await fetch(url, { headers: { 'User-Agent': 'painel-tuf/1.0 (github.com/GuilhermeDias001/painel-acompanhamento)' }, signal: AbortSignal.timeout(15000) });
@@ -65,7 +65,7 @@ async function nominatim(q) {
   const j = await r.json();
   return j[0] ? { lat: +j[0].lat, lng: +j[0].lon } : null;
 }
-async function geocodificar(endereco) {
+export async function geocodificar(endereco) {
   const primeiro = endereco.replace(/^Endere[cç]o:\s*/i, '').split(/\s\/\s/)[0].trim();
   const cep = (primeiro.match(/(\d{5})-?(\d{3})/) || []).slice(1).join('');
   const semCep = primeiro.replace(/,?\s*\d{5}-?\d{3}.*$/, '');
