@@ -10,10 +10,11 @@ const sem = (s) => txt(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
 // Endereços completos vindos do TNS (tooltip do documento: "RUA X 353, BAIRRO, CIDADE-UF"), guardados em lojas-extra.json -> _farmo_enderecos [{cod, completo}].
 // Casamento: mesmo código PNET (quando existe) + nomes de rua parecidos (tokens), como o script do Automa faz com a rua.
 const TIPO = new Set(['RUA', 'R', 'AV', 'AVENIDA', 'AL', 'ALAMEDA', 'ESTRADA', 'EST', 'TRAV', 'TRAVESSA', 'PCA', 'PRACA', 'ROD', 'RODOVIA']);
+const LIGACAO = new Set(['DE', 'DA', 'DO', 'DAS', 'DOS', 'E']);
 const EXP = { DR: 'DOUTOR', DRA: 'DOUTORA', CAP: 'CAPITAO', MAJ: 'MAJOR', PROF: 'PROFESSOR', DEP: 'DEPUTADO', ENG: 'ENGENHEIRO', CEL: 'CORONEL', GEN: 'GENERAL', PRES: 'PRESIDENTE' };
 const tokensRua = (s) => sem(String(s).split(',')[0]).replace(/[^A-Z0-9 ]/g, ' ').split(' ').filter(Boolean)
   .filter((t, i) => !(i === 0 && TIPO.has(t))).map((t) => EXP[t] || t)
-  .filter((t) => !/^[0-9]+[A-Z]?$/.test(t) && t !== 'SN' && t !== 'S')
+  .filter((t) => !/^[0-9]+[A-Z]?$/.test(t) && t !== 'SN' && t !== 'S' && !LIGACAO.has(t)) // 'DE/DA/DO' não distinguem rua (Afonso DE Freitas x Herculano DE Freitas)
   .map((t) => t.replace(/([A-Z])\1/g, '$1')); // letras dobradas viram uma (MOTTA = MOTA)
 // token igual, ou parecido (1 letra de diferença em palavras longas: ABRAMOWICH x ABRAMOWICZ)
 const parecido = (x, y) => x === y || (x.length >= 6 && y.length >= 6 && Math.abs(x.length - y.length) <= 1 && dist1(x, y));

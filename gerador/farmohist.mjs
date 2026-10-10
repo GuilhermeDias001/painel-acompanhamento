@@ -87,6 +87,28 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
     if (compl || inseridas) log.push(`histórico em dias já existentes: ${compl} campos completados, ${inseridas} linhas inseridas`);
   }
 
+  // ---------- 1b) endereço completo (TNS) nas linhas do dia ABERTO: sobrepõe o número antigo, só onde o Guilherme não editou o endereço ----------
+  {
+    const sp0 = new Date(Date.now() - 3 * 3600000), hoje0 = sp0.toISOString().slice(0, 10);
+    const comp = (farmoOp?.operacaoHoje || []).filter((x) => x.enderecoCompleto);
+    if (farmoOp?.dataHoje === hoje0 && comp.length && abertos.has(hoje0)) {
+      const padrao = (ec) => { const p = ec.split(',').map((v) => v.trim()); const rua = p[0].replace(/^(.*\S)\s+(\d+[A-Z]?(?:\/\d+)?)$/, '$1, $2'); return `${rua} - ${p[1] || ''}, ${(p[2] || '').replace(/-([A-Z]{2})$/, ' - $1')}`; };
+      const jaPadrao = /, .* - [A-Z]{2}$/;
+      const atuais = await get(`farmo_operacao_linha?select=id,linha,rota,endereco,bairro,codigo_pnet&dia=eq.${hoje0}&limit=1000`);
+      const editados = new Set((await get(`farmo_auditoria?select=registro&dia=eq.${hoje0}&campo=eq.endereco&quem=ilike.diasguilherme*&limit=2000`)).map((a) => String(a.registro)));
+      const nr = (s) => txt(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ');
+      const usadas = new Set(); let n = 0;
+      for (const x of comp) {
+        const t = tokensRua(x.endereco || '');
+        const b = atuais.find((a) => !usadas.has(a.id) && nr(a.rota) === nr(x.rota) && nr(a.codigo_pnet) === nr(x.codigoPnet) && sim(tokensRua(a.endereco || ''), t) >= 0.8);
+        if (!b) continue; usadas.add(b.id);
+        if (editados.has(String(b.id)) || jaPadrao.test(b.endereco)) continue;
+        await send(`farmo_operacao_linha?id=eq.${b.id}`, 'PATCH', { endereco: padrao(x.enderecoCompleto), ...(x.bairroCompleto ? { bairro: x.bairroCompleto } : {}) }); n++;
+      }
+      if (n) log.push(`endereço completo aplicado em ${n} linhas de hoje`);
+    }
+  }
+
   // ---------- 2) hoje: Excel só depois das 23:30 e só onde o site não preencheu ----------
   const sp = new Date(Date.now() - 3 * 3600000), minutos = sp.getUTCHours() * 60 + sp.getUTCMinutes();
   const hojeSP = sp.toISOString().slice(0, 10);
