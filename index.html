@@ -1111,6 +1111,11 @@ html:not(.v-painel):not(.fit-modo) .view:not(:has(>.banner:first-child)){padding
 .sq-tab tr[data-st="ENTRAR EM CONTATO"] .sq-copy,.sq-tab tr[data-st="PRÉ CONFIRMADO"] .sq-copy{display:inline-flex}
 .sq-copy:hover,.sq-copy:focus-visible{color:var(--fg);border-color:var(--n-ciano);outline:none}
 .sq-copy.ok{color:var(--n-verde);border-color:var(--n-verde)}
+.wa-passos{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.45}
+.wa-msg{margin:0 0 14px;padding:10px 12px;border:1px solid var(--n-amarelo);border-radius:10px;background:color-mix(in srgb,var(--n-amarelo) 12%,transparent);font-size:13.5px}
+.wa-msg:empty{display:none}
+.wa-fav{cursor:grab;text-decoration:none;display:inline-flex;align-items:center}
+.sq-wa{color:var(--n-verde)}.sq-wa:hover,.sq-wa:focus-visible{border-color:var(--n-verde)!important}
 .sq-tab select[data-c="status"]{font-weight:600;transition:background-color .25s ease,border-color .25s ease}
 .sq-tab tr[data-st="CONFIRMADO"] select[data-c="status"]{background-color:color-mix(in srgb,var(--n-verde) 32%,var(--surface-2));border-color:var(--n-verde)}
 .sq-tab tr[data-st="PRÉ CONFIRMADO"] select[data-c="status"]{background-color:color-mix(in srgb,var(--n-ciano) 30%,var(--surface-2));border-color:var(--n-ciano)}
@@ -1734,6 +1739,28 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <p class="est-regra">Status volta para ENTRAR EM CONTATO, o comentário é limpo e não vão as linhas de RETORNO, INÍCIO CLT e ESPORÁDICO FIXO. Nunca sobrescreve um dia que já tem linhas.</p>
       <p class="est-msg" id="estMsg" role="status"></p>
       <div class="perfil-rodape"><span></span><span><button type="button" class="perfil-btn sec" id="estCancelar">Cancelar</button> <button type="button" class="perfil-btn" id="estOk">Estruturar</button></span></div>
+    </div>
+  </div>
+</div>
+<div class="ficha-modal" id="waModal" hidden>
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="waTitulo" style="max-width:580px">
+    <header class="ficha-head">
+      <div><h2 id="waTitulo">Ligar ao WhatsApp Web</h2><p id="waSub">Abre a conversa na aba do WhatsApp que já está aberta, sem recarregar</p></div>
+      <div class="ficha-acoes"><button type="button" id="waFechar" aria-label="Fechar">×</button></div>
+    </header>
+    <div class="ficha-corpo" style="display:block">
+      <p class="wa-msg" id="waMsg"></p>
+      <h3 class="cont-h3">PRIMEIRA VEZ NESTE CHROME</h3>
+      <p class="sub" style="margin:0 0 10px">Arraste o botão abaixo para a barra de favoritos (Ctrl+Shift+B mostra a barra).</p>
+      <p style="margin:0 0 6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><a id="waFav" class="perfil-btn wa-fav" href="#" draggable="true" title="Arraste para a barra de favoritos">Painel TUF</a><button type="button" class="perfil-btn sec" id="waCopiarFav">Copiar Endereço do Favorito</button></p>
+      <p class="sub" style="margin:0 0 14px">Se preferir criar à mão: novo favorito com o nome Painel TUF e, no campo URL, cole o endereço copiado.</p>
+      <h3 class="cont-h3">TODA VEZ QUE FOR USAR</h3>
+      <ol class="wa-passos">
+        <li>Deixe o WhatsApp Web aberto em uma aba só.</li>
+        <li>Com a aba do WhatsApp na frente, clique no favorito <b>Painel TUF</b>. O painel abre já ligado a ela.</li>
+        <li>No painel, clique no botão verde do WhatsApp da pessoa: a conversa abre lá, com a mensagem escrita. Confira e aperte Enter.</li>
+      </ol>
+      <p class="sub" style="margin:12px 0 0">Se a aba do WhatsApp for recarregada, clique no favorito de novo. Nada é enviado sozinho.</p>
     </div>
   </div>
 </div>
@@ -2858,7 +2885,7 @@ document.getElementById('fichaSalvar').addEventListener('click',function(){
   });
   if(mudou){
     try{localStorage.setItem('tuf-func-edic',JSON.stringify(FUNC_EDIC));localStorage.setItem('tuf-sq-aud',JSON.stringify(SQ_AUD))}catch(e){}
-    FUNC_CACHE={chave:'',lista:null}; renderFuncionarios();
+    FUNC_CACHE={chave:'',lista:null}; renderFuncionarios(); try{sqRender()}catch(er){}
     if(window.sqAviso)window.sqAviso(mudou+' alteraç'+(mudou===1?'ão salva':'ões salvas')+' no cadastro.');
   }
   fichaEditando=false; fichaRender(p);
@@ -3333,7 +3360,7 @@ function sqSugestoes(l){
   function posiciona(el,btn,larg){var r2=btn.getBoundingClientRect();el.style.left=Math.max(8,Math.min(r2.left,window.innerWidth-larg-8))+'px';el.style.top=Math.min(r2.bottom+4,window.innerHeight-60)+'px'}
   corpo.addEventListener('click',function(e){
     var lb=e.target.closest('.sq-lamp'), cb=e.target.closest('.sq-com-btn'), cp=e.target.closest('.sq-copy');
-    if(cp){e.stopPropagation();sqCopiarMensagem(cp);return}
+    if(cp){e.stopPropagation();if(cp.classList.contains('sq-wa'))sqAbrirWhats(cp);else sqCopiarMensagem(cp);return}
     if(lb){
       e.stopPropagation(); fechaBal();
       var i=+lb.getAttribute('data-lamp'), l=SQ_LINHAS[i];
@@ -3664,6 +3691,7 @@ function sqCriar(modo){
     lin('Loja 12','Colaborador L','CLT','CONFIRMADO','','','',null)
   ];
 }
+var SQ_ICO_WA='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>';
 var SQ_ICO_COPIAR='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
 var SQ_ICO_OK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
 // mensagem de contato: puxa loja, horario (da linha; se nao tiver, da escala da loja no dia) e valor (so quando existe)
@@ -3697,11 +3725,101 @@ function sqCelular(nome){
   if(d.length<10)return '';
   return d.length<=11?'55'+d:d;
 }
+// ===== WHATSAPP WEB LIGADO AO PAINEL, SEM EXTENSAO =====
+// Um site nao consegue comandar a aba do WhatsApp Web (ele corta o vinculo com quem o abre). O caminho inverso funciona:
+// um FAVORITO clicado na aba do WhatsApp abre o painel (que fica com window.opener = aba do WhatsApp) e passa a ouvir pedidos.
+// O painel manda {tufWa:'abrir',phone,text}; o favorito clica num link wa.me DENTRO do WhatsApp, que abre a conversa por dentro, sem recarregar.
+var WA_ORIGEM='https://web.whatsapp.com', WA_LIG={on:false,esp:{},ult:{k:'',t:0}};
+var WA_PAINEL_URL=location.protocol==='file:'?'https://guilhermedias001.github.io/painel-acompanhamento/':(location.origin+location.pathname);
+function waFavoritoCodigo(){
+  var U=WA_PAINEL_URL, P=U.split('/').slice(0,3).join('/');
+  var f=function(P,U){
+    if(location.origin!=='https://web.whatsapp.com'){alert('Use este favorito com a aba do WhatsApp Web na frente.');return}
+    if(!window.__tufWa){
+      window.__tufWa=1;
+      window.addEventListener('message',function(e){
+        if(e.origin!==P||!e.data||!e.data.tufWa)return;
+        var d=e.data;
+        if(d.tufWa==='ping'){e.source.postMessage({tufWa:'pronto'},P);return}
+        if(d.tufWa!=='abrir')return;
+        var tel=String(d.phone||'').replace(/[^0-9]/g,''); if(tel.length<10||tel.length>15)return;
+        var a=document.createElement('a'), abriu=false;
+        a.href='https://wa.me/'+tel+'?text='+encodeURIComponent(String(d.text||'').slice(0,3000));
+        a.target='_blank'; a.rel='noopener'; a.style.display='none';
+        a.addEventListener('click',function(ev){abriu=ev.defaultPrevented; if(!abriu)ev.preventDefault()});
+        document.body.appendChild(a); a.click(); a.remove();
+        e.source.postMessage({tufWa:abriu?'ok':'falhou',id:d.id},P);
+      });
+    }
+    var w=window.open('','tuf-painel');
+    if(!w){alert('O Chrome bloqueou a abertura do painel. Permita pop-ups para o WhatsApp Web e clique de novo.');return}
+    var novo=false; try{novo=w.location.href==='about:blank'}catch(er){}
+    if(novo)w.location.href=U; else{try{w.postMessage({tufWa:'pronto'},P)}catch(er){}}
+    try{w.focus()}catch(er){}
+  };
+  return 'javascript:'+encodeURIComponent('('+f.toString()+')('+JSON.stringify(P)+','+JSON.stringify(U)+');');
+}
+function waAbridor(){try{return window.opener&&!window.opener.closed?window.opener:null}catch(e){return null}}
+window.addEventListener('message',function(e){
+  if(e.origin!==WA_ORIGEM||!e.data||!e.data.tufWa)return;
+  var d=e.data;
+  if(d.tufWa==='pronto'){var antes=WA_LIG.on; WA_LIG.on=true; if(!antes&&window.sqAviso)window.sqAviso('Painel ligado ao WhatsApp Web: o botão verde abre a conversa direto lá.'); return}
+  if(d.tufWa==='ok'||d.tufWa==='falhou'){WA_LIG.on=true; var f=WA_LIG.esp[d.id]; if(f){delete WA_LIG.esp[d.id]; f(d.tufWa==='ok')}}
+});
+try{var waAb=waAbridor(); if(waAb)waAb.postMessage({tufWa:'ping'},WA_ORIGEM)}catch(e){}
+function waAjuda(motivo){
+  var m=document.getElementById('waModal'), txt='';
+  if(motivo==='caiu')txt='A ligação com o WhatsApp Web caiu: a aba dele foi recarregada ou fechada. Clique de novo no favorito Painel TUF na aba do WhatsApp. A mensagem foi copiada.';
+  else if(motivo==='semligacao')txt='Este painel não está ligado ao WhatsApp Web, então a mensagem foi só copiada. Para abrir a conversa direto, abra o painel pelo favorito, como abaixo.';
+  if(location.protocol==='file:')txt+=(txt?' ':'')+'No arquivo aberto do computador isso não funciona: o favorito abre o site publicado.';
+  document.getElementById('waMsg').textContent=txt;
+  document.getElementById('waFav').href=waFavoritoCodigo();
+  m.hidden=false; document.getElementById('waFechar').focus();
+}
+(function(){
+  var m=document.getElementById('waModal');
+  function fecha(){m.hidden=true}
+  document.getElementById('waFechar').addEventListener('click',fecha);
+  m.addEventListener('click',function(e){if(e.target===m)fecha()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden){e.stopPropagation();fecha()}},true);
+  document.getElementById('waFav').addEventListener('click',function(e){e.preventDefault();if(window.sqAviso)window.sqAviso('Arraste este botão para a barra de favoritos; depois clique nele com a aba do WhatsApp na frente.')});
+  document.getElementById('waCopiarFav').addEventListener('click',function(){
+    var c=waFavoritoCodigo();
+    try{navigator.clipboard.writeText(c).then(function(){if(window.sqAviso)window.sqAviso('Endereço do favorito copiado. Cole no campo URL de um novo favorito.')},function(){if(window.sqAviso)window.sqAviso('Não foi possível copiar. Arraste o botão Painel TUF para a barra de favoritos.')})}catch(e){}
+  });
+})();
+// botao do WhatsApp: copia a mensagem e abre a conversa da pessoa na aba do WhatsApp Web ja aberta (nunca abre aba nova nem envia sozinho)
+function sqAbrirWhats(bt){
+  var l=SQ_LINHAS[+bt.getAttribute('data-copy')]; if(!l)return;
+  var txt=sqMensagem(l), tel=sqCelular(l.colab); if(!tel)return;
+  // o WhatsApp ACRESCENTA o texto ao que ja esta na caixa: ignora o segundo clique seguido na mesma pessoa
+  if(WA_LIG.ult.k===tel&&Date.now()-WA_LIG.ult.t<4000)return;
+  WA_LIG.ult={k:tel,t:Date.now()};
+  try{navigator.clipboard.writeText(txt)}catch(e){}
+  var nome=tcase(l.colab), ab=waAbridor();
+  if(ab){
+    var id=Date.now().toString(36)+Math.random().toString(36).slice(2,7), respondeu=false, estava=WA_LIG.on;
+    WA_LIG.esp[id]=function(ok){
+      respondeu=true;
+      if(window.sqAviso)window.sqAviso(ok?'Conversa de '+nome+' aberta no WhatsApp com a mensagem escrita. Vá para a aba do WhatsApp e aperte Enter.':'O WhatsApp não abriu a conversa de '+nome+' (ele pode estar carregando). A mensagem foi copiada.');
+      if(ok){try{ab.focus()}catch(e){}}
+    };
+    try{ab.postMessage({tufWa:'abrir',id:id,phone:tel,text:txt},WA_ORIGEM)}catch(e){}
+    setTimeout(function(){if(respondeu)return; delete WA_LIG.esp[id]; WA_LIG.on=false; WA_LIG.ult.t=0; waAjuda(estava?'caiu':'semligacao')},1500);
+    return;
+  }
+  // extensao TUF (opcional), se estiver instalada
+  if(document.documentElement.getAttribute('data-tuf-wa')==='1'){
+    window.postMessage({tufWa:'enviar',id:Date.now(),phone:tel,text:txt},'*');
+    if(window.sqAviso)window.sqAviso('Conversa de '+nome+' aberta no WhatsApp Web com a mensagem pronta (também copiada).');
+    return;
+  }
+  WA_LIG.ult.t=0; waAjuda('semligacao');
+}
 function sqCopiarMensagem(bt){
   var l=SQ_LINHAS[+bt.getAttribute('data-copy')]; if(!l)return;
   var txt=sqMensagem(l), tel=sqCelular(l.colab);
-  // com celular cadastrado, abre direto o WhatsApp da pessoa com a mensagem pronta
-  if(tel){window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(txt),'_blank','noopener');if(window.sqAviso)window.sqAviso('WhatsApp aberto com a mensagem para '+tcase(l.colab)+'.');return}
+
   function ok(){bt.classList.add('ok');bt.innerHTML=SQ_ICO_OK;setTimeout(function(){bt.classList.remove('ok');bt.innerHTML=SQ_ICO_COPIAR},1400)}
   function falha(){window.prompt&&0; if(window.sqAviso)window.sqAviso('Não foi possível copiar. Selecione e copie: '+txt.replace(/\n/g,' | '))}
   try{navigator.clipboard.writeText(txt).then(ok,function(){
@@ -3768,7 +3886,7 @@ function sqRender(){
     var hst=sqHorarioStatus(l);
     return '<tr class="'+(l.status==='EM ABERTO'?'sq-aberto':'')+'" data-i="'+x.i+'" data-st="'+esc(l.status)+'">'
       +'<td><span class="sq-colab">'+inp('colab',l.colab,'text',larguraColab,'sqColabs')+(l.loja&&l.entrada?(function(){var sg=sqSugestoes(l);SQ_SUG_LINHA[x.i]={l:l,s:sg};var n=sg.length;return '<button type="button" class="sq-lamp'+(n?' acesa':'')+'" data-lamp="'+x.i+'" aria-label="Sugestões para esta vaga" title="'+(n?n+(n===1?' sugestão':' sugestões')+' de prestador para esta vaga':(l.status==='CONFIRMADO'?'Vaga confirmada: sem sugestões':'Nenhuma sugestão de prestador para esta vaga (histórico: '+sqAssinatura().split('|')[0]+' linhas)'))+'">'+SQ_LAMPADA+'</button>'})():'')+'</span></td>'
-      +'<td><span class="sq-st"><select data-c="status" aria-label="Status">'+sqOpts(SQ_STATUS.indexOf(l.status)<0&&l.status?SQ_STATUS.concat([l.status]):SQ_STATUS,l.status)+'</select><button type="button" class="sq-copy" data-copy="'+x.i+'" aria-label="Copiar mensagem para o prestador" title="'+(sqCelular(l.colab)?'Abrir WhatsApp com a mensagem':'Copiar mensagem de contato')+'">'+SQ_ICO_COPIAR+'</button></span></td>'
+      +'<td><span class="sq-st"><select data-c="status" aria-label="Status">'+sqOpts(SQ_STATUS.indexOf(l.status)<0&&l.status?SQ_STATUS.concat([l.status]):SQ_STATUS,l.status)+'</select><button type="button" class="sq-copy" data-copy="'+x.i+'" aria-label="Copiar mensagem para o prestador" title="Copiar mensagem de contato">'+SQ_ICO_COPIAR+'</button>'+(sqCelular(l.colab)?'<button type="button" class="sq-copy sq-wa" data-copy="'+x.i+'" aria-label="Abrir o WhatsApp da pessoa" title="Copiar a mensagem e abrir o chat no WhatsApp Web">'+SQ_ICO_WA+'</button>':'')+'</span></td>'
       +'<td class="sq-mono"><span class="sq-val'+(sqSemTufLog(l)?' sem-tuf" title="TUF Log não aprovado: valor travado':'')+'"><span>R$</span>'+inp('valor',l.valor,'text',0)+'<button type="button" class="sq-com-btn'+(l.com&&l.com.t?' tem':'')+'" data-com="'+x.i+'" aria-label="Comentário" title="'+(l.com&&l.com.t?esc(l.com.t+(l.com.a?' — '+l.com.a:'')):'Adicionar comentário')+'">+</button></span></td>'
       +'<td><span class="sq-auto-txt">'+(cad?esc(cad.tipo):l._tipoReal?esc(l._tipoReal):semCad?'<span class="aviso-empty" title="Colaborador sem cadastro">Sem cadastro</span>':'—')+'</span></td>'
       +'<td><button type="button" class="sq-pix-btn'+(cad&&cad.pix?'':' sem')+'" data-pix="'+x.i+'" aria-label="Chave Pix" title="'+(cad&&cad.pix?'Ver chave Pix':'Sem chave Pix cadastrada')+'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3 21 2M16 7l3 3M14 9l2 2"/></svg></button></td>'
@@ -5410,7 +5528,7 @@ var FOP={dias:{},fechados:{}}, FOD={dias:{},fechados:{}};
 try{FOP=JSON.parse(localStorage.getItem('tuf-farmo-op')||'null')||FOP}catch(e){}
 try{FOD=JSON.parse(localStorage.getItem('tuf-farmo-dev')||'null')||FOD}catch(e){}
 function fopSalvar(){try{localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP));localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}catch(e){}try{fsAgendar()}catch(e){}}
-var FOP_ROTAS=['1 MANHA - CENTRO/NORTE','2 MANHA - LESTE','3 MANHA - SUL','4 MANHA - CENTRO/OESTE','5 MANHA - NORTE/OESTE 2','1 TARDE - CENTRO/NORTE','2 TARDE - LESTE','3 TARDE - SUL','4 TARDE - CENTRO/OESTE','6 TARDE - LITORAL NORTE','7 TARDE - VALE DO PARAIBA','Noite - Alto Tiete','Noite - Litoral'];
+var FOP_ROTAS=['1 MANHA - CENTRO/NORTE','2 MANHA - LESTE','3 MANHA - SUL','4 MANHA - CENTRO/OESTE','5 MANHA - NORTE/OESTE 2','1 TARDE - CENTRO/NORTE','2 TARDE - LESTE','3 TARDE - SUL','4 TARDE - CENTRO/OESTE','5 TARDE - LITORAL NORTE','6 TARDE - VALE DO PARAIBA','Noite - Alto Tiete','Noite - Litoral'];
 var FOP_TIT={tit:{},des:{},fol:'',folDes:''};
 try{FOP_TIT=Object.assign({tit:{},des:{},fol:'',folDes:''},JSON.parse(localStorage.getItem('tuf-farmo-tit')||'null')||{})}catch(e){}
 function fopTitSalvar(){try{localStorage.setItem('tuf-farmo-tit',JSON.stringify(FOP_TIT))}catch(e){}}
@@ -5490,7 +5608,7 @@ function fopImportar(txt){
 }
 // Litoral Norte e Vale do Paraiba sao as rotas 6 e 7 da tarde: o nome antigo e o novo valem como a mesma rota
 function fopRotaChave(r){var k=norm(String(r||'').replace(/^\s*\d+\s+/,'')).trim(); return k.replace(/^tarde\s*-\s*(litoral norte|vale do paraiba)$/,'$1')}
-function fopRotaNome(r){var k=fopRotaChave(r); return k==='litoral norte'?'6 TARDE - LITORAL NORTE':k==='vale do paraiba'?'7 TARDE - VALE DO PARAIBA':r}
+function fopRotaNome(r){var k=fopRotaChave(r); return k==='litoral norte'?'5 TARDE - LITORAL NORTE':k==='vale do paraiba'?'6 TARDE - VALE DO PARAIBA':r}
 // ---- regras das abas Rotas/Operacao ----
 // MOTORISTA_DIA: titular da rota; se a grade semanal da folga dele no dia, entra o folguista; INTERNO vem da escala dos internos por data
 function fopNomeMapa(ls){
