@@ -314,6 +314,22 @@ const dados = {
 // dados que não vêm da planilha (escala do mês, avisos): ficam fora do index.html para
 // não irem a público sem criptografia
 dados.cadastroMotoristas = await cadastroMotoristas(tk);
+// CPF e placa dos motoristas (ficha), da aba Motorista da Farmoterápica (E nome, G CPF, H placa; Guilherme autorizou "todos os campos" em 10/10).
+// Só na área LOGADA do Supabase: saem de dados.js e do dados.enc.json (semPessoais). Nunca a CNH, o usuário de acesso nem a chave Pix.
+try {
+  const mot = await lerAcomp(tk, 'Motorista', 'E2:H80', FARMO);
+  const ch = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+  const por = new Map(mot.filter((l) => String(l[0]).trim()).map((l) => [ch(l[0]), l]));
+  let n = 0;
+  for (const m of dados.cadastroMotoristas) {
+    const l = por.get(ch(m.nome)); if (!l) continue;
+    const cpf = String(l[2] ?? '').replace(/\D/g, ''), placa = String(l[3] ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (cpf.length === 10 || cpf.length === 11) m.cpf = cpf.padStart(11, '0'); // o Excel tira o zero à esquerda do CPF numérico
+    if (placa.length >= 7) m.placa = placa;
+    if (m.cpf || m.placa) n++;
+  }
+  console.log(`motoristas com CPF/placa: ${n} de ${dados.cadastroMotoristas.length}`);
+} catch (e) { console.log(`FALHA CPF/placa dos motoristas: ${String(e.message).slice(0, 160)}`); }
 // falha no cadastro do RH não derruba o resto do painel
 try { dados.cadastroRH = await cadastroRH(tk); } catch (e) { console.log(`FALHA cadastro RH: ${String(e.message).slice(0, 200)}`); }
 try {
