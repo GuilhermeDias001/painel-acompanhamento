@@ -1758,9 +1758,10 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <ol class="wa-passos">
         <li>Deixe o WhatsApp Web aberto em uma aba só.</li>
         <li>Com a aba do WhatsApp na frente, clique no favorito <b>Painel TUF</b>. O painel abre já ligado a ela.</li>
-        <li>No painel, clique no botão verde do WhatsApp da pessoa: a conversa abre lá, com a mensagem escrita. Confira e aperte Enter.</li>
+        <li>No painel, clique no botão verde do WhatsApp da pessoa: o Chrome vai para a aba do WhatsApp, com a conversa aberta e a mensagem escrita. Confira e aperte Enter.</li>
       </ol>
       <p class="sub" style="margin:12px 0 0">Se a aba do WhatsApp for recarregada, clique no favorito de novo. Nada é enviado sozinho.</p>
+      <p class="sub" style="margin:8px 0 0">Já tinha um favorito Painel TUF de antes? Apague o antigo e arraste este: só o novo troca de aba sozinho.</p>
     </div>
   </div>
 </div>
@@ -3727,46 +3728,59 @@ function sqCelular(nome){
 }
 // ===== WHATSAPP WEB LIGADO AO PAINEL, SEM EXTENSAO =====
 // Um site nao consegue comandar a aba do WhatsApp Web (ele corta o vinculo com quem o abre). O caminho inverso funciona:
-// um FAVORITO clicado na aba do WhatsApp abre o painel (que fica com window.opener = aba do WhatsApp) e passa a ouvir pedidos.
-// O painel manda {tufWa:'abrir',phone,text}; o favorito clica num link wa.me DENTRO do WhatsApp, que abre a conversa por dentro, sem recarregar.
+// um FAVORITO clicado na aba do WhatsApp abre o painel (que fica com window.opener = aba do WhatsApp), da um nome a aba e passa a ouvir pedidos.
+// O painel manda {tufWa2:'abrir',phone,text}; o favorito clica num link wa.me DENTRO do WhatsApp, que abre a conversa por dentro, sem recarregar.
+// Depois do ok o painel chama window.open('',nome): como a aba com esse nome ja existe, o Chrome so vai para ela (nao abre nem recarrega nada).
 var WA_ORIGEM='https://web.whatsapp.com', WA_LIG={on:false,esp:{},ult:{k:'',t:0}};
 var WA_PAINEL_URL=location.protocol==='file:'?'https://guilhermedias001.github.io/painel-acompanhamento/':(location.origin+location.pathname);
 function waFavoritoCodigo(){
   var U=WA_PAINEL_URL, P=U.split('/').slice(0,3).join('/');
   var f=function(P,U){
     if(location.origin!=='https://web.whatsapp.com'){alert('Use este favorito com a aba do WhatsApp Web na frente.');return}
-    if(!window.__tufWa){
-      window.__tufWa=1;
+    var N='tuf-whats'; window.name=N;
+    if(!window.__tufWa2){
+      window.__tufWa2=1;
       window.addEventListener('message',function(e){
-        if(e.origin!==P||!e.data||!e.data.tufWa)return;
+        if(e.origin!==P||!e.data||!e.data.tufWa2)return;
         var d=e.data;
-        if(d.tufWa==='ping'){e.source.postMessage({tufWa:'pronto'},P);return}
-        if(d.tufWa!=='abrir')return;
+        if(d.tufWa2==='ping'){window.name=N;e.source.postMessage({tufWa2:'pronto',nome:N},P);return}
+        if(d.tufWa2!=='abrir')return;
         var tel=String(d.phone||'').replace(/[^0-9]/g,''); if(tel.length<10||tel.length>15)return;
         var a=document.createElement('a'), abriu=false;
         a.href='https://wa.me/'+tel+'?text='+encodeURIComponent(String(d.text||'').slice(0,3000));
         a.target='_blank'; a.rel='noopener'; a.style.display='none';
         a.addEventListener('click',function(ev){abriu=ev.defaultPrevented; if(!abriu)ev.preventDefault()});
         document.body.appendChild(a); a.click(); a.remove();
-        e.source.postMessage({tufWa:abriu?'ok':'falhou',id:d.id},P);
+        window.name=N;
+        e.source.postMessage({tufWa2:abriu?'ok':'falhou',id:d.id,nome:N},P);
       });
     }
     var w=window.open('','tuf-painel');
     if(!w){alert('O Chrome bloqueou a abertura do painel. Permita pop-ups para o WhatsApp Web e clique de novo.');return}
     var novo=false; try{novo=w.location.href==='about:blank'}catch(er){}
-    if(novo)w.location.href=U; else{try{w.postMessage({tufWa:'pronto'},P)}catch(er){}}
+    if(novo)w.location.href=U; else{try{w.postMessage({tufWa2:'pronto',nome:N},P)}catch(er){}}
     try{w.focus()}catch(er){}
   };
   return 'javascript:'+encodeURIComponent('('+f.toString()+')('+JSON.stringify(P)+','+JSON.stringify(U)+');');
 }
 function waAbridor(){try{return window.opener&&!window.opener.closed?window.opener:null}catch(e){return null}}
 window.addEventListener('message',function(e){
-  if(e.origin!==WA_ORIGEM||!e.data||!e.data.tufWa)return;
+  if(e.origin!==WA_ORIGEM||!e.data||!e.data.tufWa2)return;
   var d=e.data;
-  if(d.tufWa==='pronto'){var antes=WA_LIG.on; WA_LIG.on=true; if(!antes&&window.sqAviso)window.sqAviso('Painel ligado ao WhatsApp Web: o botão verde abre a conversa direto lá.'); return}
-  if(d.tufWa==='ok'||d.tufWa==='falhou'){WA_LIG.on=true; var f=WA_LIG.esp[d.id]; if(f){delete WA_LIG.esp[d.id]; f(d.tufWa==='ok')}}
+  if(d.tufWa2==='pronto'){var antes=WA_LIG.on; WA_LIG.on=true; if(!antes&&window.sqAviso)window.sqAviso('Painel ligado ao WhatsApp Web: o botão verde abre a conversa direto lá.'); return}
+  if(d.tufWa2==='ok'||d.tufWa2==='falhou'){WA_LIG.on=true; var f=WA_LIG.esp[d.id]; if(f){delete WA_LIG.esp[d.id]; f(d.tufWa2==='ok',String(d.nome||''))}}
 });
-try{var waAb=waAbridor(); if(waAb)waAb.postMessage({tufWa:'ping'},WA_ORIGEM)}catch(e){}
+try{var waAb=waAbridor(); if(waAb)waAb.postMessage({tufWa2:'ping'},WA_ORIGEM)}catch(e){}
+// leva o Chrome para a aba do WhatsApp: abrir uma janela pelo NOME de uma aba que ja existe so traz essa aba para a frente.
+// Se por algum motivo o nome nao for achado, o Chrome criaria uma aba em branco: ela e fechada na hora.
+function waIrParaWhats(nome){
+  if(!nome)return false;
+  var w=null; try{w=window.open('',nome)}catch(e){return false}
+  if(!w)return false;
+  var emBranco=false; try{emBranco=w.location.href==='about:blank'}catch(e){}
+  if(emBranco){try{w.close()}catch(e){} return false}
+  return true;
+}
 function waAjuda(motivo){
   var m=document.getElementById('waModal'), txt='';
   if(motivo==='caiu')txt='A ligação com o WhatsApp Web caiu: a aba dele foi recarregada ou fechada. Clique de novo no favorito Painel TUF na aba do WhatsApp. A mensagem foi copiada.';
@@ -3785,10 +3799,10 @@ function waAjuda(motivo){
   document.getElementById('waFav').addEventListener('click',function(e){e.preventDefault();if(window.sqAviso)window.sqAviso('Arraste este botão para a barra de favoritos; depois clique nele com a aba do WhatsApp na frente.')});
   document.getElementById('waCopiarFav').addEventListener('click',function(){
     var c=waFavoritoCodigo();
-    try{navigator.clipboard.writeText(c).then(function(){if(window.sqAviso)window.sqAviso('Endereço do favorito copiado. Cole no campo URL de um novo favorito.')},function(){if(window.sqAviso)window.sqAviso('Não foi possível copiar. Arraste o botão Painel TUF para a barra de favoritos.')})}catch(e){}
+    try{navigator.clipboard.writeText(c).then(function(){if(window.sqAviso)window.sqAviso('Endereço do favorito copiado. Cole no campo URL de um novo favorito (não na barra de endereços).')},function(){if(window.sqAviso)window.sqAviso('Não foi possível copiar. Arraste o botão Painel TUF para a barra de favoritos.')})}catch(e){}
   });
 })();
-// botao do WhatsApp: copia a mensagem e abre a conversa da pessoa na aba do WhatsApp Web ja aberta (nunca abre aba nova nem envia sozinho)
+// botao do WhatsApp: copia a mensagem, abre a conversa da pessoa na aba do WhatsApp Web ja aberta e vai para ela (nunca abre aba nova nem envia sozinho)
 function sqAbrirWhats(bt){
   var l=SQ_LINHAS[+bt.getAttribute('data-copy')]; if(!l)return;
   var txt=sqMensagem(l), tel=sqCelular(l.colab); if(!tel)return;
@@ -3799,12 +3813,13 @@ function sqAbrirWhats(bt){
   var nome=tcase(l.colab), ab=waAbridor();
   if(ab){
     var id=Date.now().toString(36)+Math.random().toString(36).slice(2,7), respondeu=false, estava=WA_LIG.on;
-    WA_LIG.esp[id]=function(ok){
+    WA_LIG.esp[id]=function(ok,nomeAba){
       respondeu=true;
-      if(window.sqAviso)window.sqAviso(ok?'Conversa de '+nome+' aberta no WhatsApp com a mensagem escrita. Vá para a aba do WhatsApp e aperte Enter.':'O WhatsApp não abriu a conversa de '+nome+' (ele pode estar carregando). A mensagem foi copiada.');
-      if(ok){try{ab.focus()}catch(e){}}
+      if(!ok){if(window.sqAviso)window.sqAviso('O WhatsApp não abriu a conversa de '+nome+' (ele pode estar carregando). A mensagem foi copiada.');return}
+      var foi=waIrParaWhats(nomeAba);
+      if(window.sqAviso)window.sqAviso('Conversa de '+nome+' aberta no WhatsApp com a mensagem escrita.'+(foi?'':' Vá para a aba do WhatsApp e aperte Enter.'));
     };
-    try{ab.postMessage({tufWa:'abrir',id:id,phone:tel,text:txt},WA_ORIGEM)}catch(e){}
+    try{ab.postMessage({tufWa2:'abrir',id:id,phone:tel,text:txt},WA_ORIGEM)}catch(e){}
     setTimeout(function(){if(respondeu)return; delete WA_LIG.esp[id]; WA_LIG.on=false; WA_LIG.ult.t=0; waAjuda(estava?'caiu':'semligacao')},1500);
     return;
   }
