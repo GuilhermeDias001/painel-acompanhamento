@@ -793,6 +793,8 @@ html.mapa-modo main{padding-bottom:0}
 .maplibregl-ctrl-attrib .maplibregl-ctrl-attrib-inner{display:none!important}
 .maplibregl-ctrl-attrib:hover .maplibregl-ctrl-attrib-inner,.maplibregl-ctrl-attrib:focus-within .maplibregl-ctrl-attrib-inner{display:block!important}
 .mapa-card{min-height:0!important}
+.mapa-card{isolation:isolate;z-index:0}
+.rail{z-index:60}
 .mapa-lado{overflow-y:auto;scrollbar-width:none}
 .mapa-lado::-webkit-scrollbar{display:none}
 .mapa-regs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -950,6 +952,7 @@ html.mapa-modo main{padding-bottom:0}
 .fop-tab input{text-transform:uppercase;width:100%;height:32px;font:500 13px var(--font-sys);color:var(--fg);background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:0 9px;box-sizing:border-box;min-width:0}
 .fop-tab input[data-c="hor"]{text-align:center}
 .fop-tab input:focus{outline:2px solid var(--n-vermelho);outline-offset:0}
+.fop-tab input[data-c="end"]:focus{position:relative;z-index:40;box-shadow:0 6px 20px rgba(0,0,0,.45)}
 .ficha-sel,.ficha-fp{width:100%;height:34px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:500 13px var(--font-sys)}
 .ficha-fr-box{margin-top:8px;display:flex;flex-direction:column;gap:5px}.ficha-fr-box small{color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px}
 .ficha-fr{display:flex;gap:8px;align-items:center;font-size:12.5px;cursor:pointer}
@@ -998,7 +1001,17 @@ html.fop-travado input.trava,html.fop-travado #fopTravaBar{pointer-events:auto!i
 .fop-imp{width:100%;min-height:260px;font:500 12.5px ui-monospace,Consolas,monospace;color:var(--fg);background:var(--surface-2);border:1px solid var(--border-strong);border-radius:10px;padding:10px;box-sizing:border-box;white-space:pre;overflow:auto}
 .fod-blocos{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media (max-width:1100px){.fod-blocos{grid-template-columns:1fr}}
-.fod-tab td,.fod-tab th{padding:3px 5px!important}
+.fod-tab td,.fod-tab th{padding:1px 5px!important}
+.fod-data{display:flex;flex-direction:column;gap:2px;font-size:11px;color:#f3d9d5;margin-left:auto}.fod-data input{height:28px;font-size:12.5px;padding:0 8px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--fg)}#viewFarmoDev .pf-barra,#viewFarmoDev #fodSub,#viewFarmoDev #fodNota{display:none!important}
+.fod-tab tfoot td{font-weight:800;text-align:center;font-size:12.5px;color:var(--fg);border-top:2px solid var(--border-strong);padding-top:3px!important}.fod-tab tfoot td.tot-l{text-align:left;color:var(--fg-muted)}
+html.expanded .fod-data,html.fit-modo .fod-data{position:fixed;left:16px;top:84px;width:122px;flex-direction:row-reverse;justify-content:flex-end;align-items:center;gap:6px;margin:0;z-index:20}html.expanded .fod-data input,html.fit-modo .fod-data input{height:24px!important;font-size:11.5px!important;padding:0 5px!important;flex:1;min-width:0;width:auto;box-sizing:border-box}
+.fod-banner{padding:8px 18px!important;margin-bottom:8px!important}.fod-banner .eyebrow{margin:0 0 2px!important;font-size:11px}.fod-banner h1{font-size:20px!important;margin:0}
+#viewFarmoDev .card{padding:8px 14px 4px!important;margin-bottom:0!important}#viewFarmoDev{padding-bottom:0!important;margin-bottom:0!important;gap:6px!important}html.expanded #viewFarmoDev .fod-banner{margin-bottom:12px!important}html:has(#viewFarmoDev:not([style*="none"])),html:has(#viewFarmoDev:not([style*="none"])) body{overflow:hidden!important}
+#viewFarmoDev .pf-barra label{font-size:11px}#viewFarmoDev #fodSub{margin:2px 0 4px!important}
+html.fit-modo #viewFarmoDev .pf-barra{position:fixed;left:16px;top:82px;width:150px;z-index:20;font-size:0}html.fit-modo #viewFarmoDev .pf-barra input{height:26px;font-size:12px;padding:0 6px}
+html.fit-modo #viewFarmoDev .pf-barra label{width:100%}html.fit-modo #viewFarmoDev .pf-barra input{width:100%;box-sizing:border-box}
+html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:0}#viewFarmoDev .cont-h3{margin:4px 0!important;font-size:13px}
+@media (min-width:1101px){.fod-tab input{height:var(--fod-h,32px);padding:0 8px;font-size:12.5px}.fod-tab th{line-height:1.1}#viewFarmoDev .sub{margin:6px 0 8px!important}#viewFarmoDev .est-regra{margin-top:6px!important}}
 #atModal{z-index:86}
 .at-drop{border:2px dashed var(--border-strong);border-radius:12px;padding:26px 16px;text-align:center;background:var(--surface-2);cursor:pointer;transition:border-color .2s ease,background-color .2s ease}
 .at-drop:hover,.at-drop.sobre{border-color:var(--n-vermelho);background:color-mix(in srgb,var(--n-vermelho) 8%,var(--surface-2))}
@@ -1620,14 +1633,10 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       </section>
     </div>
     <div class="view" id="viewFarmoDev" style="display:none">
-      <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA · DEVOLUÇÃO</p><h1>Protocolo de devolução</h1></div></section>
+      <section class="banner fod-banner"><div><p class="eyebrow">FARMOTERÁPICA · DEVOLUÇÃO</p><h1>Protocolo de devolução</h1></div><label class="fod-data"><input type="date" id="fodData" aria-label="Data" title="Data"></label></section>
       <section class="card">
         <div class="pf-barra">
-          <label>Data<input type="date" id="fodData"></label>
-          <label>Status<span id="fodStatus" class="pill programado" style="align-self:flex-start;margin-top:8px">Em aberto</span></label>
-          <span style="flex:1 1 auto"></span>
-          <button type="button" class="perfil-btn sec" id="fodDesfazer">Desfazer devolução</button>
-          <button type="button" class="perfil-btn" id="fodFechar">Fechar devolução</button>
+                    <label id="fodStatusL" style="display:none">Status<span id="fodStatus" class="pill programado" style="align-self:flex-start;margin-top:8px">Em aberto</span></label>
         </div>
         <p class="sub" id="fodSub" style="margin:10px 0 14px"></p>
         <div class="fod-blocos" id="fodBlocos"></div>
@@ -6138,6 +6147,15 @@ function fopMascara(e){
   t.setAttribute('data-ok',u);
 }
 document.addEventListener('focusin',function(e){var t=e.target;if(t&&t.tagName==='INPUT'&&t.getAttribute('data-c'))t.setAttribute('data-ok',t.value)},true);
+// endereco: ao clicar, o campo se alarga sobre as colunas vizinhas para mostrar o texto inteiro (continua editavel; ao sair volta ao tamanho da celula)
+(function(){
+  var cv=document.createElement('canvas').getContext('2d');
+  function larg(t){cv.font='500 13px '+(getComputedStyle(t).fontFamily||'sans-serif');return Math.ceil(cv.measureText(String(t.value).toUpperCase()).width)+34}
+  function ajusta(t){var base=t.parentNode.clientWidth-(t.offsetLeft||0);var w=Math.min(Math.max(larg(t),base),Math.max(base,Math.min(640,window.innerWidth-t.getBoundingClientRect().left-24)));t.style.width=w+'px'}
+  document.addEventListener('focusin',function(e){var t=e.target;if(t&&t.matches&&t.matches('#fopCorpo input[data-c="end"]'))ajusta(t)});
+  document.addEventListener('input',function(e){var t=e.target;if(t&&t.matches&&t.matches('#fopCorpo input[data-c="end"]'))ajusta(t)});
+  document.addEventListener('focusout',function(e){var t=e.target;if(t&&t.matches&&t.matches('#fopCorpo input[data-c="end"]'))t.style.width=''});
+})();
 document.addEventListener('input',function(e){var t=e.target;if(t&&t.closest&&(t.closest('#fopCorpo')||t.closest('.fod-tab')))fopMascara(e)},true);
 // DELETE em bolsa, termometro e portador apaga o campo inteiro (Backspace continua apagando letra a letra)
 document.addEventListener('keydown',function(e){
@@ -7094,8 +7112,7 @@ function fmMostrar(){
 function renderFarmoDev(){
   var inp=document.getElementById('fodData'), hj=sqHoje(); if(!inp.value)inp.value=hj;
   var iso=inp.value, fech=!!FOD.fechados[iso], dia=fech?FOD.fechados[iso]:fodDia(iso);
-  var st=document.getElementById('fodStatus'); st.textContent=fech?'Dia fechado':'Em aberto'; st.className='pill '+(fech?'t-verde':'t-vermelho');
-  document.getElementById('fodFechar').disabled=fech; document.getElementById('fodDesfazer').disabled=!fech||iso!==hj;
+  var st=document.getElementById('fodStatus'); st.textContent=fech?'Dia fechado':'Em aberto'; st.className='pill '+(fech?'t-verde':'t-vermelho'); document.getElementById('fodStatusL').style.display=fech?'':'none';
   var html='';
   [['manha','MANHÃ'],['tarde','TARDE']].forEach(function(b){
     var ls=dia[b[0]], cont={};
@@ -7104,12 +7121,23 @@ function renderFarmoDev(){
       ls.map(function(l,i){return '<tr data-i="'+i+'">'+FOD_COLS.map(function(c){
         var v=l[c[0]]||'', k=String(v).toUpperCase(); if(c[0][0]==='t')k=k.replace(/^P/,'');
         var cls=(!fodValor(c[0],v)?'inv':'')+(v&&cont[k]>1?' dup':'');
-        return '<td><input data-c="'+c[0]+'" class="'+cls+'" value="'+esc(v)+'"'+(fech?' disabled':'')+(cls.indexOf('inv')>=0?' title="Código inválido"':cls.indexOf('dup')>=0?' title="Repetido neste protocolo"':'')+'></td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div></div>';
+        return '<td><input data-c="'+c[0]+'" class="'+cls+'" value="'+esc(v)+'"'+(fech?' disabled':'')+(cls.indexOf('inv')>=0?' title="Código inválido"':cls.indexOf('dup')>=0?' title="Repetido neste protocolo"':'')+'></td>'}).join('')+'</tr>'}).join('')+'</tbody><tfoot><tr>'+FOD_COLS.map(function(c){var n=0;ls.forEach(function(l){if(l[c[0]])n++});return '<td>'+n+'</td>'}).join('')+'</tr><tr><td colspan="'+FOD_COLS.length+'" class="tot-l">Total '+b[1].toLowerCase()+': '+ls.reduce(function(a,l){return a+FOD_COLS.filter(function(c){return l[c[0]]}).length},0)+' itens</td></tr></tfoot></table></div></div>';
   });
   document.getElementById('fodBlocos').innerHTML=html;
   var tot=0; ['manha','tarde'].forEach(function(b){dia[b].forEach(function(l){FOD_COLS.forEach(function(c){if(l[c[0]])tot++})})});
   document.getElementById('fodSub').textContent=iso.split('-').reverse().join('/')+' · '+tot+' item'+(tot===1?'':'ns')+' devolvido'+(tot===1?'':'s')+(fech?' · fechado em '+remDataBR(FOD.fechados[iso].em.slice(0,10))+' por '+FOD.fechados[iso].por:'');
-  document.getElementById('fodNota').textContent='Cada coluna é um tipo de item (bolsa P, M, G ou termômetro). Código repetido no mesmo protocolo fica em vermelho; inválido, em amarelo. Fechar grava o dia e trava a edição; dia fechado não é alterado, só o de hoje pode ser desfeito. A devolução baixa as pendências de bolsa e termômetro.';
+  document.getElementById('fodNota').textContent='Repetido no mesmo protocolo: vermelho; inválido: amarelo. O dia é fechado pelo sistema às 4h e a devolução baixa as pendências de bolsa e termômetro.';
+  fodAjustar(); setTimeout(fodAjustar,120); setTimeout(fodAjustar,500);
+}
+// a devolucao cabe inteira na tela, sem rolagem: a altura de cada linha e calculada pelo espaco que sobra
+function fodAjustar(){
+  var v=document.getElementById('viewFarmoDev'), bl=document.getElementById('fodBlocos'); if(!v||!bl||v.style.display==='none')return;
+  if(window.innerWidth<=1100){bl.style.removeProperty('--fod-h');return}
+  var tb=bl.querySelector('.fod-tab'); if(!tb)return;
+  var linhas=tb.querySelectorAll('tr').length, topo=bl.getBoundingClientRect().top, h3=bl.querySelector('.cont-h3'), cab=h3?h3.getBoundingClientRect().height+10:0;
+  var nota=document.getElementById('fodNota'), resto=(nota?nota.getBoundingClientRect().height:0)+20;
+  var h=Math.floor((window.innerHeight-topo-cab-resto)/linhas)-2;
+  bl.style.setProperty('--fod-h',Math.max(18,Math.min(32,h))+'px');
 }
 (function(){
   var bl=document.getElementById('fodBlocos');
@@ -7121,23 +7149,8 @@ function renderFarmoDev(){
     fopDestravar(); linhaD[cD]=vD; fopSalvar(); renderFarmoDev();
   });
   document.getElementById('fodData').addEventListener('change',renderFarmoDev);
-  document.getElementById('fodFechar').addEventListener('click',function(){
-    var iso=document.getElementById('fodData').value; if(FOD.fechados[iso])return;
-    var dia=fodDia(iso), n=0, ruim=false; ['manha','tarde'].forEach(function(b){dia[b].forEach(function(l){FOD_COLS.forEach(function(c){if(l[c[0]]){n++;if(!fodValor(c[0],l[c[0]]))ruim=true}})})});
-    if(!n){if(window.sqAviso)window.sqAviso('Nada para fechar: protocolo vazio.');return}
-    if(ruim){if(window.sqAviso)window.sqAviso('Há código inválido (em amarelo). Corrija antes de fechar.');return}
-    FOD.fechados[iso]={em:new Date().toISOString(),por:sqQuem(),manha:dia.manha.map(function(l){return Object.assign({},l)}),tarde:dia.tarde.map(function(l){return Object.assign({},l)})}; fopSalvar();
-    SQ_AUD.push({t:new Date().toISOString(),quem:sqQuem(),modo:'cadastro',dia:iso,linha:'-',loja:'Farmoterápica',campo:'devolucao',antes:'em aberto',depois:'fechado ('+n+' itens)',acao:'editar',origem:'farmoterapica devolucao'});
-    try{localStorage.setItem('tuf-sq-aud',JSON.stringify(SQ_AUD))}catch(er){}
-    renderFarmoDev();
-  });
-  document.getElementById('fodDesfazer').addEventListener('click',function(){
-    var iso=document.getElementById('fodData').value; if(!FOD.fechados[iso]||iso!==sqHoje())return;
-    var f=FOD.fechados[iso]; FOD.dias[iso]={manha:f.manha,tarde:f.tarde}; delete FOD.fechados[iso]; fopSalvar();
-    SQ_AUD.push({t:new Date().toISOString(),quem:sqQuem(),modo:'cadastro',dia:iso,linha:'-',loja:'Farmoterápica',campo:'devolucao',antes:'fechado',depois:'reaberto',acao:'desfazer',origem:'farmoterapica devolucao'});
-    try{localStorage.setItem('tuf-sq-aud',JSON.stringify(SQ_AUD))}catch(er){}
-    renderFarmoDev();
-  });
+  window.addEventListener('resize',fodAjustar);
+  try{new ResizeObserver(function(){fodAjustar()}).observe(document.documentElement)}catch(e){}
 })();
 if(location.hash.length>1)mostrarView(location.hash.slice(1));
 else document.documentElement.classList.add("v-painel"); // abrir sem #: a tela inicial e o Painel
