@@ -11,6 +11,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
 import { montarFarmoOp } from './farmoop.mjs';
+import { sincronizarFarmo } from './farmohist.mjs';
 import { ingerirDiasFechados } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
@@ -367,6 +368,11 @@ try {
     // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
     try {
       dados.farmoOp = await montarFarmoOp((aba, end) => lerAcomp(tk, aba, end, FARMO));
+      // só no Actions: histórico inteiro da Farmoterápica para o banco + cópia do dia de hoje depois das 23:30 (o site prevalece)
+      if (process.env.SUPABASE_SECRET) {
+        try { console.log(await sincronizarFarmo((aba, end) => lerAcomp(tk, aba, end, FARMO), dados.farmoOp, process.env.SUPABASE_SECRET)); }
+        catch (e) { console.log(`FALHA farmo histórico: ${String(e.message).slice(0, 200)}`); }
+      }
     } catch (e) { console.log(`FALHA farmo operacional: ${String(e.message).slice(0, 200)}`); }
     // Contratos completo (todas as lojas/vagas, não só as do mapa) + escalas alternadas (AR:AU)
     const alt = await lerAcomp(tk, 'Contratos', 'AR2:AU760', NOVA_OP);
