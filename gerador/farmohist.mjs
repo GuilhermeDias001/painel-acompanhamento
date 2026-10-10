@@ -21,7 +21,8 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
 
   // ---------- 1) histórico (aba Historico) ----------
   const col = await ler('Historico', 'A2:A25000');
-  const datas = col.map((l) => iso(l[0]));
+  const colL = await ler('Historico', 'L2:L25000'); // a devolução tem dias próprios (alguns sem linha de operação)
+  const datas = [...col.map((l) => iso(l[0])), ...colL.map((l) => iso(l[0]))];
   const todasDatas = [...new Set(datas.filter((d) => d && d >= cfg.de))].sort();
   const noBanco = new Set((await get(`farmo_dia?select=dia&dia=gte.${cfg.de}&limit=2000`)).map((x) => x.dia));
   // dias do histórico que o banco ainda não tem (entram inteiros) e dias que já tem (só completam o que está vazio, no máximo 5 por ciclo)
@@ -31,7 +32,7 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
   const existentes = todasDatas.filter((d) => noBanco.has(d) && d >= limite7);
   if (novos.length || existentes.length) {
     const A = await ler('Historico', `A2:J${col.length + 1}`);
-    const R = await ler('Historico', `L2:R${col.length + 1}`);
+    const R = await ler('Historico', `L2:R${Math.max(col.length, colL.length) + 1}`);
     const alvo = new Set([...novos, ...existentes]);
     const ops = [], devs = [], ordem = {};
     A.forEach((l) => {
