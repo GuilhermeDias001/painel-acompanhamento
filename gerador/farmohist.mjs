@@ -24,12 +24,15 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
   const colL = await ler('Historico', 'L2:L25000'); // a devolução tem dias próprios (alguns sem linha de operação)
   const datas = [...col.map((l) => iso(l[0])), ...colL.map((l) => iso(l[0]))];
   const todasDatas = [...new Set(datas.filter((d) => d && d >= cfg.de))].sort();
-  const noBanco = new Set((await get(`farmo_dia?select=dia&dia=gte.${cfg.de}&limit=2000`)).map((x) => x.dia));
+  const diasBanco = await get(`farmo_dia?select=dia,status&dia=gte.${cfg.de}&limit=2000`);
+  const noBanco = new Set(diasBanco.map((x) => x.dia));
+  // dia ABERTO (hoje, preenchido no site) nunca é revisitado por aqui: a numeração de 'linha' do Histórico não é a do site e criava linhas repetidas (10/10)
+  const abertos = new Set(diasBanco.filter((x) => x.status !== 'fechado').map((x) => x.dia));
   // dias do histórico que o banco ainda não tem (entram inteiros) e dias que já tem (só completam o que está vazio, no máximo 5 por ciclo)
   const novos = todasDatas.filter((d) => !noBanco.has(d));
   // dias já no banco: só os últimos 7 são revisitados a cada ciclo (completar o que ficou vazio); os antigos já foram resolvidos na carga
   const limite7 = new Date(Date.now() - 3 * 3600000 - 7 * 86400000).toISOString().slice(0, 10);
-  const existentes = todasDatas.filter((d) => noBanco.has(d) && d >= limite7);
+  const existentes = todasDatas.filter((d) => noBanco.has(d) && d >= limite7 && !abertos.has(d));
   if (novos.length || existentes.length) {
     const A = await ler('Historico', `A2:J${col.length + 1}`);
     const R = await ler('Historico', `L2:R${Math.max(col.length, colL.length) + 1}`);
