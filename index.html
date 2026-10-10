@@ -1219,7 +1219,7 @@ html:not(.v-painel):not(.fit-modo) .view:not(:has(>.banner:first-child)){padding
 #sqEscMenu li:hover,#sqEscMenu li:focus{background:color-mix(in srgb,var(--fg) 9%,transparent);outline:0}
 #sqEscMenu li.vazio{cursor:default;color:var(--fg-faint)}
 .sq-presenca{display:flex;align-items:center;margin-left:auto;margin-right:14px;padding-left:10px}
-.sq-av{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-left:-10px;border:2px solid var(--bg);font:700 12px var(--font-sys);color:#fff;letter-spacing:.02em;position:relative;cursor:default;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.sq-av{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;flex:none;border:2px solid var(--bg);font:700 12px var(--font-sys);color:#fff;letter-spacing:.02em;position:relative;cursor:default;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
 .sq-av.eu{box-shadow:0 0 0 2px var(--n-verde)}
 .sq-av.mais{background:var(--surface-2);color:var(--fg-muted)}
 .sq-av::after{content:"";position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:50%;background:var(--n-verde);border:2px solid var(--bg)}
@@ -2708,6 +2708,8 @@ function funcLista(){
   // pessoas com nome repetido: o banco pode identifica-las pelo codigo (funcionario_chave = 'cod:F123'), que e unico
   lista.forEach(function(q){var d=q.cod&&FUNC_DB['cod:'+String(q.cod).trim().toUpperCase()];if(d)Object.keys(d).forEach(function(c){q[c]=d[c]})});
   if(Object.keys(FUNC_EXCL).length)lista=lista.filter(function(p){return !FUNC_EXCL[funcChave(p.nome)]});
+  // quem tem data de demissao preenchida e inativo (vale por cima da situacao que veio do cadastro)
+  lista.forEach(function(q){if(String(q.demissao||'').trim()&&String(q.demissao).trim()!=='-')q.situacao='INATIVO'});
   FUNC_CACHE={chave:ck,lista:lista};
   return lista;
 }
@@ -3554,7 +3556,8 @@ function sqpCor(s){var h0=0;for(var i=0;i<s.length;i++)h0=(h0*31+s.charCodeAt(i)
 function sqpRender(){
   var el=document.getElementById('sqPresenca'); if(!el)return;
   var vistos={}, lista=[];
-  Object.keys(SQP.estado).forEach(function(k){(SQP.estado[k]||[]).forEach(function(m){var id=m.nome||k;if(!vistos[id]){vistos[id]=1;lista.push({nome:m.nome||'Alguém',eu:k===SQP.eu})}})});
+  // uma pessoa = uma chave (id do usuario): varias abas/navegadores do mesmo usuario aparecem uma vez so, com o nome mais recente
+Object.keys(SQP.estado).forEach(function(k){var ms=(SQP.estado[k]||[]).slice().sort(function(a,b){return (b.desde||0)-(a.desde||0)}), m=ms[0]; if(!m||vistos[k])return; vistos[k]=1; lista.push({nome:m.nome||'Alguém',eu:k===SQP.eu})});
   if(!lista.length&&SQP.eu!=null)lista.push({nome:SQP.nomeEu||'Você',eu:true});
   lista.sort(function(a,b){return (b.eu?1:0)-(a.eu?1:0)});
   var max=6, vis=lista.slice(0,max), resto=lista.length-vis.length;
@@ -4058,7 +4061,8 @@ function sqCelular(nome){
 // O painel manda {tufWa2:'abrir',phone,text}; o favorito clica num link wa.me DENTRO do WhatsApp, que abre a conversa por dentro, sem recarregar.
 // Depois do ok o painel chama window.open('',nome): como a aba com esse nome ja existe, o Chrome so vai para ela (nao abre nem recarrega nada).
 var WA_ORIGEM='https://web.whatsapp.com', WA_LIG={on:false,esp:{},ult:{k:'',t:0}};
-var WA_PAINEL_URL=location.protocol==='file:'?'https://guilhermedias001.github.io/painel-acompanhamento/':(location.origin+location.pathname);
+// o favorito abre o painel no endereco novo (Cloudflare) direto na Operacao de hoje (#sisoperacao)
+var WA_PAINEL_URL=(location.protocol==='file:'||/github.io$/.test(location.hostname)?'https://painel-site.pages.dev/':(location.origin+location.pathname))+'#sisoperacao';
 function waFavoritoCodigo(){
   var U=WA_PAINEL_URL, P=U.split('/').slice(0,3).join('/');
   var f=function(P,U){
@@ -4084,7 +4088,7 @@ function waFavoritoCodigo(){
     var w=window.open('','tuf-painel');
     if(!w){alert('O Chrome bloqueou a abertura do painel. Permita pop-ups para o WhatsApp Web e clique de novo.');return}
     var novo=false; try{novo=w.location.href==='about:blank'}catch(er){}
-    if(novo)w.location.href=U; else{try{w.postMessage({tufWa2:'pronto',nome:N},P)}catch(er){}}
+    if(novo)w.location.href=U; else{try{w.postMessage({tufWa2:'pronto',nome:N},P)}catch(er){} try{w.location.href=U}catch(er){}} // aba do painel ja aberta: so troca o # (sem recarregar) e vai para a Operacao de hoje
     try{w.focus()}catch(er){}
   };
   return 'javascript:'+encodeURIComponent('('+f.toString()+')('+JSON.stringify(P)+','+JSON.stringify(U)+');');
@@ -6997,11 +7001,15 @@ function geoAtualizarTelas(){
 function geoRodar(){
   if(GEO.rodando)return; var q=GEO.fila.shift(); if(!q){geoNuvemSalvar();return}
   GEO.rodando=true;
-  var url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&accept-language=pt-BR&q='+encodeURIComponent(q.q);
+  var url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&accept-language=pt-BR&viewbox=-46.90,-23.30,-46.30,-23.85&bounded='+(q.max<=40000?'1':'0')+'&q='+encodeURIComponent(q.q);
   fetch(url).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(a){
     var h=a&&a[0], lat=h&&+h.lat, lng=h&&+h.lon;
-    if(h&&lat<-22.9&&lat>-24.5&&lng<-45.8&&lng>-47.5){GEO.c[q.k]={lat:lat,lng:lng,prec:'endereco',t:Date.now()};GEO.sujo=true}
+    var o0=null; try{o0=fmOrigem()}catch(e){}
+    var perto=!o0||!h||fmHav({lat:lat,lng:lng},o0)<=(q.max||90000);
+    if(h&&perto&&lat<-22.9&&lat>-24.5&&lng<-45.8&&lng>-47.5){GEO.c[q.k]={lat:lat,lng:lng,prec:'endereco',t:Date.now()};GEO.sujo=true}
+    else if(q.alt){GEO.fila.unshift({k:q.k,q:q.alt,alt:null,rua:true,max:q.max});geoSalvarLocal();return}
     else GEO.c[q.k]={nf:1,t:Date.now()};
+    if(q.rua&&GEO.c[q.k]&&GEO.c[q.k].lat!=null)GEO.c[q.k].prec='rua';
     geoSalvarLocal(); geoAtualizarTelas();
   }).catch(function(){delete GEO.emFila[q.k]}).then(function(){GEO.rodando=false;setTimeout(geoRodar,1200)});
 }
@@ -7009,9 +7017,11 @@ function geoRodar(){
 function geoGet(l){
   var q=geoConsulta(l); if(!q)return null; var k=norm(q).trim(); geoNuvemCarregar();
   var h=GEO.c[k];
-  if(h&&h.lat!=null)return {lat:h.lat,lng:h.lng,prec:'endereco',endC:q};
+  var mx=(q===String(l.end||'').trim()?90000:40000), o1=null; try{o1=fmOrigem()}catch(e){}
+  if(h&&h.lat!=null&&o1&&fmHav({lat:h.lat,lng:h.lng},o1)>mx)h=null; // ponto antigo longe demais (rua homonima em outra cidade): consulta de novo
+  if(h&&h.lat!=null)return {lat:h.lat,lng:h.lng,prec:h.prec||'endereco',endC:q};
   if(h&&h.nf&&Date.now()-(h.t||0)<7*864e5)return null;
-  if(!GEO.emFila[k]){GEO.emFila[k]=1;GEO.fila.push({k:k,q:q});setTimeout(geoRodar,50)}
+  if(!GEO.emFila[k]){GEO.emFila[k]=1;GEO.fila.push({k:k,q:q,max:(q===String(l.end||'').trim()?90000:40000),alt:geoTemNum(l.end)?(fmRua(l.end)+(l.bairro?', '+l.bairro:'')+', São Paulo, SP'):null});setTimeout(geoRodar,50)}
   return null;
 }
 function fmRua(t){
@@ -7108,7 +7118,7 @@ function fmListar(grupos,rotas,o){
     var r=rotas[m.chave], km=r?fmKm(r.m):'…', tempo=r&&r.s?' · '+fmMin(r.s):'', aviso=r&&r.reta?' · linha reta':'';
     if(r)tot+=r.m;
     var comCoord=m.paradas.filter(function(p){return p.lat!=null}).length;
-    h+='<div class="fm-m'+(FM.sel===m.chave?' on':'')+'" data-g="'+esc(m.chave)+'" style="--cor:'+m.cor+'"><b><span>'+esc(tcase(m.nome))+(FM_TURNO_TODOS()?' <small>'+esc(tcase(m.turno))+'</small>':'')+'</span><span class="km">'+km+'</span></b><small>'+m.itens+(m.itens===1?' item · ':' itens · ')+m.paradas.length+(m.paradas.length===1?' parada':' paradas')+tempo+aviso+'</small>'+(comCoord<m.paradas.length?'<small style="color:var(--n-amarelo)">'+(m.paradas.length-comCoord)+' sem coordenada</small>':'')+'</div>';
+    h+='<div class="fm-m'+(FM.sel===m.chave?' on':'')+'" data-g="'+esc(m.chave)+'" style="--cor:'+m.cor+'"><b><span>'+esc(tcase(m.nome))+(FM_TURNO_TODOS()?' <small>'+esc(tcase(m.turno))+'</small>':'')+'</span><span class="km">'+km+'</span></b><small>'+m.itens+(m.itens===1?' item · ':' itens · ')+m.paradas.length+(m.paradas.length===1?' parada':' paradas')+tempo+aviso+'</small>'+(comCoord<m.paradas.length?'<small style="color:var(--n-amarelo)" title="'+esc(m.paradas.filter(function(x){return x.lat==null}).map(function(x){return x.end+(x.bairro?' - '+x.bairro:'')}).join(' | '))+'">'+(m.paradas.length-comCoord)+' sem coordenada</small>':'')+'</div>';
   });
   document.getElementById('fmLista').innerHTML=h||'<p class="aviso-empty">Nenhuma parada com bolsa neste turno.</p>';
   document.getElementById('fmNota').innerHTML=grupos.lista.length?'Total do turno: <b>'+fmKm(tot)+'</b> (só a ida). O km é por estrada, saindo da Farmo até a última parada, sem contar o retorno, na ordem de visita mais curta; o número em cada ponto é a ordem. Clique em um motoboy para ver só a rota dele.':'';
@@ -7231,6 +7241,7 @@ function fodAjustar(){
   window.addEventListener('resize',fodAjustar);
   try{new ResizeObserver(function(){fodAjustar()}).observe(document.documentElement)}catch(e){}
 })();
+window.addEventListener('hashchange',function(){var v=location.hash.slice(1); if(v)try{mostrarView(v)}catch(e){}});
 if(location.hash.length>1)mostrarView(location.hash.slice(1));
 else document.documentElement.classList.add("v-painel"); // abrir sem #: a tela inicial e o Painel
 
