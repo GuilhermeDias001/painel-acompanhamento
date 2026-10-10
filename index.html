@@ -6056,9 +6056,9 @@ function fopEndCompleto(l){
   var op=window.DADOS&&DADOS.farmoOp; if(!op)return '';
   if(FOP_ENDC.ref!==op){
     FOP_ENDC={ref:op,m:{}};
-    (op.operacaoHoje||[]).concat(op.enderecosPorRota||[]).forEach(function(x){var ec=x.enderecoCompleto; if(ec)FOP_ENDC.m[fopRotaChave(x.rota)+'|'+norm(String(x.endereco||x.end||'')).trim()]=ec});
+    (op.operacaoHoje||[]).concat(op.enderecosPorRota||[]).forEach(function(x){var ec=x.enderecoCompleto; if(ec){FOP_ENDC.m[fopRotaChave(x.rota)+'|'+norm(String(x.endereco||x.end||'')).trim()]=ec;FOP_ENDC.m['r|'+fopRotaChave(x.rota)+'|'+fmRua(x.endereco||x.end)]=ec}});
   }
-  return FOP_ENDC.m[fopRotaChave(l.rota)+'|'+norm(String(l.end||'')).trim()]||'';
+  return FOP_ENDC.m[fopRotaChave(l.rota)+'|'+norm(String(l.end||'')).trim()]||FOP_ENDC.m['r|'+fopRotaChave(l.rota)+'|'+fmRua(l.end)]||'';
 }
 var FOP_LAY=[];
 try{FOP_LAY=JSON.parse(localStorage.getItem('tuf-farmo-lay')||'[]')||[]}catch(e){FOP_LAY=[]}
@@ -6941,6 +6941,65 @@ function fmOrigem(){
   if(b&&b.lat!=null&&b.lng!=null)return {lat:+b.lat,lng:+b.lng,endereco:b.endereco||''};
   return null;
 }
+// ===== GEOCODIFICACAO NO PROPRIO SITE: endereco -> coordenada (Nominatim/OpenStreetMap), com cache no navegador e no banco (farmo_config.geocache) =====
+var GEO={c:{},fila:[],emFila:{},rodando:false,sujo:false,nuvem:false,tAtual:0};
+try{GEO.c=JSON.parse(localStorage.getItem('tuf-geo')||'{}')||{}}catch(e){GEO.c={}}
+function geoSalvarLocal(){try{localStorage.setItem('tuf-geo',JSON.stringify(GEO.c))}catch(e){}}
+function geoTemNum(t){return /\d/.test(String(t||''))}
+function geoConsulta(l){
+  var e=String(l.end||'').trim(); if(!e)return '';
+  var comp=!geoTemNum(e)&&fopEndCompleto(l); if(comp)return comp;
+  if(/\s-\s[A-Za-z]{2}$/.test(e)||/s[aã]o paulo|guarulhos|osasco|santo andr|barueri|taboao|diadema|caieiras|cotia/i.test(e))return e;
+  return e+(l.bairro?', '+l.bairro:'')+', São Paulo, SP';
+}
+function geoNuvemCarregar(){
+  if(GEO.nuvem||!window.qdbAtivo||!qdbAtivo())return; GEO.nuvem=true;
+  try{sbCliente().from('farmo_config').select('valor').eq('chave','geocache').maybeSingle().then(function(r){
+    var v=r&&r.data&&r.data.valor; if(!v||typeof v!=='object')return; var mudou=false;
+    Object.keys(v).forEach(function(k){if(!GEO.c[k]){GEO.c[k]=v[k];mudou=true}});
+    if(mudou){geoSalvarLocal();geoAtualizarTelas()}
+  }).catch(function(){})}catch(e){}
+}
+function geoNuvemSalvar(){
+  if(!window.qdbAtivo||!qdbAtivo()||!GEO.sujo)return; GEO.sujo=false;
+  try{var c=sbCliente(), ach={};Object.keys(GEO.c).forEach(function(k){if(GEO.c[k]&&GEO.c[k].lat!=null)ach[k]=GEO.c[k]});
+    c.from('farmo_config').select('valor').eq('chave','geocache').maybeSingle().then(function(r){
+      var atual=(r&&r.data&&r.data.valor)||{}; Object.keys(atual).forEach(function(k){if(!ach[k])ach[k]=atual[k]});
+      return c.from('farmo_config').upsert({chave:'geocache',valor:ach},{onConflict:'chave'});
+    }).catch(function(){})}catch(e){}
+}
+var GEO_T=0;
+function geoAtualizarTelas(){
+  clearTimeout(GEO_T); GEO_T=setTimeout(function(){
+    try{var v=document.getElementById('viewFarmoMapa');if(v&&v.style.display!=='none')fmAtualizar()}catch(e){}
+    try{if(document.getElementById('fopVol'))fmKmCards()}catch(e){}
+  },400);
+}
+function geoRodar(){
+  if(GEO.rodando)return; var q=GEO.fila.shift(); if(!q){geoNuvemSalvar();return}
+  GEO.rodando=true;
+  var url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&accept-language=pt-BR&q='+encodeURIComponent(q.q);
+  fetch(url).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(a){
+    var h=a&&a[0], lat=h&&+h.lat, lng=h&&+h.lon;
+    if(h&&lat<-22.9&&lat>-24.5&&lng<-45.8&&lng>-47.5){GEO.c[q.k]={lat:lat,lng:lng,prec:'endereco',t:Date.now()};GEO.sujo=true}
+    else GEO.c[q.k]={nf:1,t:Date.now()};
+    geoSalvarLocal(); geoAtualizarTelas();
+  }).catch(function(){delete GEO.emFila[q.k]}).then(function(){GEO.rodando=false;setTimeout(geoRodar,1200)});
+}
+// coordenada exata do endereco da linha (cache); se ainda nao existe, entra na fila de consulta
+function geoGet(l){
+  var q=geoConsulta(l); if(!q)return null; var k=norm(q).trim(); geoNuvemCarregar();
+  var h=GEO.c[k];
+  if(h&&h.lat!=null)return {lat:h.lat,lng:h.lng,prec:'endereco',endC:q};
+  if(h&&h.nf&&Date.now()-(h.t||0)<7*864e5)return null;
+  if(!GEO.emFila[k]){GEO.emFila[k]=1;GEO.fila.push({k:k,q:q});setTimeout(geoRodar,50)}
+  return null;
+}
+function fmRua(t){
+  var x=norm(String(t||'')).trim();
+  x=x.split(/\s*,\s*|\s+-\s+/)[0]||x;
+  return x.replace(/\s+\d+[a-z]?$/,'').trim();
+}
 function fmCoords(){
   var fm=window.DADOS&&DADOS.farmoMapa, m={}, soEnd={};
   ((fm&&fm.paradas)||[]).forEach(function(x){
@@ -6948,6 +7007,7 @@ function fmCoords(){
     var v={lat:+x.lat,lng:+x.lng,prec:x.precisao||'',endC:x.enderecoCompleto||''};
     m[fopRotaChave(x.rota)+'|'+norm(String(x.endereco||'')).trim()]=v;
     soEnd[norm(String(x.endereco||'')).trim()]=soEnd[norm(String(x.endereco||'')).trim()]||v;
+    var rr=fmRua(x.endereco); if(rr){m['r|'+fopRotaChave(x.rota)+'|'+rr]=m['r|'+fopRotaChave(x.rota)+'|'+rr]||v;soEnd['r|'+rr]=soEnd['r|'+rr]||v}
   });
   return {m:m,soEnd:soEnd,tem:Object.keys(m).length};
 }
@@ -6956,7 +7016,7 @@ function fmGrupos(turno){
   var iso=sqHoje(), dia=fopDia(iso), cl=fopCalcula(dia.linhas,iso), co=fmCoords(), g={}, sem=[], semBolsa=[];
   dia.linhas.forEach(function(l,i){
     var tu=fopTurno(l.rota); if(turno!=='TODOS'&&tu!==turno)return;
-    var ch=norm(String(l.end||'')).trim(), c=co.m[fopRotaChave(l.rota)+'|'+ch]||co.soEnd[ch];
+    var ch=norm(String(l.end||'')).trim(), c=geoGet(l)||co.m[fopRotaChave(l.rota)+'|'+ch]||co.soEnd[ch]||co.m['r|'+fopRotaChave(l.rota)+'|'+fmRua(l.end)]||co.soEnd['r|'+fmRua(l.end)];
     var itens=fopPartes(l.bolsa).length;
     if(!itens||!cl.efet[i]){if(c)semBolsa.push({end:l.end,rota:l.rota,lat:c.lat,lng:c.lng});return}
     var k=cl.efet[i]+'|'+tu; if(!g[k])g[k]={nome:cl.efet[i],turno:tu,paradas:[],itens:0,ord:i};
