@@ -925,6 +925,13 @@ html.mapa-modo main{padding-bottom:0}
 .cont-troca{cursor:pointer}.cont-troca:hover{filter:brightness(1.25)}
 .fop-titsel{width:100%;max-width:340px;height:34px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:500 13px var(--font-sys)}
 .fop-tit td{padding:5px 8px}
+.fc-cmp th.fc-g{text-align:center;border-bottom:1px solid var(--border-strong)}
+.fc-cmp{table-layout:fixed}
+.fc-cmp .fc-c{text-align:center}
+.fc-cmp .fc-ini{border-left:1px solid var(--border-strong)}
+.fc-cmp td{padding-top:5px;padding-bottom:5px}
+.fc-chip{display:inline-block;min-width:34px;max-width:100%;padding:3px 10px;border-radius:8px;border:1px solid var(--n-amarelo);background:color-mix(in srgb,var(--n-amarelo) 14%,transparent);color:var(--n-amarelo);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box}
+.fc-chip .aviso-empty{color:var(--n-amarelo);opacity:.7}
 .fop-tab td.fop-bolsa{position:relative}
 .fop-tab td.fop-bolsa input{padding-right:26px}
 .fop-dd{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:22px;height:22px;border:0;border-radius:6px;background:transparent;color:var(--fg-muted);cursor:pointer;font-size:13px;line-height:1;padding:0}
@@ -1525,6 +1532,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <section class="card">
         <div class="pf-barra">
           <label>Data<input type="date" id="fcData"></label>
+          <label>Comparar<input type="date" id="fcComp" autocomplete="off"></label>
           <label style="flex:1 1 260px">Rastrear bolsa ou termômetro<input type="text" id="fcBusca" placeholder="Ex.: A071, B006 ou P580" autocomplete="off" spellcheck="false" style="text-transform:uppercase"></label>
         </div>
         <p class="sub" id="fcSub" style="margin:10px 0 14px"></p>
@@ -6143,6 +6151,30 @@ function fcTabelaOp(ls){
   });
   return h+'</tbody></table></div>';
 }
+function fcTabelaOpCmp(a,b,da,db){
+  var br=function(i){return i.split('-').reverse().join('/')};
+  var rotas=[], idx={};
+  function pega(l,lado){var rk=fopRotaChave(l.rota), ek=norm(String(l.end||'')).trim();
+    if(!(rk in idx)){idx[rk]={nome:l.rota,linhas:[],mapa:{}};rotas.push(idx[rk])}
+    var r=idx[rk], k=ek; if(!(k in r.mapa)){r.mapa[k]={a:null,b:null,base:l};r.linhas.push(r.mapa[k])}
+    r.mapa[k][lado]=l; return r.mapa[k]}
+  (a||[]).forEach(function(l){pega(l,'a')}); (b||[]).forEach(function(l){pega(l,'b')});
+  var dif=0;
+  function cel(v,d){var t=v?esc(v):'<span class="aviso-empty">—</span>';return d?'<span class="fc-chip">'+t+'</span>':t}
+  var h='<div class="mot-cad-wrap"><table class="mot-cad cont-eq fc-cmp"><colgroup><col style="width:25%"><col style="width:6%"><col style="width:13%"><col style="width:11%"><col style="width:8%"><col style="width:8%"><col style="width:11%"><col style="width:8%"><col style="width:8%"></colgroup><thead><tr><th rowspan="2">Endereço</th><th rowspan="2">Horário</th><th rowspan="2">Bairro</th><th colspan="3" class="fc-g">'+br(da)+'</th><th colspan="3" class="fc-g fc-ini">'+br(db)+'</th></tr><tr><th class="fc-c">Portador</th><th class="fc-c">Bolsa</th><th class="fc-c">Termômetro</th><th class="fc-c fc-ini">Portador</th><th class="fc-c">Bolsa</th><th class="fc-c">Termômetro</th></tr></thead><tbody>';
+  rotas.forEach(function(r){
+    h+='<tr><td colspan="9" style="font-weight:800;text-align:center;background:var(--surface-2)">'+esc(fopRotaNome(r.nome||'Sem rota'))+'</td></tr>';
+    r.linhas.forEach(function(x){
+      var A=x.a||{}, B=x.b||{}, f=function(c){return String(A[c]||'').toUpperCase()!==String(B[c]||'').toUpperCase()};
+      var dp=f('port'), db2=f('bolsa'), dt=f('term'); if(dp||db2||dt)dif++;
+      var nota=!x.a?' <span class="pill programado">só em '+br(db)+'</span>':(!x.b?' <span class="pill programado">só em '+br(da)+'</span>':'');
+      h+='<tr><td>'+esc(tcase(x.base.end))+nota+'</td><td class="cont-hr">'+esc(x.base.hor||'')+'</td><td>'+esc(x.base.bairro||'')+'</td>'
+        +'<td class="fc-c">'+cel(A.port?tcase(A.port):'',dp)+'</td><td class="fc-c">'+cel(A.bolsa,db2)+'</td><td class="fc-c">'+cel(A.term,dt)+'</td>'
+        +'<td class="fc-c fc-ini">'+cel(B.port?tcase(B.port):'',dp)+'</td><td class="fc-c">'+cel(B.bolsa,db2)+'</td><td class="fc-c">'+cel(B.term,dt)+'</td></tr>';
+    });
+  });
+  return {html:h+'</tbody></table></div>',dif:dif};
+}
 function fcTabelaDev(d){
   var h='';
   [['manha','Manhã'],['tarde','Tarde']].forEach(function(b){
@@ -6156,12 +6188,19 @@ function renderFarmoCons(){
   var inp=document.getElementById('fcData'); if(!inp.value){var d=new Date(sqHoje()+'T12:00:00');d.setDate(d.getDate()-1);inp.value=d.toISOString().slice(0,10)}
   var iso=inp.value, ger=++FC.ger, corpo=document.getElementById('fcCorpo');
   document.getElementById('fcSub').textContent='Carregando…'; corpo.innerHTML='';
-  fcBuscarDia(iso).then(function(r){
+  var cmp=document.getElementById('fcComp').value; if(cmp===iso)cmp='';
+  Promise.all([fcBuscarDia(iso),cmp?fcBuscarDia(cmp):Promise.resolve(null)]).then(function(rs){
     if(ger!==FC.ger)return;
-    var br=iso.split('-').reverse().join('/');
-    if(!r.op&&!r.dv){document.getElementById('fcSub').textContent='Sem registro da Farmoterápica em '+br+'.';corpo.innerHTML='';return}
-    var ent=(r.op||[]).reduce(function(t,l){return t+fopPartes(l.bolsa).length},0);
-    document.getElementById('fcSub').textContent=br+' · '+((r.op||[]).length)+' paradas · '+ent+' entrega'+(ent===1?'':'s')+' · fonte: '+r.fonte;
+    var r=rs[0], r2=rs[1], br=function(i){return i.split('-').reverse().join('/')};
+    if(!r.op&&!r.dv&&!(r2&&r2.op)){document.getElementById('fcSub').textContent='Sem registro da Farmoterápica em '+br(iso)+(cmp?' nem em '+br(cmp):'')+'.';corpo.innerHTML='';return}
+    function ent(x){return ((x&&x.op)||[]).reduce(function(t,l){return t+fopPartes(l.bolsa).length},0)}
+    if(cmp){
+      var c=fcTabelaOpCmp(r.op,r2.op,iso,cmp);
+      document.getElementById('fcSub').textContent=br(iso)+': '+((r.op||[]).length)+' paradas, '+ent(r)+' entregas · '+br(cmp)+': '+((r2.op||[]).length)+' paradas, '+ent(r2)+' entregas · '+c.dif+' parada'+(c.dif===1?'':'s')+' com diferença (em destaque)';
+      corpo.innerHTML='<h3 class="cont-h3">Operação · comparação</h3>'+c.html+fcTabelaDev(r.dv).replace(/Protocolo de devolução/g,'Protocolo de devolução em '+br(iso));
+      return;
+    }
+    document.getElementById('fcSub').textContent=br(iso)+' · '+((r.op||[]).length)+' paradas · '+ent(r)+' entrega'+(ent(r)===1?'':'s')+' · fonte: '+r.fonte;
     corpo.innerHTML=(r.op?'<h3 class="cont-h3">Operação</h3>'+fcTabelaOp(r.op):'')+fcTabelaDev(r.dv);
   });
   fcRastrear();
@@ -6199,6 +6238,7 @@ function fcRastrear(){
 }
 (function(){
   var d=document.getElementById('fcData'), b=document.getElementById('fcBusca'), t=null;
+  var cp=document.getElementById('fcComp'); cp.value=''; cp.addEventListener('change',function(){renderFarmoCons()}); // a comparacao sempre comeca zerada ao recarregar
   d.addEventListener('change',function(){renderFarmoCons()});
   b.addEventListener('input',function(){clearTimeout(t);t=setTimeout(fcRastrear,350)});
 })();
