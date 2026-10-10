@@ -3560,7 +3560,7 @@ function sqpRender(){
   var el=document.getElementById('sqPresenca'); if(!el)return;
   var vistos={}, lista=[];
   // uma pessoa = uma chave (id do usuario): varias abas/navegadores do mesmo usuario aparecem uma vez so, com o nome mais recente
-Object.keys(SQP.estado).forEach(function(k){var ms=(SQP.estado[k]||[]).slice().sort(function(a,b){return (b.desde||0)-(a.desde||0)}), m=ms[0]; if(!m||vistos[k])return; vistos[k]=1; lista.push({nome:m.nome||'Alguém',eu:k===SQP.eu})});
+Object.keys(SQP.estado).forEach(function(k){var ms=(SQP.estado[k]||[]).slice().sort(function(a,b){return (b.desde||0)-(a.desde||0)}), m=ms[0]; if(!m||vistos[k])return; vistos[k]=1; lista.push({nome:(k===SQP.eu&&perfilNomeExibido())||m.nome||'Alguém',eu:k===SQP.eu})});
   if(!lista.length&&SQP.eu!=null)lista.push({nome:SQP.nomeEu||'Você',eu:true});
   lista.sort(function(a,b){return (b.eu?1:0)-(a.eu?1:0)});
   var max=6, vis=lista.slice(0,max), resto=lista.length-vis.length;
@@ -4085,8 +4085,9 @@ function waFavoritoCodigo(){
   var f=function(P,U){
     if(location.origin!=='https://web.whatsapp.com'){alert('Use este favorito com a aba do WhatsApp Web na frente.');return}
     var N='tuf-whats'; window.name=N;
-    if(!window.__tufWa2){
-      window.__tufWa2=1;
+    if(typeof window.__tufWa2!=='object'||!window.__tufWa2)window.__tufWa2={}; // um ouvinte por endereco do painel (trocar de github.io para o Cloudflare nao deixa o ouvinte antigo ocupando o lugar)
+    if(!window.__tufWa2[P]){
+      window.__tufWa2[P]=1;
       window.addEventListener('message',function(e){
         if(e.origin!==P||!e.data||!e.data.tufWa2)return;
         var d=e.data;
@@ -5119,6 +5120,7 @@ function perfilNomeExibido(){
     try{if(v)localStorage.setItem('tuf-perfil-nome',v);else localStorage.removeItem('tuf-perfil-nome')}catch(e){}
     try{if(modoCarregamento==='supabase'){var cc=sbCliente();if(cc&&cc.auth&&cc.auth.updateUser)cc.auth.updateUser({data:{nome:v}}).catch(function(){})}}catch(e){}
     var pn=document.getElementById('railNome'); if(pn)pn.textContent=perfilNomeExibido();
+    try{if(SQP.canal){SQP.nomeEu=perfilNomeExibido()||SQP.nomeEu;SQP.canal.track({nome:SQP.nomeEu,desde:Date.now()})}sqpRender()}catch(e){} // a faixa de presenca passa a mostrar o nome novo
     perfilAtualizarMarca();
     document.getElementById('perfilSub').textContent=perfilNomeExibido()||'Sem nome definido';
     fechar();
