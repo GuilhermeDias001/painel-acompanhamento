@@ -1304,6 +1304,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <a class="nav-subitem active" href="#" data-view="painel"><span class="nav-label">Visão geral</span></a>
           <a class="nav-subitem" href="#" data-view="farmoop"><span class="nav-label">Operação</span></a>
           <a class="nav-subitem" href="#" data-view="farmodev"><span class="nav-label">Devolução</span></a>
+          <a class="nav-subitem" href="#" data-view="farmocons"><span class="nav-label">Consulta</span></a>
           <a class="nav-subitem" href="#" data-view="motoristas"><span class="nav-label">Motoristas</span></a>
         </div>
       </div>
@@ -1514,6 +1515,18 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="fop-rodape"><span class="aviso-empty" id="fopHoje"></span><button type="button" class="fop-btn sec" id="fopImportar" title="Cola aqui as colunas Endereço, Horário, Bairro e Código PNET copiadas da aba Operação">Importar Endereços</button></div>
         <p class="sub" id="fopSub" style="margin:10px 0 0"></p>
         <p class="est-regra" id="fopNota" style="margin-top:6px"></p>
+      </section>
+    </div>
+    <div class="view" id="viewFarmoCons" style="display:none">
+      <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA · CONSULTA</p><h1>Consulta de dias</h1></div></section>
+      <section class="card">
+        <div class="pf-barra">
+          <label>Data<input type="date" id="fcData"></label>
+          <label style="flex:1 1 260px">Rastrear bolsa ou termômetro<input type="text" id="fcBusca" placeholder="Ex.: A071, B006 ou P580" autocomplete="off" spellcheck="false" style="text-transform:uppercase"></label>
+        </div>
+        <p class="sub" id="fcSub" style="margin:10px 0 14px"></p>
+        <div id="fcRastro"></div>
+        <div id="fcCorpo"></div>
       </section>
     </div>
     <div class="view" id="viewFarmoDev" style="display:none">
@@ -4432,7 +4445,7 @@ function renderOperacao(){
 }
 var AREAS_BREVE={frota:'Frota',ti:'T.I',rh:'Recursos Humanos'};
 function mostrarView(v){
-  var views={painel:'viewPainel',operacao:'viewOperacao',planejamento:'viewOperacao',mapa:'viewMapa',sisoperacao:'viewSisOp',sisconsulta:'viewSisCons',sisplanejamento:'viewSisOp',contratos:'viewContratos',motoristas:'viewFuncionarios',funcionarios:'viewFuncionarios',remanejamento:'viewRemanejamento',pontofaltas:'viewPontoFaltas',atestados:'viewPfMotivo',sumidos:'viewPfMotivo',farmoop:'viewFarmoOp',farmodev:'viewFarmoDev'};
+  var views={painel:'viewPainel',operacao:'viewOperacao',planejamento:'viewOperacao',mapa:'viewMapa',sisoperacao:'viewSisOp',sisconsulta:'viewSisCons',sisplanejamento:'viewSisOp',contratos:'viewContratos',motoristas:'viewFuncionarios',funcionarios:'viewFuncionarios',remanejamento:'viewRemanejamento',pontofaltas:'viewPontoFaltas',atestados:'viewPfMotivo',sumidos:'viewPfMotivo',farmoop:'viewFarmoOp',farmodev:'viewFarmoDev',farmocons:'viewFarmoCons'};
   var breve=!!AREAS_BREVE[v];
   if(!views[v]&&!breve)v='painel';
   Object.keys(views).forEach(function(k){document.getElementById(views[k]).style.display='none'});
@@ -4458,7 +4471,8 @@ function mostrarView(v){
   Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-view]'),function(a){
     a.classList.toggle('active',a.getAttribute('data-view')===v);
   });
-  document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas'||v==='farmoop'||v==='farmodev');
+  document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas'||v==='farmoop'||v==='farmodev'||v==='farmocons');
+  if(v==='farmocons')renderFarmoCons();
   if(v==='farmoop')renderFarmoOp();
   if(v==='farmodev')renderFarmoDev();
   document.getElementById('navFunc').classList.toggle('active',v==='funcionarios'||v==='remanejamento');
@@ -6100,6 +6114,91 @@ function fodDia(iso){
   return FOD.dias[iso]={manha:bloco(),tarde:bloco()};
 }
 function fodValor(c,v){v=String(v||'').trim().toUpperCase();if(!v)return true;return c==='t1'||c==='t2'?/^P\d{2,4}$/.test(v):(/^ISOPOR\.[ABC]$/.test(v)||/^[BC]\d{3}$/.test(v)||/^A\d{3}(-\d{4})?$/.test(v))}
+// ===== FARMOTERAPICA · CONSULTA: operacao e devolucao de qualquer dia (somente leitura) + rastreio de bolsa/termometro =====
+var FC={ger:0};
+function fcLocalOp(iso){var f=FOP.fechados[iso];if(f&&f.linhas)return f.linhas;var d=FOP.dias[iso];return d&&d.linhas&&d.linhas.length?d.linhas:null}
+function fcLocalDev(iso){var f=FOD.fechados[iso];if(f)return f.manha||f.tarde?f:(f.dia||null);var d=FOD.dias[iso];return d||null}
+// banco (quando logado): operacao e devolucao do dia
+function fcBuscarDia(iso){
+  var local={op:fcLocalOp(iso),dv:fcLocalDev(iso),fonte:'neste navegador'};
+  if(!fsAtivo())return Promise.resolve(local);
+  var c=sbCliente();
+  return Promise.all([c.from('farmo_operacao_linha').select('*').eq('dia',iso).order('linha'),c.from('farmo_devolucao_linha').select('*').eq('dia',iso)]).then(function(r){
+    if(r[0].error||r[1].error)return local;
+    var op=(r[0].data||[]).map(function(x){return {rota:x.rota,end:x.endereco,hor:x.horario,bairro:x.bairro,pnet:x.codigo_pnet,port:x.portador,bolsa:x.bolsa,term:x.termometro}});
+    var dv=null; if(r[1].data&&r[1].data.length){dv={manha:[],tarde:[]};r[1].data.forEach(function(x){if(dv[x.turno])dv[x.turno][x.ordem]={p:x.bolsa_p,m:x.bolsa_m,g:x.bolsa_g,t1:x.termometro1,t2:x.termometro2}})}
+    if(!op.length&&!dv)return local;
+    return {op:op.length?op:local.op,dv:dv||local.dv,fonte:'banco'};
+  }).catch(function(){return local});
+}
+function fcTabelaOp(ls){
+  var rotas=[], idx={}; ls.forEach(function(l){var k=fopRotaChave(l.rota);if(!(k in idx)){idx[k]=rotas.length;rotas.push({nome:l.rota,ls:[]})}rotas[idx[k]].ls.push(l)});
+  var h='<div class="mot-cad-wrap"><table class="mot-cad cont-eq"><thead><tr><th>Endereço</th><th>Horário</th><th>Bairro</th><th>Portador</th><th>Bolsa</th><th>Termômetro</th></tr></thead><tbody>';
+  rotas.forEach(function(r){
+    h+='<tr><td colspan="6" style="font-weight:800;text-align:center;background:var(--surface-2)">'+esc(fopRotaNome(r.nome||'Sem rota'))+'</td></tr>';
+    r.ls.forEach(function(l){h+='<tr><td>'+esc(tcase(l.end))+'</td><td class="cont-hr">'+esc(l.hor||'')+'</td><td>'+esc(l.bairro||'')+'</td><td>'+(l.port?esc(tcase(l.port)):'<span class="aviso-empty">—</span>')+'</td><td>'+(l.bolsa?esc(l.bolsa):'<span class="aviso-empty">—</span>')+'</td><td>'+(l.term?esc(l.term):'<span class="aviso-empty">—</span>')+'</td></tr>'});
+  });
+  return h+'</tbody></table></div>';
+}
+function fcTabelaDev(d){
+  var h='';
+  [['manha','Manhã'],['tarde','Tarde']].forEach(function(b){
+    var ls=((d&&d[b[0]])||[]).filter(function(l){return l&&(l.p||l.m||l.g||l.t1||l.t2)});
+    h+='<h3 class="cont-h3">Protocolo de devolução · '+b[1]+'</h3>';
+    h+=ls.length?'<div class="mot-cad-wrap"><table class="mot-cad cont-eq"><thead><tr><th>Bolsa P</th><th>Bolsa M</th><th>Bolsa G</th><th>Term.</th><th>Term.</th></tr></thead><tbody>'+ls.map(function(l){return '<tr><td>'+esc(l.p||'')+'</td><td>'+esc(l.m||'')+'</td><td>'+esc(l.g||'')+'</td><td>'+esc(l.t1||'')+'</td><td>'+esc(l.t2||'')+'</td></tr>'}).join('')+'</tbody></table></div>':'<p class="aviso-empty">Sem devoluções lançadas.</p>';
+  });
+  return h;
+}
+function renderFarmoCons(){
+  var inp=document.getElementById('fcData'); if(!inp.value){var d=new Date(sqHoje()+'T12:00:00');d.setDate(d.getDate()-1);inp.value=d.toISOString().slice(0,10)}
+  var iso=inp.value, ger=++FC.ger, corpo=document.getElementById('fcCorpo');
+  document.getElementById('fcSub').textContent='Carregando…'; corpo.innerHTML='';
+  fcBuscarDia(iso).then(function(r){
+    if(ger!==FC.ger)return;
+    var br=iso.split('-').reverse().join('/');
+    if(!r.op&&!r.dv){document.getElementById('fcSub').textContent='Sem registro da Farmoterápica em '+br+'.';corpo.innerHTML='';return}
+    var ent=(r.op||[]).reduce(function(t,l){return t+fopPartes(l.bolsa).length},0);
+    document.getElementById('fcSub').textContent=br+' · '+((r.op||[]).length)+' paradas · '+ent+' entrega'+(ent===1?'':'s')+' · fonte: '+r.fonte;
+    corpo.innerHTML=(r.op?'<h3 class="cont-h3">Operação</h3>'+fcTabelaOp(r.op):'')+fcTabelaDev(r.dv);
+  });
+  fcRastrear();
+}
+// rastreio: onde uma bolsa/termometro passou (portador e endereco), no banco quando logado ou nos dias deste navegador
+function fcRastrear(){
+  var q=String(document.getElementById('fcBusca').value||'').trim().toUpperCase(), box=document.getElementById('fcRastro'), ger=(FC.ger2=(FC.ger2||0)+1);
+  if(q.length<2){box.innerHTML='';return}
+  function mostra(ls){
+    if(ger!==FC.ger2)return;
+    if(!ls.length){box.innerHTML='<p class="aviso-empty">Nenhum registro de "'+esc(q)+'".</p>';return}
+    ls.sort(function(a,b){return a.dia<b.dia?1:-1});
+    box.innerHTML='<h3 class="cont-h3">Rastreio de '+esc(q)+' <span class="cont-conta">'+ls.length+' registro'+(ls.length===1?'':'s')+'</span></h3><div class="mot-cad-wrap"><table class="mot-cad cont-eq"><thead><tr><th>Data</th><th>Onde</th><th>Endereço</th><th>Portador</th><th>Bolsa / termômetro</th></tr></thead><tbody>'+ls.slice(0,200).map(function(x){return '<tr><td>'+esc(x.dia.split('-').reverse().join('/'))+'</td><td>'+esc(x.onde)+'</td><td>'+esc(x.end?tcase(x.end):'—')+'</td><td>'+(x.port?esc(tcase(x.port)):'—')+'</td><td>'+esc(x.cod)+'</td></tr>'}).join('')+'</tbody></table></div>';
+  }
+  var achou=[];
+  function local(){
+    var dias={}; Object.keys(FOP.dias).forEach(function(d){dias[d]=1});Object.keys(FOP.fechados).forEach(function(d){dias[d]=1});
+    Object.keys(dias).forEach(function(d){var ls=fcLocalOp(d)||[];ls.forEach(function(l){if((l.bolsa||'').toUpperCase().indexOf(q)>=0||(l.term||'').toUpperCase().indexOf(q)>=0)achou.push({dia:d,onde:fopRotaNome(l.rota||'Operação'),end:l.end,port:l.port,cod:[l.bolsa,l.term].filter(Boolean).join(' · ')})})});
+    var dd={}; Object.keys(FOD.dias).forEach(function(d){dd[d]=1});Object.keys(FOD.fechados).forEach(function(d){dd[d]=1});
+    Object.keys(dd).forEach(function(d){var v=fcLocalDev(d);if(!v)return;['manha','tarde'].forEach(function(t){(v[t]||[]).forEach(function(l){var cods=[l.p,l.m,l.g,l.t1,l.t2].filter(Boolean);if(cods.some(function(c){return String(c).toUpperCase().indexOf(q)>=0}))achou.push({dia:d,onde:'Devolução '+(t==='manha'?'manhã':'tarde'),end:'',port:'',cod:cods.join(' · ')})})})});
+  }
+  local();
+  if(!fsAtivo()){mostra(achou);return}
+  var c=sbCliente(), pat='%'+q.replace(/[,()%]/g,'')+'%';
+  Promise.all([
+    c.from('farmo_operacao_linha').select('dia,rota,endereco,portador,bolsa,termometro').or('bolsa.ilike.'+pat+',termometro.ilike.'+pat).order('dia',{ascending:false}).limit(150),
+    c.from('farmo_devolucao_linha').select('dia,turno,bolsa_p,bolsa_m,bolsa_g,termometro1,termometro2').or('bolsa_p.ilike.'+pat+',bolsa_m.ilike.'+pat+',bolsa_g.ilike.'+pat+',termometro1.ilike.'+pat+',termometro2.ilike.'+pat).order('dia',{ascending:false}).limit(100)
+  ]).then(function(r){
+    var db=[], vistos={};
+    (r[0].data||[]).forEach(function(x){db.push({dia:x.dia,onde:fopRotaNome(x.rota||'Operação'),end:x.endereco,port:x.portador,cod:[x.bolsa,x.termometro].filter(Boolean).join(' · ')})});
+    (r[1].data||[]).forEach(function(x){db.push({dia:x.dia,onde:'Devolução '+(x.turno==='manha'?'manhã':'tarde'),end:'',port:'',cod:[x.bolsa_p,x.bolsa_m,x.bolsa_g,x.termometro1,x.termometro2].filter(Boolean).join(' · ')})});
+    var todos=db.concat(achou).filter(function(x){var k=x.dia+'|'+x.onde+'|'+x.end+'|'+x.cod;if(vistos[k])return false;vistos[k]=1;return true});
+    mostra(todos);
+  }).catch(function(){mostra(achou)});
+}
+(function(){
+  var d=document.getElementById('fcData'), b=document.getElementById('fcBusca'), t=null;
+  d.addEventListener('change',function(){renderFarmoCons()});
+  b.addEventListener('input',function(){clearTimeout(t);t=setTimeout(fcRastrear,350)});
+})();
 function renderFarmoDev(){
   var inp=document.getElementById('fodData'), hj=sqHoje(); if(!inp.value)inp.value=hj;
   var iso=inp.value, fech=!!FOD.fechados[iso], dia=fech?FOD.fechados[iso]:fodDia(iso);
