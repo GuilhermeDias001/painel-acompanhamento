@@ -3,6 +3,7 @@
 //  2) DIA DE HOJE: os lançamentos do Excel só são copiados depois das 23:30 (SP) e SÓ onde o site não preencheu; o que foi preenchido no site prevalece.
 // Liga com painel.area='ingestao_farmo' = {de:'AAAA-MM-DD'}. Roda só no Actions (precisa da chave secreta do Supabase). Nunca lê Pix/CPF (a aba Motorista não é tocada).
 import { SUPABASE_URL } from './supabase.mjs';
+import { tokensRua, sim } from './farmomapa.mjs';
 
 const txt = (v) => (v == null ? '' : String(v)).trim();
 const iso = (s) => (typeof s === 'number' && s > 30000 ? new Date((s - 25569) * 86400000).toISOString().slice(0, 10) : '');
@@ -93,11 +94,20 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
     const dia = hojeSP;
     await send('farmo_dia?on_conflict=dia', 'POST', [{ dia, status: 'aberto' }], ',resolution=ignore-duplicates');
     const atuais = await get(`farmo_operacao_linha?select=id,linha,rota,endereco,horario,bairro,codigo_pnet,sugestao,portador,bolsa,termometro&dia=eq.${dia}&limit=1000`);
-    const porLinha = new Map(atuais.map((x) => [x.linha, x]));
+    // a numeração de 'linha' do Excel não é a do site: casa por rota + rua (cada linha do banco é usada uma única vez)
+    const usadas = new Set(); let proxima = Math.max(-1, ...atuais.map((a) => a.linha)) + 1;
+    const nr = (s) => txt(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ');
+    const casar = (x) => {
+      const t = tokensRua(x.endereco || '');
+      const c = atuais.filter((a) => !usadas.has(a.id) && nr(a.rota) === nr(x.rota) && sim(tokensRua(a.endereco || ''), t) >= 0.8);
+      const b = c.find((a) => a.linha === x.linha) || c[0];
+      if (b) usadas.add(b.id);
+      return b;
+    };
     const novas = [], completar = [];
     for (const x of farmoOp.operacaoHoje) {
-      const b = porLinha.get(x.linha);
-      if (!b) { novas.push({ dia, linha: x.linha, rota: x.rota, endereco: x.endereco, horario: x.horario, bairro: x.bairro, codigo_pnet: x.codigoPnet, sugestao: x.sugestao, portador: x.portador, bolsa: x.bolsa, termometro: x.termometro }); continue; }
+      const b = casar(x);
+      if (!b) { novas.push({ dia, linha: proxima++, rota: x.rota, endereco: x.endereco, horario: x.horario, bairro: x.bairro, codigo_pnet: x.codigoPnet, sugestao: x.sugestao, portador: x.portador, bolsa: x.bolsa, termometro: x.termometro }); continue; }
       // site prevalece: só campo vazio no banco recebe o valor do Excel
       const p = {};
       for (const [campo, v] of [['portador', x.portador], ['bolsa', x.bolsa], ['termometro', x.termometro], ['sugestao', x.sugestao]]) if (!txt(b[campo]) && txt(v)) p[campo] = v;

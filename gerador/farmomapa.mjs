@@ -31,6 +31,7 @@ function carregarCompletos() {
   } catch { COMPLETOS = []; }
   return COMPLETOS;
 }
+export { tokensRua, sim };
 export function acharCompleto(endereco, cod) {
   const t = tokensRua(endereco); let melhor = null, ms = 0;
   for (const c of carregarCompletos()) { if (cod && c.cod && sem(cod) !== sem(c.cod)) continue; const v = sim(t, c.tokens); if (v > ms) { ms = v; melhor = c; } }
