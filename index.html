@@ -6818,12 +6818,12 @@ function fmGrupos(turno){
   lista.forEach(function(m,i){m.cor=FM_CORES[i%FM_CORES.length]});
   return {lista:lista,sem:sem,semBolsa:semBolsa,coordenadas:co.tem};
 }
-// rota por estrada: OSRM /trip escolhe a melhor ORDEM das paradas saindo e voltando a Farmo, e devolve trajeto, km e tempo
+// rota por estrada: OSRM /trip escolhe a melhor ORDEM das paradas saindo da Farmo e terminando na ultima (so a IDA, sem retorno), e devolve trajeto, km e tempo
 function fmRotear(m,o){
   var pts=m.paradas.filter(function(p){return p.lat!=null}); if(!pts.length)return Promise.resolve(null);
-  var coords=[o].concat(pts), chave=coords.map(function(c){return c.lng.toFixed(5)+','+c.lat.toFixed(5)}).join(';'), ca=fmCache();
+  var coords=[o].concat(pts), pos=coords.map(function(c){return c.lng.toFixed(5)+','+c.lat.toFixed(5)}).join(';'), chave='ida|'+pos, ca=fmCache();
   if(ca[chave])return Promise.resolve(Object.assign({chave:chave,pts:pts},ca[chave]));
-  var url='https://router.project-osrm.org/trip/v1/driving/'+chave+'?roundtrip=true&source=first&geometries=geojson&overview=simplified';
+  var url='https://router.project-osrm.org/trip/v1/driving/'+pos+'?roundtrip=false&source=first&destination=any&geometries=geojson&overview=simplified';
   return fetch(url).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(j){
     if(j.code!=='Ok'||!j.trips||!j.trips[0])throw new Error(j.code||'sem rota');
     var t=j.trips[0], ordem=j.waypoints.map(function(w,i){return {i:i,pos:w.waypoint_index}}).filter(function(x){return x.i>0}).sort(function(a,b){return a.pos-b.pos}).map(function(x){return x.i-1});
@@ -6832,8 +6832,8 @@ function fmRotear(m,o){
     return Object.assign({chave:chave,pts:pts},res);
   }).catch(function(){
     // sem o servico de rotas: linha reta (ida e volta) so para nao deixar a tela vazia
-    var d=0,ant=o; pts.forEach(function(p){d+=fmHav(ant,p);ant=p}); d+=fmHav(ant,o);
-    return {chave:chave,pts:pts,m:Math.round(d),s:null,geo:[[o.lng,o.lat]].concat(pts.map(function(p){return [p.lng,p.lat]})).concat([[o.lng,o.lat]]),ordem:pts.map(function(p,i){return i}),reta:true};
+    var d=0,ant=o; pts.forEach(function(p){d+=fmHav(ant,p);ant=p});
+    return {chave:chave,pts:pts,m:Math.round(d),s:null,geo:[[o.lng,o.lat]].concat(pts.map(function(p){return [p.lng,p.lat]})),ordem:pts.map(function(p,i){return i}),reta:true};
   });
 }
 function fmLimpar(){FM.marcas.forEach(function(m){m.remove()});FM.marcas=[];if(FM.orig){FM.orig.remove();FM.orig=null}}
@@ -6882,7 +6882,7 @@ function fmListar(grupos,rotas,o){
     h+='<div class="fm-m'+(FM.sel===m.chave?' on':'')+'" data-g="'+esc(m.chave)+'" style="--cor:'+m.cor+'"><b><span>'+esc(tcase(m.nome))+(FM_TURNO_TODOS()?' <small>'+esc(tcase(m.turno))+'</small>':'')+'</span><span class="km">'+km+'</span></b><small>'+m.itens+(m.itens===1?' item · ':' itens · ')+m.paradas.length+(m.paradas.length===1?' parada':' paradas')+tempo+aviso+'</small>'+(comCoord<m.paradas.length?'<small style="color:var(--n-amarelo)">'+(m.paradas.length-comCoord)+' sem coordenada</small>':'')+'</div>';
   });
   document.getElementById('fmLista').innerHTML=h||'<p class="aviso-empty">Nenhuma parada com bolsa neste turno.</p>';
-  document.getElementById('fmNota').innerHTML=grupos.lista.length?'Total do turno: <b>'+fmKm(tot)+'</b> (ida e volta). O km é por estrada, saindo e voltando à Farmo, na ordem de visita mais curta; o número em cada ponto é a ordem. Clique em um motoboy para ver só a rota dele.':'';
+  document.getElementById('fmNota').innerHTML=grupos.lista.length?'Total do turno: <b>'+fmKm(tot)+'</b> (só a ida). O km é por estrada, saindo da Farmo até a última parada, sem contar o retorno, na ordem de visita mais curta; o número em cada ponto é a ordem. Clique em um motoboy para ver só a rota dele.':'';
 }
 function FM_TURNO_TODOS(){return document.getElementById('fmTurno').value==='TODOS'}
 function fmAtualizar(){
