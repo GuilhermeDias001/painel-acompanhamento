@@ -332,10 +332,16 @@ try {
     // Nunca R (endereço), Y (contato) e Z (telefone) entram aqui.
     const ac = await lerAcomp(tk, 'Contratos', 'A2:X760', NOVA_OP);
     const cad = await lerAcomp(tk, 'Cadastro Colaboradores', 'B3:D1500', NOVA_OP);
-    // cadastro de colaboradores: A:D e F:L — a coluna E (telefone) e G (chave Pix) nunca são lidas
+    // cadastro de colaboradores: A:D, E (telefone: autorizado pelo Guilherme em 10/10, só para a área logada) e F:L — a coluna G (chave Pix) NUNCA é lida
     const cadAD = await lerAcomp(tk, 'Cadastro Colaboradores', 'A3:D1500', NOVA_OP);
+    const cadE = await lerAcomp(tk, 'Cadastro Colaboradores', 'E3:E1500', NOVA_OP);
     const cadFL = await lerAcomp(tk, 'Cadastro Colaboradores', 'F3:L1500', NOVA_OP);
-    dados.colaboradores = montarColaboradores(cadAD.map((l, i) => [l[0], l[1], l[2], l[3], '', ...(cadFL[i] || [])]));
+    dados.colaboradores = montarColaboradores(cadAD.map((l, i) => [l[0], l[1], l[2], l[3], (cadE[i] || [])[0] ?? '', ...(cadFL[i] || [])]));
+    // o celular também vai para a ficha do RH, casando pelo nome (sem acento, caixa e espaços duplicados)
+    const chaveNome = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+    const fone = new Map(dados.colaboradores.filter((c) => c.celularProprio).map((c) => [chaveNome(c.nome), c.celularProprio]));
+    for (const p of dados.cadastroRH || []) { const f = fone.get(chaveNome(p.nome)); if (f) p.celularProprio = f; }
+    console.log(`celulares: ${fone.size} colaboradores com telefone, ${(dados.cadastroRH || []).filter((p) => p.celularProprio).length} fichas do RH preenchidas`);
     vincularEquipes({ mapa: dados.mapa, vagas: ac, cadastro: cad, rh: dados.cadastroRH || [] });
     // Quadro do dia real (hoje e amanhã, da aba dd-mm-aaaa) + histórico de 60 dias p/ a sugestão por lâmpada.
     // Nunca lê Valor nem Chave Pix (ver quadro.mjs).
@@ -382,8 +388,13 @@ try {
 if (existsSync(join(AQUI, 'fixos.json'))) dados.fixos = JSON.parse(readFileSync(join(AQUI, 'fixos.json'), 'utf8'));
 
 const json = JSON.stringify(dados);
+// dados.json (completo) só é lido pelo Actions para gravar nas áreas LOGADAS do Supabase. Os arquivos que podem ir parar num lugar público
+// (dados.js local e dados.enc.json do modo senha) saem SEM os dados pessoais da ficha (Guilherme, 10/10: só na área logada, nunca no arquivo público).
+const PESSOAIS = ['celularProprio', 'celularEmergencia', 'cpf', 'email', 'parentesco', 'endereco', 'bairro', 'cep', 'placa', 'cnh'];
+const semPessoais = (lista) => (Array.isArray(lista) ? lista.map((x) => { const o = { ...x }; for (const k of PESSOAIS) delete o[k]; return o; }) : lista);
+const jsonPublico = JSON.stringify({ ...dados, colaboradores: semPessoais(dados.colaboradores), cadastroRH: semPessoais(dados.cadastroRH), cadastroMotoristas: semPessoais(dados.cadastroMotoristas) });
 writeFileSync(join(AQUI, 'dados.json'), json);
-writeFileSync(join(AQUI, 'dados.js'), 'window.DADOS = ' + json + ';\n');
+writeFileSync(join(AQUI, 'dados.js'), 'window.DADOS = ' + jsonPublico + ';\n');
 
 // versão criptografada para publicar: só existe se houver senha.txt na pasta
 const SENHA = join(AQUI, 'senha.txt');
@@ -399,7 +410,7 @@ if (existsSync(SENHA)) {
   const chaveAes = pbkdf2Sync(senha, Buffer.from(sal.salt, 'base64'), ITER, 32, 'sha256');
   const iv = randomBytes(12);
   const c = createCipheriv('aes-256-gcm', chaveAes, iv);
-  const ct = Buffer.concat([c.update(json, 'utf8'), c.final(), c.getAuthTag()]); // texto cifrado + etiqueta, como o WebCrypto espera
+  const ct = Buffer.concat([c.update(jsonPublico, 'utf8'), c.final(), c.getAuthTag()]); // texto cifrado + etiqueta, como o WebCrypto espera
   mkdirSync(join(AQUI, 'publicar'), { recursive: true });
   writeFileSync(join(AQUI, 'publicar', 'dados.enc.json'), JSON.stringify({
     v: 1, kdf: 'PBKDF2-SHA256', iter: ITER, salt: sal.salt, iv: iv.toString('base64'), ct: ct.toString('base64'),
