@@ -87,9 +87,11 @@ export async function montarHistorico(ler, nomesAbas, hojeIso, cache, dias = 60,
   const alvo = nomesAbas.map((n) => [n, dataDaAba(n)]).filter(([, d]) => d && d < hojeIso).sort((a, b) => b[1].localeCompare(a[1])).slice(0, dias);
   let lidos = 0;
   for (const [nome, data] of alvo) {
-    if (cache[data] || lidos >= limite) continue; // `limite`: no máximo N abas novas por execução
-    const l = await lerDia(ler, nome);
-    cache[data] = (l || []).filter((x) => x.colab && x.loja).map(({ loja, colab, entrada, saida, status }) => ({ data, loja, colab, entrada, saida, status })); // sem valor
+    // cache velho (sem motivo/faltante, que a tela Ponto e Faltas precisa) é relido; `limite`: no máximo N abas por execução
+    if ((cache[data] && cache[data].every((x) => 'faltante' in x)) || lidos >= limite) continue;
+    const l = await lerDiaCompleto(ler, nome, nomesAbas); // domingos juntam a aba "DOMINGO dd-mm-aaaa"
+    // linha com colaborador OU com faltante (vaga em aberto de quem faltou também é falta); sem valor/Pix
+    cache[data] = (l || []).filter((x) => x.loja && (x.colab || x.faltante)).map(({ loja, colab, entrada, saida, status, motivo, faltante }) => ({ data, loja, colab, entrada, saida, status, motivo, faltante }));
     lidos++;
   }
   const manter = new Set(alvo.map(([, d]) => d));

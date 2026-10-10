@@ -355,7 +355,7 @@ try {
       const abas = abasNO;
       const cacheHQ = join(AQUI, 'historico-quadro.json');
       const cache = existsSync(cacheHQ) ? JSON.parse(readFileSync(cacheHQ, 'utf8')) : {};
-      const hq = await montarHistorico(lerNO, abas, dataDaAba(hojeNome), cache);
+      const hq = await montarHistorico(lerNO, abas, dataDaAba(hojeNome), cache, 60, 25);
       writeFileSync(cacheHQ, JSON.stringify(cache));
       dados.historicoQuadro = { linhas: hq.linhas, dias: hq.dias };
       if (hq.pendentes) console.log(`historicoQuadro: faltam ${hq.pendentes} dias (entram nas próximas execuções)`);
