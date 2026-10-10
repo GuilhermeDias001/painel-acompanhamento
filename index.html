@@ -6981,12 +6981,18 @@ function geoNuvemSalvar(){
       return c.from('farmo_config').upsert({chave:'geocache',valor:ach},{onConflict:'chave'});
     }).catch(function(){})}catch(e){}
 }
-var GEO_T=0;
+var GEO_T=0, GEO_U=0;
+// redesenha o mapa/km so quando a fila de consultas acaba (ou, se a fila for longa, no maximo a cada 25 s), para as rotas nao ficarem recalculando a cada resposta
 function geoAtualizarTelas(){
-  clearTimeout(GEO_T); GEO_T=setTimeout(function(){
+  clearTimeout(GEO_T);
+  var ocupado=GEO.fila.length>0||GEO.rodando, espera=ocupado?Math.max(1500,25000-(Date.now()-GEO_U)):1500;
+  GEO_T=setTimeout(function(){
+    if((GEO.fila.length>0||GEO.rodando)&&Date.now()-GEO_U<25000){geoAtualizarTelas();return}
+    GEO_U=Date.now();
     try{var v=document.getElementById('viewFarmoMapa');if(v&&v.style.display!=='none')fmAtualizar()}catch(e){}
     try{if(document.getElementById('fopVol'))fmKmCards()}catch(e){}
-  },400);
+    if(GEO.fila.length>0)geoAtualizarTelas();
+  },espera);
 }
 function geoRodar(){
   if(GEO.rodando)return; var q=GEO.fila.shift(); if(!q){geoNuvemSalvar();return}
