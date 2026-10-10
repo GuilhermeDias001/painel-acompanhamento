@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { operacao as calcOperacao, planejamento as calcPlanejamento } from './operacao.mjs';
 import { montarFarmoOp } from './farmoop.mjs';
 import { sincronizarFarmo } from './farmohist.mjs';
+import { importarLegado } from './legado.mjs';
 import { ingerirDiasFechados } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
@@ -390,6 +391,11 @@ try {
     // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
     try {
       dados.farmoOp = await montarFarmoOp((aba, end) => lerAcomp(tk, aba, end, FARMO));
+      // cópia fiel das abas legadas (sem Pix/PIN/banco): roda uma vez por aba, só no Actions ou em teste local com TUF_LEGADO_SECO=1
+      if (process.env.SUPABASE_SECRET || process.env.TUF_LEGADO_SECO) {
+        try { console.log(await importarLegado((arq) => (aba, end) => lerAcomp(tk, aba, end, { nova: NOVA_OP, farmo: FARMO, acomp: ACOMP }[arq]), process.env.SUPABASE_SECRET || 'DRY')); }
+        catch (e) { console.log(`FALHA legado: ${String(e.message).slice(0, 200)}`); }
+      }
       // só no Actions: histórico inteiro da Farmoterápica para o banco + cópia do dia de hoje depois das 23:30 (o site prevalece)
       if (process.env.SUPABASE_SECRET) {
         try { console.log(await sincronizarFarmo((aba, end) => lerAcomp(tk, aba, end, FARMO), dados.farmoOp, process.env.SUPABASE_SECRET)); }
