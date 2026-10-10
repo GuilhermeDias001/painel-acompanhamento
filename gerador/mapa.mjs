@@ -89,6 +89,9 @@ export async function geocodificar(endereco) {
   return null;
 }
 
+// Base da TUF = mesmo local da Farmoterápica (Guilherme, 10/10). Quem tiver este endereço usa estas coordenadas exatas.
+const BASE_TUF = { nome: 'TUF LOGISTICA', endereco: 'Rua Marcelo Müller, 434 - São Lucas, São Paulo - SP, 03222-020', lat: -23.5890937, lng: -46.5604703, regiao: 'Leste' };
+
 // contratos: linhas [B, R, T, U] (nome, endereço, bairro, região) da aba Contratos
 export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   const cache = existsSync(cacheArq) ? JSON.parse(readFileSync(cacheArq, 'utf8')) : {};
@@ -100,7 +103,7 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
     if (!nome || !endereco || lojas.has(nome) || ehGrupo(nome)) continue;
     const tipo = tipoDe(nome);
     if (!tipo || tipo === 'outro') continue; // 'outro' (banco de sangue, grafica...) nao vai no mapa
-    lojas.set(nome, { nome, tipo, endereco, bairro: txt(t), regiao: txt(u) });
+    lojas.set(nome, { nome, tipo, endereco, bairro: (ex?.corrigeEndereco && ex.bairro) || txt(t), regiao: (ex?.corrigeEndereco && ex.regiao) || txt(u) });
   }
   // Status (Guilherme, 04/10): 'cadastrada' = sem vaga hoje na DIA ATUAL; 'fechada' = tem vaga e
   // todas resolvidas (CONFIRMADO, FOLGA, CONFIRMADO RETORNO); 'aberta' = alguma vaga em aberto ou
@@ -119,6 +122,7 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   const saida = [];
   for (const l of lojas.values()) {
     const ck = 'v3|' + l.endereco; // v3: Nominatim rua+número na Grande SP (04/10)
+    if (l.endereco === BASE_TUF.endereco) cache[ck] = { lat: BASE_TUF.lat, lng: BASE_TUF.lng, fonte: 'numero' }; // a Farmo fica na base: coordenadas exatas
     if (!(ck in cache)) {
       if (novos >= 100) continue; // limita cada execução; o resto entra nas próximas
       cache[ck] = await geocodificar(l.endereco).catch(() => null);
@@ -136,7 +140,7 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   }
   if (novos) writeFileSync(cacheArq, JSON.stringify(cache));
   // base da TUF (linha TUF LOGISTICA da aba Contratos do site; pedido do ENG-A 05/10)
-  const base = { nome: 'TUF LOGISTICA', endereco: 'Rua Marcelo Müller, 434 - São Lucas, São Paulo - SP, 03222-020', lat: -23.5890937, lng: -46.5604703, regiao: 'Leste' };
+  const base = { ...BASE_TUF };
   return { base, lojas: saida, semCoordenada: [...lojas.values()].filter((l) => cache['v3|' + l.endereco] === null).map((l) => l.nome) };
 }
 
@@ -203,10 +207,11 @@ export function montarContratos({ linhas, alt, mapa }) {
     if (!nome || ignorada(nome)) return;
     const e = porLoja.get(nome) || { nome, endereco: '', bairro: '', regiao: '', vagasDetalhe: [] };
     if (!e.endereco && txt(l[17])) e.endereco = txt(l[17]);
-    if (extraDe(nome)?.corrigeEndereco && extraDe(nome).endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'sistema'; }
+    if (extraDe(nome)?.corrigeEndereco && extraDe(nome).endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'sistema'; if (extraDe(nome).bairro) e.bairro = extraDe(nome).bairro; if (extraDe(nome).regiao) e.regiao = extraDe(nome).regiao; }
     else if (!e.endereco && extraDe(nome)?.endereco) { e.endereco = extraDe(nome).endereco; e.enderecoFonte = 'web'; }
     if (!e.bairro && txt(l[19])) e.bairro = txt(l[19]);
     if (!e.regiao && txt(l[20])) e.regiao = txt(l[20]);
+    if (extraDe(nome)?.corrigeEndereco) { if (extraDe(nome).bairro) e.bairro = extraDe(nome).bairro; if (extraDe(nome).regiao) e.regiao = extraDe(nome).regiao; }
     const a = alt[i] || [];
     const v = { titular: txt(l[0]), tipoVaga: txt(l[2]).toUpperCase(),
       horarios: { seg: hora(l[3]), ter: hora(l[4]), qua: hora(l[5]), qui: hora(l[6]), sex: hora(l[7]), sab: hora(l[8]), dom: [9, 10, 11, 12, 13].map((k) => hora(l[k])) },
