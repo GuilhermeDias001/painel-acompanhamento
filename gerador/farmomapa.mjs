@@ -60,9 +60,7 @@ async function acharCompletoGeo(completo) {
     const g = await nominatim(q).catch(() => null);
     if (g) return { ...g, fonte: precisao };
   }
-  const r = await achar(p[0], p[1] || '');
-  if (r) return r;
-  if (p[1]) { const g = await nominatim(`${p[1]}, ${cidade}`).catch(() => null); if (g) return { ...g, fonte: 'bairro' }; } // último recurso: centro do bairro
+  // sem aproximação por bairro/cidade (Guilherme, 10/10): se não achou a rua, fica "sem coordenada"
   return null;
 }
 
