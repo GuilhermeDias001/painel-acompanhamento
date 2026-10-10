@@ -756,7 +756,12 @@ html.fit-modo #viewOperacao{grid-template-areas:"banner banner banner banner ban
 html.mapa-modo,html.mapa-modo body{overflow:hidden}
 html.mapa-modo main{padding-bottom:0}
 .mapa-wrap{height:calc(100dvh - 190px);margin-top:-6px}
-.lg-wrap{max-height:calc(100dvh - 330px);overflow:auto}
+.lg-tela{display:flex;flex-direction:column}
+.lg-wrap{max-height:calc(100dvh - 250px);overflow:auto}
+.lg-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.lg-form label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-faint)}
+.lg-form input,.lg-form textarea{height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:500 13.5px var(--font-sys);text-transform:none;letter-spacing:0}
+.lg-form textarea{height:auto;min-height:64px;padding:8px 10px}
 .lg-tab thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
 .lg-tab td{vertical-align:top;max-width:360px;overflow-wrap:anywhere}
 #fmEl{position:absolute;inset:0;background:var(--surface)}
@@ -909,8 +914,8 @@ html.mapa-modo main{padding-bottom:0}
 .fop-faixa{display:flex;gap:16px;align-items:center}
 .fop-esq{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
 .fop-l1{display:flex;gap:8px;align-items:center}
-.fop-l1 .fop-turno{height:40px;min-width:130px}
-.fop-edbtn{width:40px;height:40px;flex:0 0 40px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);color:var(--fg-muted);cursor:pointer;padding:0}
+.fop-l1 .fop-turno{height:32px;min-width:104px;padding:0 10px;font-size:12.5px;border-radius:8px}
+.fop-edbtn{width:32px;height:32px;flex:0 0 32px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);color:var(--fg-muted);cursor:pointer;padding:0}
 .fop-edbtn:hover{color:var(--fg)}.fop-edbtn[aria-pressed="true"]{background:var(--n-vermelho);border-color:var(--n-vermelho);color:#fff}.fop-edbtn:disabled{opacity:.4;cursor:not-allowed}
 .fop-c1{position:relative}
 .fop-grip{display:none;position:absolute;left:6px;top:50%;transform:translateY(-50%);z-index:2;width:16px;text-align:center;cursor:grab;color:var(--fg-faint);font-size:15px;line-height:1;user-select:none}
@@ -918,7 +923,8 @@ html.mapa-modo main{padding-bottom:0}
 .fop-edit tr[data-i]{cursor:default}
 .fop-tab tr.fop-over-t td{box-shadow:inset 0 2px 0 var(--n-vermelho)}.fop-tab tr.fop-over-b td{box-shadow:inset 0 -2px 0 var(--n-vermelho)}
 .fop-tab tr.fop-arrasta td{opacity:.45}
-.fop-esq .fop-btn{height:38px;font-size:13px;padding:0 16px}
+.fop-esq .fop-btn{height:30px;font-size:12px;padding:0 12px;border-radius:8px}
+.fop-l1{gap:6px}.fop-esq{gap:7px}
 .fop-esq{gap:10px}
 .fop-rodape{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:12px}
 .fop-vol{display:flex;gap:6px;flex-wrap:nowrap;min-width:0;margin:0;padding:0;align-items:center;justify-content:flex-start;flex:1 1 auto}
@@ -1135,7 +1141,7 @@ html:not(.v-painel):not(.fit-modo) .view:not(:has(>.banner:first-child)){padding
 .sq-st{display:flex;align-items:center;gap:6px}
 .sq-st select{flex:1 1 auto;min-width:0}
 .sq-copy{display:none;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg-muted);cursor:pointer}
-.sq-tab tr[data-st="ENTRAR EM CONTATO"] .sq-copy,.sq-tab tr[data-st="PRÉ CONFIRMADO"] .sq-copy{display:inline-flex}
+.sq-tab tr[data-st="ENTRAR EM CONTATO"] .sq-copy,.sq-tab tr[data-st="PRÉ CONFIRMADO"] .sq-copy,.sq-tab tr[data-st="EM ABERTO"] .sq-copy,.sq-tab tr[data-st="PENDENTE"] .sq-copy{display:inline-flex}
 .sq-copy:hover,.sq-copy:focus-visible{color:var(--fg);border-color:var(--n-ciano);outline:none}
 .sq-copy.ok{color:var(--n-verde);border-color:var(--n-verde)}
 .wa-passos{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.45}
@@ -1345,12 +1351,12 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <a class="nav-subitem" href="#" data-view="farmoop"><span class="nav-label">Operação</span></a>
           <a class="nav-subitem" href="#" data-view="farmobm"><span class="nav-label">Bolsa Multi</span></a>
           <a class="nav-subitem" href="#" data-view="farmodev"><span class="nav-label">Devolução</span></a>
-          <a class="nav-subitem" href="#" data-view="farmomapa"><span class="nav-label">Mapa</span></a>
           <a class="nav-subitem" href="#" data-view="motoristas"><span class="nav-label">Motoristas</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
           <a class="nav-subitem" href="#" data-view="farmocons"><span class="nav-label">Consulta</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
           <a class="nav-subitem active" href="#" data-view="painel"><span class="nav-label">Visão geral</span></a>
+          <a class="nav-subitem" href="#" data-view="farmomapa"><span class="nav-label">Mapa</span></a>
         </div>
       </div>
       <a class="nav-item" href="#" data-view="frota" aria-label="Frota" title="Frota"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4.5L21 12.5V16h-8"/><circle cx="7" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span class="nav-label">Frota</span></a>
@@ -1554,7 +1560,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="fop-fixo" id="fopFixo">
           <div class="fop-faixa">
             <div class="fop-esq">
-              <div class="fop-l1"><select id="fopTurno" class="fop-turno" aria-label="Turno"><option>TODOS</option><option>MANHÃ</option><option>TARDE</option><option selected>NOITE</option></select><button type="button" class="fop-edbtn" id="fopEditar" aria-pressed="false" aria-label="Modo de edição" title="Modo de edição: mover linhas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button></div>
+              <div class="fop-l1"><select id="fopTurno" class="fop-turno" aria-label="Turno"><option>TODOS</option><option>MANHÃ</option><option>TARDE</option><option selected>NOITE</option></select><button type="button" class="fop-edbtn" id="fopEditar" aria-pressed="false" aria-label="Modo de edição" title="Modo de edição: mover linhas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button type="button" class="fop-edbtn" id="fopMapa" aria-label="Abrir o mapa" title="Abrir o mapa e as rotas do turno"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6z"/><path d="M9 3v15M15 6v15"/></svg></button></div>
               <button type="button" class="fop-btn" id="fopSugerir" title="Preenche o portador das paradas com bolsa usando a sugestão">Preencher com Sugestão</button>
             </div>
             <div class="fop-vol" id="fopVol"></div>
@@ -1568,13 +1574,24 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     </div>
     <div class="view" id="viewLegado" style="display:none">
       <section class="banner"><div><p class="eyebrow" id="lgEyebrow">SISTEMA</p><h1 id="lgTitulo"></h1></div></section>
-      <section class="card">
+      <section class="lg-tela">
         <div class="pf-barra">
           <label style="flex:1 1 280px">Buscar<input type="search" id="lgBusca" placeholder="Nome, loja, motivo…" autocomplete="off"></label>
+          <button type="button" class="perfil-btn" id="lgNovo">Novo cadastro</button>
         </div>
         <p class="sub" id="lgSub" style="margin:10px 0 12px"></p>
         <div class="mot-cad-wrap lg-wrap"><table class="mot-cad cont-eq lg-tab"><thead id="lgCab"></thead><tbody id="lgCorpo"></tbody></table></div>
       </section>
+    </div>
+    <div class="ficha-modal" id="lgModal" hidden>
+      <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="lgModalT" style="max-width:720px">
+        <header class="ficha-head"><div><h2 id="lgModalT">Novo cadastro</h2><p id="lgModalS"></p></div><div class="ficha-acoes"><button type="button" id="lgModalX" aria-label="Fechar">×</button></div></header>
+        <div class="ficha-corpo" style="display:block">
+          <div class="lg-form" id="lgForm"></div>
+          <p class="sub" id="lgModalMsg" style="margin:10px 0 0"></p>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button type="button" class="perfil-btn sec" id="lgModalCancel">Cancelar</button><button type="button" class="perfil-btn" id="lgModalOk">Salvar</button></div>
+        </div>
+      </div>
     </div>
     <div class="view" id="viewFarmoMapa" style="display:none">
       <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA · MAPA</p><h1>Mapa e rotas do dia</h1></div></section>
@@ -2029,6 +2046,7 @@ function tcase(s){
 
 // === carregamento: window.DADOS direto (local/artefato) ou senha + dados.enc.json ===
 // atencao: NAO inicializar DADOS aqui (nem com =null) - "var DADOS" e global e
+// colidiria com o window.DADOS que o <script src="dados.js"> ja pode ter setado
 // antes desta linha rodar, zerando o dado real.
 var DADOS, FIXOS={}, modoCarregamento=null, chaveAtual=null, primeiraCarga=true;
 
@@ -2621,7 +2639,7 @@ function funcListaEscopo(){var l=funcLista(); if(!l)return l; return FUNC_ESCOPO
 // trabalha hoje? usa a coluna FOLGA ("Sabado e Domingo", "Quarta Feira e 3o Domingo"...) e a data do navegador
 var DIAS_SEM=['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
 var FUNC_CACHE={chave:'',lista:null};
-var FUNC_NOVOS=[], FUNC_EDIC={}, FUNC_EXCL={};
+var FUNC_NOVOS=[], FUNC_EDIC={}, FUNC_EXCL={}, FUNC_DB={}, FUNC_DBV=0;
 try{FUNC_EXCL=JSON.parse(localStorage.getItem('tuf-func-excl')||'{}')||{}}catch(e){FUNC_EXCL={}}
 try{FUNC_EDIC=JSON.parse(localStorage.getItem('tuf-func-edic')||'{}')||{}}catch(e){FUNC_EDIC={}}
 try{FUNC_NOVOS=JSON.parse(localStorage.getItem('tuf-func-novos')||'[]')||[]}catch(e){FUNC_NOVOS=[]}
@@ -2630,7 +2648,7 @@ function funcLista(){
   var rh=(window.DADOS&&DADOS.cadastroRH)||null, col=(window.DADOS&&DADOS.colaboradores)||null;
   if(!rh&&!col&&!((window.DADOS&&DADOS.cadastroMotoristas)||[]).length)return null;
   var motd=(window.DADOS&&DADOS.cadastroMotoristas)||[];
-  var ck=(rh?rh.length:0)+'|'+(col?col.length:0)+'|'+motd.length+'|'+FUNC_NOVOS.length+'|'+Object.keys(FUNC_EXCL).length+'|'+(window.DADOS&&DADOS.geradoEm);
+  var ck=(rh?rh.length:0)+'|'+(col?col.length:0)+'|'+motd.length+'|'+FUNC_NOVOS.length+'|'+Object.keys(FUNC_EXCL).length+'|'+(window.DADOS&&DADOS.geradoEm)+'|'+FUNC_DBV;
   if(FUNC_CACHE.chave===ck&&FUNC_CACHE.lista)return FUNC_CACHE.lista;
   var lista=(rh||[]).slice(), idx={}, porPrimeiro={};
   lista.forEach(function(p){if(!p.veiculo&&p.modeloMoto){p.veiculo=p.modeloMoto}idx[funcChave(p.nome)]=p; var t=contToks(p.nome); if(t.length)(porPrimeiro[t[0]]=porPrimeiro[t[0]]||[]).push({p:p,t:t})});
@@ -2676,6 +2694,10 @@ function funcLista(){
   lista.forEach(function(q){if(/farmoter/.test(norm(q.local||'')))q._farmo=true; if(q._farmo&&!q.funcao)q.funcao='Motorista'});
   FUNC_NOVOS.forEach(function(n){if(!idx[funcChave(n.nome)]){idx[funcChave(n.nome)]=n;lista.push(n)}});
   Object.keys(FUNC_EDIC).forEach(function(k){var p=idx[k];if(p)Object.keys(FUNC_EDIC[k]).forEach(function(c){p[c]=FUNC_EDIC[k][c]})});
+  // fichas gravadas no banco (importacao do RH e edicoes de todos): valem por cima do cadastro
+  Object.keys(FUNC_DB).forEach(function(k){var p=idx[k];if(p)Object.keys(FUNC_DB[k]).forEach(function(c){p[c]=FUNC_DB[k][c]})});
+  // pessoas com nome repetido: o banco pode identifica-las pelo codigo (funcionario_chave = 'cod:F123'), que e unico
+  lista.forEach(function(q){var d=q.cod&&FUNC_DB['cod:'+String(q.cod).trim().toUpperCase()];if(d)Object.keys(d).forEach(function(c){q[c]=d[c]})});
   if(Object.keys(FUNC_EXCL).length)lista=lista.filter(function(p){return !FUNC_EXCL[funcChave(p.nome)]});
   FUNC_CACHE={chave:ck,lista:lista};
   return lista;
@@ -2928,7 +2950,7 @@ document.getElementById('fichaSalvar').addEventListener('click',function(){
     if(window.sqAviso)window.sqAviso('Cadastro de '+tcase(p.nome)+' excluído.');
     return;
   }
-  var chave=funcChave(p.nome), mudou=0;
+  var chave=funcChave(p.nome), mudou=0, dbRows=[];
   var fpSel=document.querySelector('#fichaCorpo .ficha-fp');
   if(fpSel&&p._farmo){
     var papNovo=/^titular$/i.test(fpSel.value)?'TITULAR':/^folguista$/i.test(fpSel.value)?'FOLGUISTA':'', atu=fopPapelAtual(p), rotasNovas=atu.rotas.slice();
@@ -2940,10 +2962,17 @@ document.getElementById('fichaSalvar').addEventListener('click',function(){
   Array.prototype.forEach.call(document.querySelectorAll('#fichaCorpo .ficha-in'),function(i){
     var k=i.getAttribute('data-k'), novo=i.value.trim(), velho=p[k]==null?'':String(p[k]);
     if(novo===velho)return;
+    if(fdbAtivo()){ // no site (logado) a edicao vai para o banco: INSERT novo em ficha_edicao, vale o ultimo
+      dbRows.push({funcionario_chave:chave,campo:k,valor:novo,quem:sqQuem()});
+      (FUNC_DB[chave]=FUNC_DB[chave]||{})[k]=novo; p[k]=novo; mudou++; FUNC_DBV++;
+      if(k==='local'&&novo&&p.baseTemp){FUNC_EDIC[chave]=FUNC_EDIC[chave]||{};FUNC_EDIC[chave].baseTemp=false;p.baseTemp=false}
+      return;
+    }
     FUNC_EDIC[chave]=FUNC_EDIC[chave]||{}; FUNC_EDIC[chave][k]=novo; p[k]=novo; mudou++;
     if(k==='local'&&novo&&p.baseTemp){FUNC_EDIC[chave].baseTemp=false;p.baseTemp=false}
     SQ_AUD.push({t:new Date().toISOString(),quem:sqQuem(),modo:'cadastro',dia:sqHoje(),linha:chave,loja:p.nome,campo:k,antes:velho,depois:novo,acao:'editar'});
   });
+  if(dbRows.length)fdbEnviar(dbRows);
   if(mudou){
     try{localStorage.setItem('tuf-func-edic',JSON.stringify(FUNC_EDIC));localStorage.setItem('tuf-sq-aud',JSON.stringify(SQ_AUD))}catch(e){}
     FUNC_CACHE={chave:'',lista:null}; renderFuncionarios(); try{sqRender()}catch(er){}
@@ -3626,6 +3655,45 @@ function sqBase(modo){
   var ls=SQ_REAL?sqCopia(SQ_REAL.linhas):sqCriar(modo);
   return sqEnriquecer(ls,modo);
 }
+// ===== FICHAS NO BANCO: ficha_atual (leitura) e ficha_edicao (append-only, uma linha por campo editado) =====
+function fdbAtivo(){return qdbAtivo()}
+var FDB={pronto:false,rt:null};
+function fdbAplicar(){FUNC_DBV++;FUNC_CACHE={chave:'',lista:null};clearTimeout(FDB.rt);FDB.rt=setTimeout(function(){try{renderFuncionarios()}catch(e){}try{sqRender()}catch(e){}try{if(typeof renderContratos==='function')renderContratos()}catch(e){}},300)}
+function fdbCarregar(){
+  if(!fdbAtivo())return Promise.resolve();
+  var c=sbCliente(), todas=[];
+  function pagina(de){
+    return c.from('ficha_atual').select('funcionario_chave,campo,valor').range(de,de+999).then(function(r){
+      if(r.error)throw r.error; todas=todas.concat(r.data||[]); return (r.data&&r.data.length===1000)?pagina(de+1000):todas;
+    });
+  }
+  return pagina(0).then(function(rows){
+    var m={}; rows.forEach(function(x){(m[x.funcionario_chave]=m[x.funcionario_chave]||{})[x.campo]=x.valor==null?'':String(x.valor)});
+    FUNC_DB=m; FDB.pronto=true; fdbAplicar();
+  }).catch(function(e){FDB.erro=String((e&&e.message)||e)});
+}
+function fdbIniciar(){
+  if(!fdbAtivo()||FDB.canal)return;
+  fdbCarregar();
+  try{
+    FDB.canal=sbCliente().channel('ficha-edicao').on('postgres_changes',{event:'INSERT',schema:'public',table:'ficha_edicao'},function(p){
+      var n=p&&p.new; if(!n||!n.funcionario_chave)return;
+      var o=FUNC_DB[n.funcionario_chave]||(FUNC_DB[n.funcionario_chave]={}), v=n.valor==null?'':String(n.valor);
+      if(o[n.campo]===v)return; // eco da propria edicao
+      o[n.campo]=v; fdbAplicar();
+    }).subscribe(function(st){if(st==='SUBSCRIBED'){if(FDB.visto)fdbCarregar();FDB.visto=true}});
+  }catch(e){}
+}
+function fdbEnviar(rows){
+  sbCliente().from('ficha_edicao').insert(rows).then(function(r){
+    if(r.error)throw r.error;
+  }).catch(function(e){
+    // nao gravou no banco: guarda neste navegador para nao perder e avisa
+    rows.forEach(function(x){FUNC_EDIC[x.funcionario_chave]=FUNC_EDIC[x.funcionario_chave]||{};FUNC_EDIC[x.funcionario_chave][x.campo]=x.valor});
+    try{localStorage.setItem('tuf-func-edic',JSON.stringify(FUNC_EDIC))}catch(er){}
+    if(window.sqAviso)window.sqAviso('Não foi possível salvar a ficha no banco agora ('+String((e&&e.message)||'erro')+'). A alteração ficou só neste navegador.');
+  });
+}
 // ===== QUADRO NO BANCO (tempo real): Operacao e Planejamento lidos e gravados em public.quadro_linha =====
 // Um dia "vive no banco" quando existe quadro_dia com fonte 'sistema'. Nesse caso o banco manda: edicao por CAMPO, Realtime para os colegas,
 // carimbo de tempo calculado pelo proprio banco e auditoria por trigger (o site nao grava em quadro_auditoria). Sem login/banco nada muda.
@@ -3940,6 +4008,12 @@ var SQ_ICO_COPIAR='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" s
 var SQ_ICO_OK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
 // mensagem de contato: puxa loja, horario (da linha; se nao tiver, da escala da loja no dia) e valor (so quando existe)
 function sqMensagem(l){
+  // EM ABERTO / PENDENTE: a vaga ja deveria estar em andamento; a mensagem e para confirmar se a pessoa ja chegou na loja
+  if(SQ_MODO!=='planejamento'&&(l.status==='EM ABERTO'||l.status==='PENDENTE')){
+    var qm=sqQuem(), ln=(qm&&qm!=='(sem nome)')?['*'+tcase(qm)+'*']:[], p1=l.colab?tcase(String(l.colab).trim().split(/\s+/)[0]):'';
+    ln.push((p1?p1+', gostaria':'Gostaria')+' de confirmar se você já chegou na loja '+tcase(l.loja||'')+'?');
+    return ln.join('\n');
+  }
   var h=new Date().getHours(), sau=h<12?'Bom dia':(h<18?'Boa tarde':'Boa noite');
   var dia='HOJE', dt=new Date();
   // ENTRAR EM CONTATO na Operacao e contato para o dia seguinte
@@ -5967,6 +6041,16 @@ function fopCalcula(ls,iso){
   return {sug:sug,tit:tit,troca:troca,efet:efet,vol:vol,cnt:cnt,par:par,ord:ord,cap:cap,lim:lim};
 }
 function fopSugestao(l){return ''}
+// endereco completo (rua, numero, bairro, cidade) que o gerador casou com o cadastro: aparece como dica; o campo continua com o endereco original
+var FOP_ENDC={ref:null,m:{}};
+function fopEndCompleto(l){
+  var op=window.DADOS&&DADOS.farmoOp; if(!op)return '';
+  if(FOP_ENDC.ref!==op){
+    FOP_ENDC={ref:op,m:{}};
+    (op.operacaoHoje||[]).concat(op.enderecosPorRota||[]).forEach(function(x){var ec=x.enderecoCompleto; if(ec)FOP_ENDC.m[fopRotaChave(x.rota)+'|'+norm(String(x.endereco||x.end||'')).trim()]=ec});
+  }
+  return FOP_ENDC.m[fopRotaChave(l.rota)+'|'+norm(String(l.end||'')).trim()]||'';
+}
 var FOP_LAY=[];
 try{FOP_LAY=JSON.parse(localStorage.getItem('tuf-farmo-lay')||'[]')||[]}catch(e){FOP_LAY=[]}
 function fopLayChave(l){return norm(String(l.end||''))+'|'+norm(String(l.bairro||''))}
@@ -6443,7 +6527,7 @@ function renderFarmoOp(){
   function linha(l,i){
     var dupB=fopPartes(l.bolsa).some(function(x){return !/^ISOPOR/.test(x)&&cb[x]>1}), dupT=fopPartes(l.term).some(function(x){return ct[x]>1});
     var inv=function(f,v){return v&&!f(v)}, dis=fech?' disabled':'';
-    return '<tr data-i="'+i+'"><td class="fop-c1"><span class="fop-grip" title="Arrastar para mover" aria-hidden="true">⠿</span><input data-c="end" value="'+esc(l.end)+'"'+dis+'></td><td><input data-c="hor" value="'+esc(l.hor)+'" placeholder="hh:mm"'+dis+'></td><td><input data-c="bairro" value="'+esc(l.bairro)+'"'+dis+'></td><td><input data-c="pnet" value="'+esc(l.pnet||'')+'"'+dis+'></td><td class="fop-sug'+((calc.sug[i]&&calc.sug[i]!==calc.tit[i]&&calc.sug[i]!==fopNome(l.port))?' troca':'')+'" data-n="'+esc(String(calc.sug[i]||'').toUpperCase())+'" title="'+(calc.troca[i]?'Troca de rota: '+esc(calc.troca[i])+' · ':'')+esc(String(calc.sug[i]||'').toUpperCase())+'">'+esc(fopCurto(String(calc.sug[i]||'').toUpperCase()))+'</td><td><input data-c="port" value="'+esc(l.port)+'" list="fopMotList"'+dis+'></td>'
+    return '<tr data-i="'+i+'"><td class="fop-c1"><span class="fop-grip" title="Arrastar para mover" aria-hidden="true">⠿</span><input data-c="end" value="'+esc(l.end)+'"'+(fopEndCompleto(l)?' title="'+esc(fopEndCompleto(l))+'"':'')+dis+'></td><td><input data-c="hor" value="'+esc(l.hor)+'" placeholder="hh:mm"'+dis+'></td><td><input data-c="bairro" value="'+esc(l.bairro)+'"'+dis+'></td><td><input data-c="pnet" value="'+esc(l.pnet||'')+'"'+dis+'></td><td class="fop-sug'+((calc.sug[i]&&calc.sug[i]!==calc.tit[i]&&calc.sug[i]!==fopNome(l.port))?' troca':'')+'" data-n="'+esc(String(calc.sug[i]||'').toUpperCase())+'" title="'+(calc.troca[i]?'Troca de rota: '+esc(calc.troca[i])+' · ':'')+esc(String(calc.sug[i]||'').toUpperCase())+'">'+esc(fopCurto(String(calc.sug[i]||'').toUpperCase()))+'</td><td><input data-c="port" value="'+esc(l.port)+'" list="fopMotList"'+dis+'></td>'
       +'<td class="fop-bolsa"><input data-c="bolsa" class="'+(inv(fopValBolsa,l.bolsa)?'inv':'')+(dupB?' dup':'')+'" value="'+esc(l.bolsa)+'"'+dis+(inv(fopValBolsa,l.bolsa)?' title="Código inválido: use ISOPOR.A/B/C ou A/B/C + 3 dígitos, separados por /"':dupB?' title="Bolsa repetida no dia"':'')+'>'+(fech?'':'<button type="button" class="fop-dd" data-dd="'+i+'" tabindex="-1" title="Escolher isopor" aria-label="Escolher isopor">▾</button>')+'</td>'
       +'<td><input data-c="term" class="'+(inv(fopValTerm,l.term)?'inv':'')+(dupT?' dup':'')+'" value="'+esc(l.term)+'"'+dis+(inv(fopValTerm,l.term)?' title="Termômetro inválido: use P + número (até 4 dígitos), separados por /"':dupT?' title="Termômetro repetido no dia"':'')+'></td></tr>';
   }
@@ -6460,11 +6544,12 @@ function renderFarmoOp(){
   // controle de volume por turno selecionado: rosca com a capacidade dividida em zonas de cor (acima de 100% e excedente real, nunca truncado)
   var sel=selTu, turnos=todosTu?['MANHÃ','TARDE','NOITE','LITORAL','VALE']:turnosTu;
   var vk=Object.keys(calc.vol).map(function(k){var q=k.split('|');return {nome:q[0],turno:q[1],l:calc.vol[k],o:calc.ord[k],n:calc.cnt[k]||0,pa:calc.par[k]||0,pct:Math.round(calc.vol[k]/calc.cap*100)}}).filter(function(x){return turnos.indexOf(x.turno)>=0}).sort(function(a,b){return a.o-b.o});
-  document.getElementById('fopVol').innerHTML=(vk.length?vk.map(function(x){var cls=x.pct>85?' cheio':(x.pct>50?' medio':' baixo');if(x.pct>100)cls+=' excesso';var et=x.n+(x.n===1?' item':' itens')+' · '+x.pa+(x.pa===1?' parada':' paradas');return '<div class="fop-dc'+cls+'" title="'+esc(tcase(x.nome))+' · '+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'"><b>'+esc(tcase(x.nome))+'</b><div class="n">'+x.pct+'%</div><small>'+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'</small><div class="bar"><i style="width:'+(x.pct>100?Math.min(100,x.pct-100):x.pct)+'%"></i></div></div>'}).join(''):(function(){
+  document.getElementById('fopVol').innerHTML=(vk.length?vk.map(function(x){var cls=x.pct>85?' cheio':(x.pct>50?' medio':' baixo');if(x.pct>100)cls+=' excesso';var et=x.n+(x.n===1?' item':' itens')+' · '+x.pa+(x.pa===1?' parada':' paradas');return '<div class="fop-dc'+cls+'" title="'+esc(tcase(x.nome))+' · '+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'"><b>'+esc(tcase(x.nome))+'</b><div class="n">'+x.pct+'%<span class="km-est" data-k="'+esc(x.nome+'|'+x.turno)+'"></span></div><small>'+et+(todosTu?' · '+esc(tcase(x.turno)):'')+'</small><div class="bar"><i style="width:'+(x.pct>100?Math.min(100,x.pct-100):x.pct)+'%"></i></div></div>'}).join(''):(function(){
     var outros={}; Object.keys(calc.vol).forEach(function(k){var t=k.split('|')[1];if(turnos.indexOf(t)<0){var g=(t==='LITORAL'||t==='VALE')?'NOITE':t;outros[g]=(outros[g]||0)+1}});
     var bs=Object.keys(outros).map(function(t){return '<button type="button" class="fop-btn sec" style="height:30px;padding:0 12px;font-size:12px" data-turno="'+esc(t)+'">Ver '+esc(t)+' ('+outros[t]+')</button>'}).join(' ');
     return '<span class="aviso-empty" style="align-self:center">Sem bolsas lançadas '+(todosTu?'no dia.':'no turno '+esc(sel)+'.')+(bs?' Há volume em outro turno:':'')+'</span> '+bs;
   })());
+  try{fmKmCards()}catch(e){}
   var gr=document.querySelector('#viewFarmoOp .fop-grade'); document.getElementById('viewFarmoOp').style.setProperty('--fop-vh',document.getElementById('fopFixo').offsetHeight+'px');
   document.getElementById('fopNota').textContent=(window.DADOS&&DADOS.farmoOp?'Dados da planilha de '+remDataBR(String(DADOS.farmoOp.dataHoje||'').slice(0,10))+' (via gerador). ':(window.FARMO_CAD?'Cadastro local da planilha. ':'As rotas e endereços ainda não vieram do gerador: cole-os em "Importar Endereços". '))+'Preenchida a bolsa, a parada conta como entrega. A sugestão é o titular da rota no dia (folguista se for a folga dele; interno pela escala); a troca de endereço só vale quando quem tem a parada passa de 85% de ocupação (90 L). O dia fecha sozinho às 04:00, com a sugestão no portador das paradas que ficaram sem. Bolsa e termômetro repetidos ficam em vermelho.';
 }
@@ -6533,6 +6618,11 @@ function renderFarmoOp(){
   document.addEventListener('mousedown',function(e){if(!ddMenu.hidden&&!e.target.closest('.fop-ddmenu')&&!e.target.closest('.fop-dd'))ddFecha()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')ddFecha()});
   // MODO DE EDICAO: arrastar uma linha pela alca para outra posicao ou outra rota; vale para o dia e para os dias novos
+  document.getElementById('fopMapa').addEventListener('click',function(){
+    var t=document.getElementById('fopTurno').value, ft=document.getElementById('fmTurno');
+    if(ft)ft.value=(t==='TODOS'||t==='MANHÃ'||t==='TARDE'||t==='NOITE')?t:'TODOS';
+    FM.sel=''; var a=document.querySelector('.nav-subitem[data-view="farmomapa"]'); if(a)a.click();
+  });
   var edBtn=document.getElementById('fopEditar'), edDrag=-1;
   edBtn.addEventListener('click',function(){
     var on=edBtn.getAttribute('aria-pressed')!=='true';
@@ -6737,7 +6827,15 @@ function fcRastrear(){
 // ===== ABAS DAS PLANILHAS ANTIGAS NO BANCO (legado_aba / legado_linha), SOMENTE LEITURA =====
 // TUF Log (arquivo Nova Operacao) e Proibidos: o Cerebro importou as linhas; aqui so se consulta. Colunas Pix/PIN/Login nunca vem.
 var LG={cfg:{tuflog:{aba:'TUF Log',tit:'TUF Log',eye:'SISTEMA · TUF LOG'},proibidos:{aba:'Proibidos',tit:'Proibidos',eye:'SISTEMA · PROIBIDOS'}},cache:{},ver:'',ger:0};
-function lgData(v){return /^\d{4}-\d{2}-\d{2}/.test(String(v))?String(v).slice(0,10).split('-').reverse().join('/'):String(v)}
+function lgData(v,col){
+  var t=String(v);
+  if(/^\d{4}-\d{2}-\d{2}/.test(t))return t.slice(0,10).split('-').reverse().join('/');
+  // data do Excel guardada como numero (dias desde 30/12/1899)
+  if(col&&/cria|data|dia\b|nasc|venc|valid|entrada|saida/i.test(String(col))&&/^\d{5}(\.\d+)?$/.test(t)&&+t>30000&&+t<80000){var d=new Date(Date.UTC(1899,11,30)+Math.floor(+t)*86400000);return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0')+'/'+d.getUTCFullYear()}
+  return t;
+}
+function lgRotulo(k,i,aba){return (i===0&&aba==='TUF Log'&&k===LG_PRIMEIRA)?'Colaborador':tcase(String(k))}
+var LG_PRIMEIRA='';
 function lgBuscarTudo(aba){
   var c=sbCliente(), todas=[];
   function pagina(de){
@@ -6750,15 +6848,18 @@ function lgBuscarTudo(aba){
     var ab=(rs[0].data&&rs[0].data[0])||{}, linhas=rs[1];
     var cab=Array.isArray(ab.cabecalho)?ab.cabecalho.slice():[];
     if(!cab.length&&linhas.length)cab=Object.keys(linhas[0].dados||{});
-    return {cab:cab.filter(function(k){return !/\b(pix|pin)\b/i.test(String(k))}),linhas:linhas.map(function(l){return l.dados||{}})};
+    var cab2=cab.filter(function(k){return !/\b(pix|pin)\b/i.test(String(k))});
+    return {cab:cab2,linhas:linhas.map(function(l){return l.dados||{}}),nums:linhas.map(function(l){return l.linha})};
   });
 }
 function lgDesenhar(v){
   var d=LG.cache[v], q=norm(document.getElementById('lgBusca').value), ls=d.linhas;
   if(q)ls=ls.filter(function(l){return norm(d.cab.map(function(k){return l[k]==null?'':l[k]}).join(' ')).indexOf(q)>=0});
-  document.getElementById('lgCab').innerHTML='<tr>'+d.cab.map(function(k){return '<th>'+esc(tcase(String(k)))+'</th>'}).join('')+'</tr>';
+  var abaAtual=LG.cfg[v].aba; LG_PRIMEIRA=d.cab[0]||'';
+  // se o titulo da 1a coluna e o nome de uma pessoa (a planilha nao tem titulo ali), mostra "Colaborador"
+  document.getElementById('lgCab').innerHTML='<tr>'+d.cab.map(function(k,i){return '<th>'+esc(lgRotulo(k,i,abaAtual))+'</th>'}).join('')+'</tr>';
   document.getElementById('lgSub').textContent=ls.length+(ls.length===1?' registro':' registros')+(q?' de '+d.linhas.length:'')+' · somente leitura';
-  document.getElementById('lgCorpo').innerHTML=ls.slice(0,1500).map(function(l){return '<tr>'+d.cab.map(function(k){var x=l[k];return '<td>'+(x==null||x===''?'<span class="aviso-empty">—</span>':esc(lgData(x)))+'</td>'}).join('')+'</tr>'}).join('')||'<tr><td class="aviso-empty" colspan="'+Math.max(1,d.cab.length)+'">Nenhum registro.</td></tr>';
+  document.getElementById('lgCorpo').innerHTML=ls.slice(0,1500).map(function(l){return '<tr>'+d.cab.map(function(k){var x=l[k];return '<td>'+(x==null||x===''?'<span class="aviso-empty">—</span>':esc(lgData(x,k)))+'</td>'}).join('')+'</tr>'}).join('')||'<tr><td class="aviso-empty" colspan="'+Math.max(1,d.cab.length)+'">Nenhum registro.</td></tr>';
   if(ls.length>1500)document.getElementById('lgSub').textContent+=' · mostrando os primeiros 1.500; use a busca';
 }
 function lgMostrar(v){
@@ -6775,6 +6876,37 @@ function lgMostrar(v){
   }).catch(function(e){if(ger!==LG.ger)return;document.getElementById('lgSub').textContent='';document.getElementById('lgCorpo').innerHTML='<tr><td class="aviso-empty">Não foi possível carregar agora.</td></tr>'});
 }
 document.getElementById('lgBusca').addEventListener('input',function(){if(LG.cache[LG.ver])lgDesenhar(LG.ver)});
+// Novo cadastro nas telas TUF Log / Proibidos: grava uma linha nova em legado_linha (precisa da liberacao de escrita do Cerebro)
+(function(){
+  var m=document.getElementById('lgModal'), msg=document.getElementById('lgModalMsg');
+  function fecha(){m.hidden=true}
+  document.getElementById('lgModalX').addEventListener('click',fecha);
+  document.getElementById('lgModalCancel').addEventListener('click',fecha);
+  m.addEventListener('click',function(e){if(e.target===m)fecha()});
+  document.getElementById('lgNovo').addEventListener('click',function(){
+    var d=LG.cache[LG.ver]; if(!d){if(window.sqAviso)window.sqAviso('Aguarde os dados carregarem.');return}
+    document.getElementById('lgModalT').textContent='Novo cadastro · '+LG.cfg[LG.ver].tit;
+    document.getElementById('lgModalS').textContent='O registro entra para todos na hora';
+    document.getElementById('lgForm').innerHTML=d.cab.map(function(k,i){
+      var rot=lgRotulo(k,i,LG.cfg[LG.ver].aba), data=/cria|data|dia\b/i.test(String(k)), longo=/observ|motivo|descri/i.test(String(k));
+      return '<label>'+esc(rot)+(longo?'<textarea data-k="'+esc(k)+'" maxlength="500"></textarea>':'<input data-k="'+esc(k)+'" type="'+(data?'date':'text')+'" maxlength="160"'+(data?' value="'+sqHoje()+'"':'')+'>')+'</label>';
+    }).join('');
+    msg.textContent=''; m.hidden=false; var f=document.querySelector('#lgForm input,#lgForm textarea'); if(f)f.focus();
+  });
+  document.getElementById('lgModalOk').addEventListener('click',function(){
+    var d=LG.cache[LG.ver], cfg=LG.cfg[LG.ver], dados={}, vazio=true;
+    Array.prototype.forEach.call(document.querySelectorAll('#lgForm [data-k]'),function(el){var v=el.value.trim();if(v&&!(el.type==='date'&&v===sqHoje()&&false))vazio=false;dados[el.getAttribute('data-k')]=v});
+    if(vazio){msg.textContent='Preencha pelo menos um campo.';return}
+    var prox=(d.nums.length?Math.max.apply(null,d.nums):0)+1;
+    msg.textContent='Salvando…';
+    sbCliente().from('legado_linha').insert({arquivo:'nova',aba:cfg.aba,linha:prox,dados:dados}).then(function(r){
+      if(r.error)throw r.error;
+      d.linhas.push(dados); d.nums.push(prox); fecha(); lgDesenhar(LG.ver);
+      if(window.sqAviso)window.sqAviso('Cadastro salvo em '+cfg.tit+'.');
+    }).catch(function(e){msg.textContent='Não foi possível salvar: '+String((e&&e.message)||'erro')+(/permission|policy|denied|403/i.test(String((e&&e.message)||''))?' (o banco ainda não liberou a escrita nesta tela).':'')});
+  });
+})();
+
 // ===== FARMOTERAPICA · MAPA: enderecos do dia, rota de cada motoboy saindo da Farmo e km por estrada =====
 // Coordenadas dos enderecos vem do banco (area farmo_mapa, feita pelo Cerebro). A ROTA (ordem das paradas, trajeto e km por estrada) e calculada aqui
 // com o servico publico OSRM, mandando so coordenadas (sem nomes, sem bolsas); cada resultado fica guardado no navegador para nao repetir a consulta.
@@ -6795,7 +6927,7 @@ function fmCoords(){
   var fm=window.DADOS&&DADOS.farmoMapa, m={}, soEnd={};
   ((fm&&fm.paradas)||[]).forEach(function(x){
     if(x.lat==null||x.lng==null)return;
-    var v={lat:+x.lat,lng:+x.lng,prec:x.precisao||''};
+    var v={lat:+x.lat,lng:+x.lng,prec:x.precisao||'',endC:x.enderecoCompleto||''};
     m[fopRotaChave(x.rota)+'|'+norm(String(x.endereco||'')).trim()]=v;
     soEnd[norm(String(x.endereco||'')).trim()]=soEnd[norm(String(x.endereco||'')).trim()]||v;
   });
@@ -6811,7 +6943,7 @@ function fmGrupos(turno){
     if(!itens||!cl.efet[i]){if(c)semBolsa.push({end:l.end,rota:l.rota,lat:c.lat,lng:c.lng});return}
     var k=cl.efet[i]+'|'+tu; if(!g[k])g[k]={nome:cl.efet[i],turno:tu,paradas:[],itens:0,ord:i};
     var pa={end:l.end,bairro:l.bairro,rota:l.rota,hor:l.hor,itens:itens,bolsa:l.bolsa};
-    if(c){pa.lat=c.lat;pa.lng=c.lng;pa.prec=c.prec}else sem.push({nome:cl.efet[i],end:l.end});
+    if(c){pa.lat=c.lat;pa.lng=c.lng;pa.prec=c.prec;pa.endC=c.endC||fopEndCompleto(l)}else sem.push({nome:cl.efet[i],end:l.end});
     g[k].paradas.push(pa); g[k].itens+=itens;
   });
   var lista=Object.keys(g).map(function(k){return Object.assign({chave:k},g[k])}).sort(function(a,b){return a.ord-b.ord});
@@ -6853,7 +6985,7 @@ function fmDesenhar(grupos,rotas,o){
     r.ordem.forEach(function(idx,n){
       var pa=r.pts[idx]; if(!pa)return; bounds.extend([pa.lng,pa.lat]);
       var e=document.createElement('div'); e.className='fm-pin'+(FM.sel&&FM.sel!==m.chave?' apagado':''); e.style.setProperty('--cor',m.cor); e.textContent=n+1; e.setAttribute('data-g',m.chave);
-      var html='<b>'+esc(tcase(m.nome))+' · parada '+(n+1)+'</b><br>'+esc(tcase(pa.end))+'<br><small>'+esc(fopRotaNome(pa.rota))+(pa.hor?' · '+esc(pa.hor):'')+'</small><br><small>'+pa.itens+(pa.itens===1?' item: ':' itens: ')+esc(pa.bolsa||'')+'</small>'+(pa.prec&&pa.prec!=='numero'?'<br><small>Localização aproximada ('+esc(pa.prec)+')</small>':'');
+      var html='<b>'+esc(tcase(m.nome))+' · parada '+(n+1)+'</b><br>'+esc(pa.endC?pa.endC:tcase(pa.end))+'<br><small>'+esc(fopRotaNome(pa.rota))+(pa.hor?' · '+esc(pa.hor):'')+'</small><br><small>'+pa.itens+(pa.itens===1?' item: ':' itens: ')+esc(pa.bolsa||'')+'</small>'+(pa.prec&&pa.prec!=='numero'?'<br><small>Localização aproximada ('+esc(pa.prec)+')</small>':'');
       var mk=new maplibregl.Marker({element:e}).setLngLat([pa.lng,pa.lat]).setPopup(new maplibregl.Popup({offset:16,className:'mapa-pop',maxWidth:'260px'}).setHTML(html)).addTo(M);
       FM.marcas.push(mk);
     });
@@ -6912,6 +7044,23 @@ function fmAjustar(){
   var v=document.getElementById('viewFarmoMapa'), w=document.getElementById('fmWrap'); if(!v||!w||v.style.display==='none')return;
   if(window.innerWidth>900)w.style.height=Math.max(380,window.innerHeight-w.getBoundingClientRect().top-12)+'px'; else w.style.height='';
   if(FM.mapa)FM.mapa.resize();
+}
+// km estimado (so ida, por estrada) de cada motoboy, mostrado ao lado do % nos cards da Operacao; usa as mesmas rotas e o mesmo cache do Mapa
+var FM_KC={ger:0};
+function fmKmCards(){
+  var spans=Array.prototype.slice.call(document.querySelectorAll('#fopVol .km-est')); if(!spans.length)return;
+  var o=fmOrigem(), co=fmCoords(); if(!o||!co.tem||!window.fetch)return;
+  var ger=++FM_KC.ger, g=fmGrupos('TODOS'), porChave={}; g.lista.forEach(function(m){porChave[m.chave]=m});
+  var fila=spans.filter(function(sp){return porChave[sp.getAttribute('data-k')]});
+  // o que ja esta no cache aparece na hora; o resto vai sendo calculado, um por vez
+  function mostra(sp,r){if(r&&r.m!=null)sp.textContent='≈ '+fmKm(r.m)+(r.reta?' (linha reta)':'');sp.title=r&&r.s?'Estimativa por estrada, só a ida: '+fmMin(r.s):'Estimativa só da ida'}
+  function prox(){
+    if(ger!==FM_KC.ger)return;
+    var sp=fila.shift(); if(!sp)return;
+    var m=porChave[sp.getAttribute('data-k')];
+    fmRotear(m,o).then(function(r){if(ger!==FM_KC.ger||!document.body.contains(sp))return;mostra(sp,r)}).then(function(){setTimeout(prox,60)});
+  }
+  prox();
 }
 function fmMostrar(){
   var vazio=document.getElementById('fmVazio');
@@ -7696,6 +7845,7 @@ function sbCarregar(primeira){
     startApp(d);
     try{fsPreparar()}catch(e){}
     try{qdbIniciar()}catch(e){}
+    try{fdbIniciar()}catch(e){}
   }).catch(function(err){
     sbOcupado=false;
     var msg=String((err&&err.message)||'');
