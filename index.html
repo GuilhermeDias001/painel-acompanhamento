@@ -1161,7 +1161,10 @@ html:not(.v-painel):not(.fit-modo) .view:not(:has(>.banner:first-child)){padding
 .wa-msg{margin:0 0 14px;padding:10px 12px;border:1px solid var(--n-amarelo);border-radius:10px;background:color-mix(in srgb,var(--n-amarelo) 12%,transparent);font-size:13.5px}
 .wa-msg:empty{display:none}
 .wa-fav{cursor:grab;text-decoration:none;display:inline-flex;align-items:center}
-.sq-wa{color:var(--n-verde)}.sq-wa:hover,.sq-wa:focus-visible{border-color:var(--n-verde)!important}
+#bkStatus{position:fixed;right:12px;bottom:6px;z-index:30;font:600 11px var(--font-sys);color:var(--fg-faint);background:color-mix(in srgb,var(--surface) 88%,transparent);padding:3px 9px;border-radius:999px;border:1px solid var(--border);pointer-events:auto}
+#bkStatus.mal{color:var(--n-vermelho);border-color:var(--n-vermelho)}
+.sq-wa{color:var(--n-vermelho)}.sq-wa:hover,.sq-wa:focus-visible{border-color:var(--n-vermelho)!important}
+html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq-wa:focus-visible{border-color:var(--n-verde)!important}
 .sq-tab select[data-c="status"]{font-weight:600;transition:background-color .25s ease,border-color .25s ease}
 .sq-tab tr[data-st="CONFIRMADO"] select[data-c="status"]{background-color:color-mix(in srgb,var(--n-verde) 32%,var(--surface-2));border-color:var(--n-verde)}
 .sq-tab tr[data-st="PRÉ CONFIRMADO"] select[data-c="status"]{background-color:color-mix(in srgb,var(--n-ciano) 30%,var(--surface-2));border-color:var(--n-ciano)}
@@ -4060,7 +4063,21 @@ function sqCelular(nome){
 // um FAVORITO clicado na aba do WhatsApp abre o painel (que fica com window.opener = aba do WhatsApp), da um nome a aba e passa a ouvir pedidos.
 // O painel manda {tufWa2:'abrir',phone,text}; o favorito clica num link wa.me DENTRO do WhatsApp, que abre a conversa por dentro, sem recarregar.
 // Depois do ok o painel chama window.open('',nome): como a aba com esse nome ja existe, o Chrome so vai para ela (nao abre nem recarrega nada).
-var WA_ORIGEM='https://web.whatsapp.com', WA_LIG={on:false,esp:{},ult:{k:'',t:0}};
+var WA_ORIGEM='https://web.whatsapp.com', WA_LIG={on:false,esp:{},ult:{k:'',t:0},pong:0};
+// o simbolo do WhatsApp fica vermelho sem ligacao e verde com ligacao (classe wa-lig no html)
+// ultimo backup: lido de painel.area='backup_status' {ok,em,resumo|erro}; vermelho se falhou ou se passou de 2 h
+function bkRender(){
+  var b=window.sbAreas&&sbAreas.backup_status, el=document.getElementById('bkStatus');
+  if(!el){el=document.createElement('div');el.id='bkStatus';document.body.appendChild(el)}
+  if(modoCarregamento!=='supabase'||!b){el.style.display='none';return}
+  var t=b.em?new Date(b.em):null, ok=b.ok!==false&&t&&!isNaN(t), idade=ok?(Date.now()-t.getTime()):0, mal=!ok||idade>2*3600*1000;
+  var hh=t&&!isNaN(t)?String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'):'—';
+  el.style.display=''; el.className=mal?'mal':'';
+  el.textContent='Último backup: '+hh+(b.ok===false?' · falhou':(mal&&ok?' · atrasado':''));
+  el.title=b.ok===false?String(b.erro||'O último backup falhou'):(String(b.resumo||'')+(mal&&ok?' (há mais de 2 h)':''));
+}
+setInterval(function(){try{bkRender()}catch(e){}},60000);setTimeout(function(){try{bkRender()}catch(e){}},4000);
+function waSet(v){WA_LIG.on=!!v; document.documentElement.classList.toggle('wa-lig',!!v)}
 // o favorito abre o painel no endereco novo (Cloudflare) direto na Operacao de hoje (#sisoperacao)
 var WA_PAINEL_URL=(location.protocol==='file:'||/github.io$/.test(location.hostname)?'https://painel-site.pages.dev/':(location.origin+location.pathname))+'#sisoperacao';
 function waFavoritoCodigo(){
@@ -4097,10 +4114,16 @@ function waAbridor(){try{return window.opener&&!window.opener.closed?window.open
 window.addEventListener('message',function(e){
   if(e.origin!==WA_ORIGEM||!e.data||!e.data.tufWa2)return;
   var d=e.data;
-  if(d.tufWa2==='pronto'){var antes=WA_LIG.on; WA_LIG.on=true; if(!antes&&window.sqAviso)window.sqAviso('Painel ligado ao WhatsApp Web: o botão verde abre a conversa direto lá.'); return}
-  if(d.tufWa2==='ok'||d.tufWa2==='falhou'){WA_LIG.on=true; var f=WA_LIG.esp[d.id]; if(f){delete WA_LIG.esp[d.id]; f(d.tufWa2==='ok',String(d.nome||''))}}
+  if(d.tufWa2==='pronto'){var antes=WA_LIG.on; WA_LIG.pong=Date.now(); waSet(true); if(!antes&&window.sqAviso)window.sqAviso('Painel ligado ao WhatsApp Web: o botão verde abre a conversa direto lá.'); return}
+  if(d.tufWa2==='ok'||d.tufWa2==='falhou'){waSet(true); var f=WA_LIG.esp[d.id]; if(f){delete WA_LIG.esp[d.id]; f(d.tufWa2==='ok',String(d.nome||''))}}
 });
 try{var waAb=waAbridor(); if(waAb)waAb.postMessage({tufWa2:'ping'},WA_ORIGEM)}catch(e){}
+// confere a ligacao a cada 15 s: a aba do WhatsApp responde ao ping; sem resposta (aba fechada/recarregada) o simbolo volta a ficar vermelho
+setInterval(function(){
+  var ab=waAbridor(); if(!ab){if(WA_LIG.on)waSet(false);return}
+  var t0=Date.now(); try{ab.postMessage({tufWa2:'ping'},WA_ORIGEM)}catch(e){}
+  setTimeout(function(){if(WA_LIG.pong<t0&&WA_LIG.on)waSet(false)},2500);
+},15000);
 // leva o Chrome para a aba do WhatsApp: abrir uma janela pelo NOME de uma aba que ja existe so traz essa aba para a frente.
 // Se por algum motivo o nome nao for achado, o Chrome criaria uma aba em branco: ela e fechada na hora.
 function waIrParaWhats(nome){
@@ -4150,7 +4173,7 @@ function sqAbrirWhats(bt){
       if(window.sqAviso)window.sqAviso('Conversa de '+nome+' aberta no WhatsApp com a mensagem escrita.'+(foi?'':' Vá para a aba do WhatsApp e aperte Enter.'));
     };
     try{ab.postMessage({tufWa2:'abrir',id:id,phone:tel,text:txt},WA_ORIGEM)}catch(e){}
-    setTimeout(function(){if(respondeu)return; delete WA_LIG.esp[id]; WA_LIG.on=false; WA_LIG.ult.t=0; waAjuda(estava?'caiu':'semligacao')},1500);
+    setTimeout(function(){if(respondeu)return; delete WA_LIG.esp[id]; waSet(false); WA_LIG.ult.t=0; waAjuda(estava?'caiu':'semligacao')},1500);
     return;
   }
   // extensao TUF (opcional), se estiver instalada
@@ -5043,6 +5066,21 @@ function perfilIniciais(nome){
 function perfilAtualizarMarca(){
   var mk=document.querySelector('.rail-brand .mark'); if(mk)mk.textContent=perfilIniciais(perfilNomeExibido());
 }
+// traz o nome gravado na conta quando este navegador/endereco ainda nao tem apelido (ex.: abriu pelo endereco novo)
+function perfilNomeDaConta(){
+  try{
+    if(localStorage.getItem('tuf-perfil-nome'))return;
+    var c=sbCliente(); if(!c||!c.auth)return;
+    c.auth.getSession().then(function(r){
+      var u=r&&r.data&&r.data.session&&r.data.session.user, n=u&&u.user_metadata&&u.user_metadata.nome;
+      if(n&&!localStorage.getItem('tuf-perfil-nome')){
+        localStorage.setItem('tuf-perfil-nome',n);
+        var pn=document.getElementById('railNome'); if(pn)pn.textContent=n;
+        try{perfilAtualizarMarca()}catch(e){}
+      }
+    }).catch(function(){});
+  }catch(e){}
+}
 function perfilNomeExibido(){
   var apelido=''; try{apelido=localStorage.getItem('tuf-perfil-nome')||''}catch(e){}
   return apelido||(FIXOS&&FIXOS.perfil&&FIXOS.perfil.nome)||'';
@@ -5079,6 +5117,7 @@ function perfilNomeExibido(){
   document.getElementById('perfilSalvar').addEventListener('click',function(){
     var v=document.getElementById('perfilNome').value.trim();
     try{if(v)localStorage.setItem('tuf-perfil-nome',v);else localStorage.removeItem('tuf-perfil-nome')}catch(e){}
+    try{if(modoCarregamento==='supabase'){var cc=sbCliente();if(cc&&cc.auth&&cc.auth.updateUser)cc.auth.updateUser({data:{nome:v}}).catch(function(){})}}catch(e){}
     var pn=document.getElementById('railNome'); if(pn)pn.textContent=perfilNomeExibido();
     perfilAtualizarMarca();
     document.getElementById('perfilSub').textContent=perfilNomeExibido()||'Sem nome definido';
@@ -7949,6 +7988,7 @@ function sbCarregar(primeira){
     try{fsPreparar()}catch(e){}
     try{qdbIniciar()}catch(e){}
     try{fdbIniciar()}catch(e){}
+    try{perfilNomeDaConta()}catch(e){}
   }).catch(function(err){
     sbOcupado=false;
     var msg=String((err&&err.message)||'');
