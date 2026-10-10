@@ -13,7 +13,7 @@ import { operacao as calcOperacao, planejamento as calcPlanejamento } from './op
 import { montarFarmoOp } from './farmoop.mjs';
 import { sincronizarFarmo } from './farmohist.mjs';
 import { importarLegado } from './legado.mjs';
-import { montarFarmoMapa } from './farmomapa.mjs';
+import { montarFarmoMapa, completarEnderecos } from './farmomapa.mjs';
 import { ingerirDiasFechados } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
@@ -392,6 +392,7 @@ try {
     // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
     try {
       dados.farmoOp = await montarFarmoOp((aba, end) => lerAcomp(tk, aba, end, FARMO));
+      try { const nc = completarEnderecos(dados.farmoOp); console.log(`farmo enderecos completos aplicados: ${nc}`); } catch (e) { console.log(`FALHA enderecos completos: ${String(e.message).slice(0, 120)}`); }
       // coordenadas das paradas da Farmoterápica (mapa do site; área logada farmo_mapa)
       try { dados.farmoMapa = await montarFarmoMapa({ farmoOp: dados.farmoOp, base: dados.mapa && dados.mapa.base, cacheArq: join(AQUI, 'geocache.json') }); if (dados.farmoMapa) console.log(`farmo mapa: ${dados.farmoMapa.paradas.length} paradas com coordenada, ${dados.farmoMapa.semCoordenada.length} sem`); }
       catch (e) { console.log(`FALHA farmo mapa: ${String(e.message).slice(0, 160)}`); }
