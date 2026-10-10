@@ -1301,11 +1301,14 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <div class="nav-group">
         <a class="nav-item active" href="#" id="navFarmo" data-home="painel" aria-label="Farmoterápica" aria-expanded="false" title="Farmoterápica"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-35 12 12)"/><line x1="12" y1="8.2" x2="12" y2="15.8" transform="rotate(-35 12 12)"/></svg><span class="nav-label">Farmoterápica</span><svg class="nav-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
         <div class="nav-sub">
-          <a class="nav-subitem active" href="#" data-view="painel"><span class="nav-label">Visão geral</span></a>
           <a class="nav-subitem" href="#" data-view="farmoop"><span class="nav-label">Operação</span></a>
+          <a class="nav-subitem" href="#" data-view="farmobm"><span class="nav-label">Bolsa Multi</span></a>
           <a class="nav-subitem" href="#" data-view="farmodev"><span class="nav-label">Devolução</span></a>
-          <a class="nav-subitem" href="#" data-view="farmocons"><span class="nav-label">Consulta</span></a>
           <a class="nav-subitem" href="#" data-view="motoristas"><span class="nav-label">Motoristas</span></a>
+          <span class="nav-sep" aria-hidden="true"></span>
+          <a class="nav-subitem" href="#" data-view="farmocons"><span class="nav-label">Consulta</span></a>
+          <span class="nav-sep" aria-hidden="true"></span>
+          <a class="nav-subitem active" href="#" data-view="painel"><span class="nav-label">Visão geral</span></a>
         </div>
       </div>
       <a class="nav-item" href="#" data-view="frota" aria-label="Frota" title="Frota"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4.5L21 12.5V16h-8"/><circle cx="7" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg><span class="nav-label">Frota</span></a>
@@ -4443,7 +4446,7 @@ function renderOperacao(){
   corpo.innerHTML=nota+'<section class="op-cards">'+cards+'</section>'+'<section class="op-linha l1">'+motivos+'</section><section class="op-duas"><div class="op-col">'+lojas+'</div><div class="op-col">'+rosca+repos+custo+'</div><div class="op-kpi-lado">'+cards+'</div></section><section class="op-linha l3">'+ret+avisos+port+'</section><section class="op-grid op-grid2">'+listas+'</section>';
   window.requestAnimationFrame(opGraficos);
 }
-var AREAS_BREVE={frota:'Frota',ti:'T.I',rh:'Recursos Humanos'};
+var AREAS_BREVE={frota:'Frota',ti:'T.I',rh:'Recursos Humanos',farmobm:'Bolsa Multi'};
 function mostrarView(v){
   var views={painel:'viewPainel',operacao:'viewOperacao',planejamento:'viewOperacao',mapa:'viewMapa',sisoperacao:'viewSisOp',sisconsulta:'viewSisCons',sisplanejamento:'viewSisOp',contratos:'viewContratos',motoristas:'viewFuncionarios',funcionarios:'viewFuncionarios',remanejamento:'viewRemanejamento',pontofaltas:'viewPontoFaltas',atestados:'viewPfMotivo',sumidos:'viewPfMotivo',farmoop:'viewFarmoOp',farmodev:'viewFarmoDev',farmocons:'viewFarmoCons'};
   var breve=!!AREAS_BREVE[v];
@@ -4471,7 +4474,7 @@ function mostrarView(v){
   Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-view]'),function(a){
     a.classList.toggle('active',a.getAttribute('data-view')===v);
   });
-  document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas'||v==='farmoop'||v==='farmodev'||v==='farmocons');
+  document.getElementById('navFarmo').classList.toggle('active',v==='painel'||v==='motoristas'||v==='farmoop'||v==='farmodev'||v==='farmocons'||v==='farmobm');
   if(v==='farmocons')renderFarmoCons();
   if(v==='farmoop')renderFarmoOp();
   if(v==='farmodev')renderFarmoDev();
