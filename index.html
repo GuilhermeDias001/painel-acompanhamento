@@ -5590,7 +5590,7 @@ function fopDia(iso){
   // dia vazio e reconstruido a partir do cadastro de paradas
   var c=fopCfg(), base=(c.operacaoDia&&c.operacaoDia[iso])||(c.operacaoHoje&&c.dataHoje===iso?c.operacaoHoje:null), cad=fopCad();
   if(!base&&cad&&cad.rotas){base=[];cad.rotas.forEach(function(r){r.paradas.forEach(function(x){base.push({rota:r.rota,end:x.end,hor:x.hor,bairro:x.bairro,pnet:x.pnet})})})}
-  d=FOP.dias[iso]={linhas:base?base.map(function(x){return {rota:x.rota||'',end:x.endereco||x.end||'',hor:x.horario||x.hor||'',bairro:x.bairro||'',pnet:x.codigoPnet||x.pnet||'',port:x.portador||x.port||'',bolsa:String(x.bolsa||'').toUpperCase(),term:String(x.termometro||x.term||'').toUpperCase()}}):[]};
+  d=FOP.dias[iso]={linhas:base?base.map(function(x){return {rota:x.rota||'',end:x.endereco||x.end||'',hor:x.horario||x.hor||'',bairro:x.bairro||'',pnet:x.codigoPnet||x.pnet||'',port:'',bolsa:'',term:''}}):[]};
   d.linhas=fopLayAplica(d.linhas);
   return d;
 }
