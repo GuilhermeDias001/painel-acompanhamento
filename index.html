@@ -1088,6 +1088,11 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .cont-vrem:hover,.cont-vrem:focus-visible{color:var(--n-vermelho);border-color:var(--n-vermelho);outline:none}
 .cont-conf{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:12px 14px;border:1px solid var(--n-vermelho);border-radius:10px;background:color-mix(in srgb,var(--n-vermelho) 12%,var(--surface-2));font-size:13px}
 .cont-conf b{color:var(--fg)}
+/* confirmacao dentro da ficha (grade de 3 colunas): ocupa a largura toda, em uma faixa so, com os botoes a direita */
+.ficha-corpo>.cont-conf{grid-column:1/-1;align-self:start;margin:6px 0 12px;flex-wrap:nowrap}
+.ficha-corpo>.cont-conf>span{flex:1 1 auto;min-width:0;line-height:1.45}
+.ficha-corpo>.cont-conf>span:last-child{display:flex;gap:8px;flex:none}
+@media (max-width:760px){.ficha-corpo>.cont-conf{flex-wrap:wrap}}
 #estModal{z-index:84}
 .est-campos{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .est-campos label{display:flex;flex-direction:column;gap:6px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-muted)}
