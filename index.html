@@ -2892,7 +2892,7 @@ function fichaRender(p){
       if(f[0]==='__rem')return '<div class="ficha-c"><dt>'+f[1]+'</dt><dd>'+fichaRemanejamento(p)+'</dd></div>';
       if(f[0]==='tipoMot')return p._farmo?'<div class="ficha-c"><dt>'+f[1]+'</dt><dd>'+fichaTipoMotHtml(p)+'</dd></div>':'';
       if(f[0]==='funcao'&&p._farmo)return '<div class="ficha-c"><dt>'+f[1]+'</dt><dd>'+(fichaEditando?fichaFarmoEdit(p):fichaFarmoView(p))+'</dd></div>';
-      if(fichaEditando&&!mascara)return '<div class="ficha-c"><dt>'+f[1]+'</dt><dd><input class="ficha-in" data-k="'+f[0]+'" type="'+(f[2]?'date':'text')+'" value="'+esc(v||'')+'" maxlength="120" aria-label="'+esc(f[1])+'"></dd></div>';
+      if(fichaEditando&&!mascara&&perfilEditaCampo(f[0]))return '<div class="ficha-c"><dt>'+f[1]+'</dt><dd><input class="ficha-in" data-k="'+f[0]+'" type="'+(f[2]?'date':'text')+'" value="'+esc(v||'')+'" maxlength="120" aria-label="'+esc(f[1])+'"></dd></div>';
       return '<div class="ficha-c"><dt>'+f[1]+'</dt><dd>'+fichaValor(p,f)+'</dd></div>';
     }).join('')+'</dl></section>';
   }).join('');
@@ -2916,7 +2916,7 @@ function abrirFicha(p,ctx){
   document.getElementById('fichaFechar').focus();
 }
 document.getElementById('fichaEditar').addEventListener('click',function(){
-  if(!fichaAtual)return;
+  if(!fichaAtual||!perfilEscreve())return;
   fichaExcluindo=false; fichaEditando=!fichaEditando; fichaRender(fichaAtual);
   if(fichaEditando){var i=document.querySelector('#fichaCorpo .ficha-in');if(i)i.focus()}
 });
@@ -5808,7 +5808,31 @@ function renderPfMotivo(modo){
 // ===== Atestados: um registro por episodio (dias seguidos); arquivo guardado neste navegador (IndexedDB) ate o banco/Storage existir =====
 var ATEST={};
 try{ATEST=JSON.parse(localStorage.getItem('tuf-atestados')||'{}')||{}}catch(e){ATEST={}}
-function atSalvar(){try{localStorage.setItem('tuf-atestados',JSON.stringify(ATEST))}catch(e){}}
+function atDb(){return typeof qdbAtivo==='function'&&qdbAtivo()}
+function atSalvar(){if(atDb())return;try{localStorage.setItem('tuf-atestados',JSON.stringify(ATEST))}catch(e){}}
+// no site logado: o cadastro vai para atestado/atestado_status e o arquivo para o bucket privado (nada fica no navegador)
+var AT_DB={carregando:false,t:0};
+function atCarregar(forcar){
+  if(!atDb()||AT_DB.carregando)return; if(!forcar&&Date.now()-AT_DB.t<20000)return;
+  AT_DB.carregando=true; var c=sbCliente();
+  Promise.all([
+    c.from('atestado').select('id,funcionario_chave,inicio,fim,motivo,observacao,arquivo_path,criado_em,quem').order('criado_em',{ascending:true}).limit(3000),
+    c.from('atestado_status').select('atestado_id,status,motivo,criado_em,quem').order('criado_em',{ascending:true}).limit(8000)
+  ]).then(function(r){
+    if(r[0].error)throw r[0].error; if(r[1].error)throw r[1].error;
+    var st={}; (r[1].data||[]).forEach(function(x){st[x.atestado_id]=x}); // a situacao atual e a linha mais recente
+    var por={}; (r[0].data||[]).forEach(function(x){var k=x.funcionario_chave+'|'+x.inicio;(por[k]=por[k]||[]).push(x)});
+    var novo={};
+    Object.keys(por).forEach(function(k){
+      var ls=por[k], u=ls[ls.length-1], su=st[u.id]||{status:'PENDENTE'}, dec=su.status!=='PENDENTE';
+      function arq(x){return {id:x.id,path:x.arquivo_path,nome:x.observacao||'arquivo',tipo:'',tamanho:0}}
+      novo[k]={nome:'',inicio:u.inicio,fim:u.fim,arquivo:arq(u),status:su.status,enviadoEm:u.criado_em,enviadoPor:u.quem||'',decididoEm:dec?su.criado_em:'',decididoPor:dec?(su.quem||''):'',
+        historico:ls.slice(0,-1).map(function(x){var sx=st[x.id]||{status:'PENDENTE'};return {arquivo:arq(x),enviadoEm:x.criado_em,enviadoPor:x.quem||'',decididoEm:sx.status!=='PENDENTE'?sx.criado_em:'',decididoPor:sx.quem||'',status:sx.status}})};
+    });
+    ATEST=novo; AT_DB.t=Date.now(); AT_DB.carregando=false;
+    try{var v=document.getElementById('viewPfMotivo');if(v&&v.style.display!=='none')renderPfMotivo();var m=document.getElementById('atModal');if(m&&!m.hidden)atRender()}catch(e){}
+  }).catch(function(e){AT_DB.carregando=false;AT_DB.t=Date.now();if(window.sqAviso&&!AT_DB.avisou){AT_DB.avisou=1;window.sqAviso('Não foi possível carregar os atestados agora ('+String((e&&e.message)||'erro')+').')}});
+}
 var AT_MAX=5*1024*1024;
 function idbAbre(){
   return new Promise(function(ok,err){
@@ -5847,6 +5871,7 @@ function atStatus(ep){
 }
 var AT_EPS={};
 function pmRenderAtestados(lista,de,ate,hj){
+  atCarregar();
   var eps=pmEpisodios(lista); AT_EPS={}; eps.forEach(function(e){AT_EPS[e.k]=e});
   eps.sort(function(a,b){return a.inicio<b.inicio?1:a.inicio>b.inicio?-1:String(a.nome).localeCompare(String(b.nome),'pt-BR')});
   var nao=eps.filter(function(e){return atStatus(e).t==='Não enviado'}).length, pend=eps.filter(function(e){return atStatus(e).t==='Atestado pendente de aprovação'}).length, ok=eps.filter(function(e){return atStatus(e).t==='Atestado aprovado'}).length;
@@ -5895,6 +5920,25 @@ function atRender(msg){
 function atEnviar(file){
   var ep=AT_EPS[AT_ATUAL]; if(!ep||!file)return;
   if(!/\.(pdf|jpe?g|png)$/i.test(file.name)){atRender('Formato não aceito. Envie PDF, JPG ou PNG.');return}
+  if(atDb()){
+    var ext=((file.name.match(/.([a-z0-9]+)$/i)||[])[1]||'').toLowerCase();
+    if(!/^(pdf|jpe?g|png|webp|heic)$/.test(ext)){atRender('Formato não aceito. Envie PDF, JPG, PNG, WEBP ou HEIC.');return}
+    if(file.size>10*1024*1024){atRender('Arquivo maior que 10 MB.');return}
+    var id2=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():null; if(!id2){atRender('Este navegador não consegue gerar o código do arquivo.');return}
+    var dn=new Date(), caminho=dn.getFullYear()+'/'+String(dn.getMonth()+1).padStart(2,'0')+'/'+id2+'.'+ext, cl=sbCliente();
+    atRender('Enviando o arquivo…');
+    cl.storage.from('atestados').upload(caminho,file,{contentType:file.type||'application/octet-stream',upsert:false}).then(function(r){
+      if(r.error)throw r.error;
+      return cl.from('atestado').insert({id:id2,funcionario_chave:funcChave(ep.nome),tipo:'atestado',inicio:ep.inicio,fim:ep.fim,motivo:Object.keys(ep.motivos||{})[0]||'',observacao:file.name,arquivo_path:caminho});
+    }).then(function(r){
+      if(r.error)throw r.error;
+      return cl.from('atestado_status').insert({atestado_id:id2,status:'PENDENTE'});
+    }).then(function(r){
+      if(r.error)throw r.error;
+      atCarregar(true); atRender('Arquivo enviado. Atestado pendente de aprovação.');
+    }).catch(function(e){atRender('Não foi possível enviar: '+String((e&&e.message)||'erro'))});
+    return;
+  }
   if(file.size>AT_MAX){atRender('Arquivo maior que 5 MB.');return}
   var id='AT'+Date.now().toString(36).toUpperCase(), atual=ATEST[ep.k], recusado=atual&&atual.status==='RECUSADO', ant=atual&&atual.arquivo, hist=(atual&&atual.historico)||[];
   if(recusado&&ant)hist=hist.concat([{arquivo:ant,enviadoEm:atual.enviadoEm,enviadoPor:atual.enviadoPor,decididoEm:atual.decididoEm,decididoPor:atual.decididoPor,status:'RECUSADO'}]);
@@ -5922,6 +5966,13 @@ function atEnviar(file){
   ['dragleave','drop'].forEach(function(ev){document.getElementById('atCorpo').addEventListener(ev,function(e){var d=e.target.closest('#atDrop');if(d){e.preventDefault();d.classList.remove('sobre');if(ev==='drop'&&e.dataTransfer.files[0])atEnviar(e.dataTransfer.files[0])}})});
   function abrirArq(){
     var a=ATEST[AT_ATUAL]; if(!a||!a.arquivo)return;
+    if(atDb()){
+      sbCliente().storage.from('atestados').createSignedUrl(a.arquivo.path,60).then(function(r){
+        if(r.error||!r.data)throw (r.error||new Error('sem link'));
+        window.open(r.data.signedUrl,'_blank','noopener');
+      }).catch(function(){atRender('Não foi possível abrir o arquivo.')});
+      return;
+    }
     idbOp('readonly',function(st){return st.get(a.arquivo.id)}).then(function(b){
       if(!b){atRender('Arquivo não encontrado neste navegador.');return}
       var url=URL.createObjectURL(b); var w=window.open(url,'_blank'); if(!w){var l=document.createElement('a');l.href=url;l.download=a.arquivo.nome;l.click()}
@@ -5931,6 +5982,12 @@ function atEnviar(file){
   document.getElementById('atRod').addEventListener('click',function(e){
     var b=e.target.closest('[data-at]'); if(!b)return; var a=ATEST[AT_ATUAL]; if(!a||a.decididoEm)return;
     var ap=b.getAttribute('data-at')==='aprovar';
+    if(atDb()){
+      sbCliente().from('atestado_status').insert({atestado_id:a.arquivo.id,status:ap?'APROVADO':'RECUSADO'}).then(function(r){
+        if(r.error)throw r.error; atCarregar(true); atRender(ap?'Atestado aprovado.':'Atestado recusado.');
+      }).catch(function(er){atRender('Não foi possível registrar: '+String((er&&er.message)||'erro'))});
+      return;
+    }
     a.status=ap?'APROVADO':'RECUSADO'; a.decididoEm=new Date().toISOString(); a.decididoPor=sqQuem(); atSalvar();
     SQ_AUD.push({t:new Date().toISOString(),quem:sqQuem(),modo:'cadastro',dia:sqHoje(),linha:funcChave(a.nome),loja:a.nome,campo:'atestado',antes:'pendente de aprovação',depois:ap?'aprovado':'recusado',acao:'editar',origem:'ponto e faltas'});
     try{localStorage.setItem('tuf-sq-aud',JSON.stringify(SQ_AUD))}catch(er){}
@@ -5946,7 +6003,7 @@ document.getElementById('pmCorpo').addEventListener('click',function(e){var tr=e
 var FOP={dias:{},fechados:{}}, FOD={dias:{},fechados:{}};
 try{FOP=JSON.parse(localStorage.getItem('tuf-farmo-op')||'null')||FOP}catch(e){}
 try{FOD=JSON.parse(localStorage.getItem('tuf-farmo-dev')||'null')||FOD}catch(e){}
-function fopSalvar(){try{localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP));localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}catch(e){}try{fsAgendar()}catch(e){}}
+function fopSalvar(){try{if(!(typeof fsAtivo==='function'&&fsAtivo())){localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP));localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}}catch(e){}try{fsAgendar()}catch(e){}}
 var FOP_ROTAS=['1 MANHA - CENTRO/NORTE','2 MANHA - LESTE','3 MANHA - SUL','4 MANHA - CENTRO/OESTE','5 MANHA - NORTE/OESTE 2','1 TARDE - CENTRO/NORTE','2 TARDE - LESTE','3 TARDE - SUL','4 TARDE - CENTRO/OESTE','5 TARDE - LITORAL NORTE','6 TARDE - VALE DO PARAIBA','Noite - Alto Tiete','Noite - Litoral'];
 var FOP_TIT={tit:{},des:{},fol:'',folDes:''};
 try{FOP_TIT=Object.assign({tit:{},des:{},fol:'',folDes:''},JSON.parse(localStorage.getItem('tuf-farmo-tit')||'null')||{})}catch(e){}
@@ -6432,7 +6489,7 @@ function fsPreparar(){
         dvs.forEach(function(x){FS.snapDev[x.turno+'|'+x.ordem]=JSON.stringify({dia:iso,turno:x.turno,ordem:x.ordem,bolsa_p:x.bolsa_p,bolsa_m:x.bolsa_m,bolsa_g:x.bolsa_g,termometro1:x.termometro1,termometro2:x.termometro2})});
       }
       FS.dia=iso; FS.pronto=true; FS.carregando=false; FS.erro=''; fsAssinar(iso);
-      try{localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP));localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}catch(e){}
+      /*sem-local*/
       FOP_HIST={dia:'',s:[],p:-1};
       try{renderFarmoOp();renderFarmoDev()}catch(e){}
       return fsSync(); // grava o que o banco ainda nao tem (dia novo ou linhas novas)
@@ -6535,7 +6592,7 @@ function fsEvOp(iso,p){
     if(novo!==local&&(antV===null||local===antV)){l[m[1]]=novo;mudou=true}
   });
   FS.snapOp[nw.linha]=JSON.stringify(fsLinhaOp({rota:nw.rota,end:nw.endereco,hor:nw.horario,bairro:nw.bairro,pnet:nw.codigo_pnet,port:nw.portador,bolsa:nw.bolsa,term:nw.termometro},nw.linha,iso,nw.sugestao));
-  if(mudou){try{localStorage.setItem('tuf-farmo-op',JSON.stringify(FOP))}catch(e){}fsRender()}
+  if(mudou){/*sem-local*/fsRender()}
 }
 function fsEvDv(iso,p){
   if(FS.dia!==iso||!FS.pronto)return;
@@ -6547,7 +6604,7 @@ function fsEvDv(iso,p){
     if(novo!==local&&local===antV){l[m[1]]=novo;mudou=true}
   });
   FS.snapDev[k]=JSON.stringify({dia:nw.dia,turno:nw.turno,ordem:nw.ordem,bolsa_p:nw.bolsa_p||'',bolsa_m:nw.bolsa_m||'',bolsa_g:nw.bolsa_g||'',termometro1:nw.termometro1||'',termometro2:nw.termometro2||''});
-  if(mudou){try{localStorage.setItem('tuf-farmo-dev',JSON.stringify(FOD))}catch(e){}fsRender()}
+  if(mudou){/*sem-local*/fsRender()}
 }
 function fsRotulo(){
   var iso=sqHoje(), t='Hoje · '+iso.split('-').reverse().join('/');
@@ -7937,6 +7994,41 @@ document.getElementById('authBtn').addEventListener('click',authEntrar);
 // === Supabase: login por pessoa; le public.painel (area, dados, versao) ===
 var SB_URL='https://jetujppwmyzyfkaflplj.supabase.co', SB_KEY='sb_publishable_YcpuHMfj_lFqs9BiG6GVag_lPNGkadJ';
 var SB=null, sbVersoes={}, sbAreas={}, sbOcupado=false;
+var PERFIL=null; // null = modo local (sem login); 'admin' | 'operador' | 'leitor'; '' = sem perfil
+var PERFIL_FICHA_OP=['celularProprio','celularEmergencia','parentesco','email','funcao','tipoMot'];
+function perfilAdmin(){return PERFIL===null||PERFIL==='admin'}
+function perfilEscreve(){return PERFIL===null||PERFIL==='admin'||PERFIL==='operador'}
+function perfilEditaCampo(k){return perfilAdmin()||(PERFIL==='operador'&&PERFIL_FICHA_OP.indexOf(k)>=0)}
+function perfilGarante(c){
+  if(PERFIL)return Promise.resolve();
+  return c.from('usuario_perfil').select('perfil').maybeSingle().then(function(r){
+    if(r.error)throw r.error;
+    PERFIL=(r.data&&r.data.perfil)||'';
+    if(!PERFIL){var e=new Error('sem perfil');e.semPerfil=true;throw e}
+  });
+}
+// sem perfil o banco nega tudo: avisa e nao carrega nada
+function sbSemPerfil(){
+  var a=document.getElementById('authScreen'); if(!a)return;
+  a.style.display='flex'; telaCargaOcultar(0);
+  document.getElementById('authMsg').textContent='Acesso pendente: peça a liberação ao administrador.';
+  ['authEmail','authSenha'].forEach(function(id){document.getElementById(id).style.display='none'});
+  var b=document.getElementById('authBtn'); b.disabled=false; b.textContent='Sair';
+  b.onclick=function(){tufLimparLocal();SB.auth.signOut().then(function(){location.reload()},function(){location.reload()})};
+  document.getElementById('authStatus').textContent='';
+}
+// esconde o que o perfil nao le e trava a edicao do leitor
+function perfilAplicar(){
+  var h=document.documentElement; h.classList.remove('perfil-admin','perfil-operador','perfil-leitor'); if(PERFIL)h.classList.add('perfil-'+PERFIL);
+  var esconder=[]; if(!perfilAdmin())esconder.push('rh','motoristas'); if(PERFIL==='leitor')esconder.push('funcionarios','atestados','sumidos');
+  document.querySelectorAll('[data-view]').forEach(function(a){var v=a.getAttribute('data-view'); if(esconder.indexOf(v)>=0){a.style.display='none'}});
+  if(esconder.indexOf((location.hash||'').slice(1))>=0){try{mostrarView('painel')}catch(e){}}
+  if(PERFIL==='leitor'&&!window.__tufSoLeitura){
+    window.__tufSoLeitura=1; var t=null;
+    var trava=function(){['#sqCorpo','#fopCorpo','#fodBlocos','#lgCorpo'].forEach(function(sel){document.querySelectorAll(sel+' input,'+sel+' select,'+sel+' textarea').forEach(function(e){e.disabled=true})})};
+    new MutationObserver(function(){clearTimeout(t);t=setTimeout(trava,80)}).observe(document.body,{childList:true,subtree:true}); trava();
+  }
+}
 function sbCliente(){
   if(SB)return SB;
   if(!window.supabase)return null;
@@ -7970,7 +8062,7 @@ function sbMontarDados(){
 function sbCarregar(primeira){
   var c=sbCliente(); if(!c||sbOcupado)return Promise.resolve();
   sbOcupado=true;
-  return c.from('painel').select('area,versao').then(function(res){
+  return perfilGarante(c).then(function(){return c.from('painel').select('area,versao')}).then(function(res){
     if(res.error)throw res.error;
     var mudou=(res.data||[]).filter(function(x){return sbVersoes[x.area]!==x.versao});
     if(!mudou.length)return null;
@@ -7992,8 +8084,10 @@ function sbCarregar(primeira){
     try{qdbIniciar()}catch(e){}
     try{fdbIniciar()}catch(e){}
     try{perfilNomeDaConta()}catch(e){}
+    try{perfilAplicar()}catch(e){}
   }).catch(function(err){
     sbOcupado=false;
+    if(err&&err.semPerfil){sbSemPerfil();return}
     var msg=String((err&&err.message)||'');
     if(/jwt|auth|401|permission|not authorized/i.test(msg)||(err&&err.status===401)){sbMostrarLogin();return}
     if(primeira){
