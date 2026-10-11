@@ -13,7 +13,7 @@ import { operacao as calcOperacao, planejamento as calcPlanejamento } from './op
 import { montarFarmoOp } from './farmoop.mjs';
 import { sincronizarFarmo } from './farmohist.mjs';
 import { importarLegado } from './legado.mjs';
-import { montarFarmoMapa, completarEnderecos } from './farmomapa.mjs';
+import { montarFarmoMapa, completarEnderecos, linhasDoBancoParaMapa } from './farmomapa.mjs';
 import { ingerirDiasFechados } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
@@ -394,7 +394,16 @@ try {
       dados.farmoOp = await montarFarmoOp((aba, end) => lerAcomp(tk, aba, end, FARMO));
       try { const nc = completarEnderecos(dados.farmoOp); console.log(`farmo enderecos completos aplicados: ${nc}`); } catch (e) { console.log(`FALHA enderecos completos: ${String(e.message).slice(0, 120)}`); }
       // coordenadas das paradas da Farmoterápica (mapa do site; área logada farmo_mapa)
-      try { dados.farmoMapa = await montarFarmoMapa({ farmoOp: dados.farmoOp, base: dados.mapa && dados.mapa.base, cacheArq: join(AQUI, 'geocache.json') }); if (dados.farmoMapa) console.log(`farmo mapa: ${dados.farmoMapa.paradas.length} paradas com coordenada, ${dados.farmoMapa.semCoordenada.length} sem`); }
+      try { let fopMapa = dados.farmoOp;
+        if (process.env.SUPABASE_SECRET) { // dia aberto do banco (site manda): só linhas com bolsa
+          try {
+            const hh = { apikey: process.env.SUPABASE_SECRET }; if (process.env.SUPABASE_SECRET.startsWith('eyJ')) hh.Authorization = 'Bearer ' + process.env.SUPABASE_SECRET;
+            const gj = async (p) => { const r = await fetch(`https://jetujppwmyzyfkaflplj.supabase.co/rest/v1/${p}`, { headers: hh }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); };
+            const dia = (await gj('farmo_dia?select=dia&status=neq.fechado&order=dia.desc&limit=1'))[0]?.dia;
+            if (dia) { const ls = await gj(`farmo_operacao_linha?select=rota,endereco,bairro,bolsa,codigo_pnet&dia=eq.${dia}&bolsa=neq.&limit=1000`); fopMapa = linhasDoBancoParaMapa(ls); console.log(`farmo mapa: dia ${dia} do banco, ${fopMapa.operacaoHoje.length} linhas com bolsa`); }
+          } catch (e) { console.log('FALHA farmo mapa (banco): ' + String(e.message).slice(0, 120)); }
+        }
+        dados.farmoMapa = await montarFarmoMapa({ farmoOp: fopMapa, base: dados.mapa && dados.mapa.base, cacheArq: join(AQUI, 'geocache.json') }); if (dados.farmoMapa) console.log(`farmo mapa: ${dados.farmoMapa.paradas.length} paradas com coordenada, ${dados.farmoMapa.semCoordenada.length} sem`); }
       catch (e) { console.log(`FALHA farmo mapa: ${String(e.message).slice(0, 160)}`); }
       // cópia fiel das abas legadas (sem Pix/PIN/banco): roda uma vez por aba, só no Actions ou em teste local com TUF_LEGADO_SECO=1
       if (process.env.SUPABASE_SECRET || process.env.TUF_LEGADO_SECO) {

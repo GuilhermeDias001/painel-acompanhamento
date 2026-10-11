@@ -58,6 +58,20 @@ export function completarEnderecos(farmoOp) {
   return n;
 }
 
+// Dia aberto vindo do BANCO (o site é a fonte da verdade): só linhas com BOLSA preenchida entram no mapa (Guilherme, 11/10).
+// O endereço do banco pode já estar no padrão 'Rua X, 123 - Bairro, Cidade - UF' (gravado pelo gerador): desfaz para o endereço completo; senão tenta o cadastro da TNS.
+export function linhasDoBancoParaMapa(linhas) {
+  const op = (linhas || []).filter((l) => txt(l.bolsa)).map((l) => {
+    const o = { rota: l.rota, endereco: l.endereco, bairro: l.bairro, bolsa: l.bolsa, codigoPnet: l.codigo_pnet };
+    const m = /^(.*\S),\s*(\d+[A-Za-z]?(?:\/\d+)?)\s+-\s+([^,]*),\s*(.*\S)\s+-\s+([A-Za-z]{2})$/.exec(txt(l.endereco));
+    if (m) { o.enderecoCompleto = `${m[1]} ${m[2]}, ${m[3]}, ${m[4]}-${m[5].toUpperCase()}`; o.bairroCompleto = m[3]; o.cidade = m[4]; }
+    return o;
+  });
+  const fm = { operacaoHoje: op, enderecosPorRota: [] };
+  completarEnderecos({ operacaoHoje: op.filter((o) => !o.enderecoCompleto), enderecosPorRota: [] });
+  return fm;
+}
+
 // Google Geocoding (segredo GOOGLE_GEOCODE_KEY no GitHub; a chave nunca vai para o log nem para o repositório).
 // Só aceita resultado PRECISO (ROOFTOP = no endereço; RANGE_INTERPOLATED = no número, interpolado na rua) e sem partial_match.
 // Centro de rua/bairro/cidade (GEOMETRIC_CENTER / APPROXIMATE) é recusado: fica "sem coordenada" (Guilherme, 10/10: sem aproximação).
