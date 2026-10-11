@@ -4,6 +4,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { nominatim, geocodificar } from './mapa.mjs';
 
 const txt = (v) => (v == null ? '' : String(v)).trim();
@@ -105,6 +106,11 @@ async function achar(endereco, bairro) {
   return null;
 }
 
+function lerManuais() {
+  for (const c of [fileURLToPath(new URL('./farmo-coordenadas.json', import.meta.url)), join(homedir(), '.tuf-segredos', 'farmo-coordenadas.json')]) if (existsSync(c)) { try { return JSON.parse(readFileSync(c, 'utf8')); } catch { /* arquivo ruim */ } }
+  return [];
+}
+
 export async function montarFarmoMapa({ farmoOp, base, cacheArq, limite = 100 }) {
   if (!farmoOp) return undefined;
   const cache = existsSync(cacheArq) ? JSON.parse(readFileSync(cacheArq, 'utf8')) : {};
@@ -120,6 +126,8 @@ export async function montarFarmoMapa({ farmoOp, base, cacheArq, limite = 100 })
   };
   for (const x of farmoOp.enderecosPorRota || []) add(x.rota, x.endereco, x);
   for (const l of farmoOp.operacaoHoje || []) add(l.rota, l.endereco, l);
+  // coordenadas conferidas à mão no Google Maps (Guilherme, 11/10): ficam no cofre e valem acima de qualquer consulta
+  const manuais = new Map(); for (const m of lerManuais()) manuais.set(sem(m.completo), m);
   let novos = 0; const paradas = [], semCoordenada = [];
   for (const p of lista) {
     const ck = p.enderecoCompleto ? `fm2|${sem(p.enderecoCompleto)}` : `fm1|${sem(p.endereco)}|${sem(p.bairro)}`;
@@ -127,6 +135,8 @@ export async function montarFarmoMapa({ farmoOp, base, cacheArq, limite = 100 })
     if (p.enderecoCompleto && cache[ck] && !cache[ck].nf && !['google', 'numero'].includes(cache[ck].fonte)) cache[ck] = null;
     // com a chave do Google, coordenada do Nominatim ('numero') é refeita uma vez no Google
     if (p.enderecoCompleto && process.env.GOOGLE_GEOCODE_KEY && cache[ck] && cache[ck].fonte === 'numero') cache[ck] = null;
+    const man = p.enderecoCompleto && manuais.get(sem(p.enderecoCompleto));
+    if (man) { paradas.push({ ...p, lat: man.lat, lng: man.lng, precisao: 'manual' }); continue; }
     // sem endereço completo (só a rua) não há coordenada confiável: nada de aproximação (Guilherme, 10/10)
     if (!p.enderecoCompleto) { semCoordenada.push({ ...p, motivo: 'sem endereço completo' }); continue; }
     // "não achou" fica guardado por 24 h ({nf, em}) para não repetir consulta (e custo) a cada ciclo
