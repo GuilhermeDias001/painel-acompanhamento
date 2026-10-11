@@ -5,13 +5,16 @@
 // Confere o tamanho no OneDrive depois de enviar e falha (erro visível no Actions) se algo não bater.
 // Não loga conteúdo (repositório público). Nunca lê chave Pix: o banco não a contém.
 import { gzipSync } from 'node:zlib';
-import { SUPABASE_URL } from './supabase.mjs';
+import { SUPABASE_URL, semProibidos } from './supabase.mjs';
+import { cifrarBuf } from './cofre.mjs';
+// CIFRADO (auditoria 11/10, A3): AES-256-GCM com chave derivada da CHAVE_CI (rótulo 'tuf-backup-v1'); abrir com restaurar-backup.mjs.
+// Trava extra: nenhum campo pix/pin entra no arquivo (semProibidos).
 
 const PASTA = 'Backups Painel';
 const DIAS = 30;
 const HORAS = 48;
 const G = 'https://graph.microsoft.com/v1.0/me/drive/root:/';
-const NOME = /^painel-(\d{4}-\d{2}-\d{2})(?:-(\d{2}))?\.json\.gz$/;
+const NOME = /^painel-(\d{4}-\d{2}-\d{2})(?:-(\d{2}))?\.json\.gz(?:\.enc)?$/;
 
 const agoraSP = () => new Date(Date.now() - 3 * 3600e3).toISOString(); // AAAA-MM-DDTHH:...
 
@@ -34,10 +37,11 @@ async function lerTabela({ nome, colunas }, h) {
   }
 }
 
-export async function backupDiario(segredo, accessToken) {
+export async function backupDiario(segredo, accessToken, chaveCi) {
+  if (!chaveCi) throw new Error('backup sem CHAVE_CI: não grava arquivo aberto');
   const gh = { Authorization: 'Bearer ' + accessToken };
   const agora = agoraSP();
-  const nome = `painel-${agora.slice(0, 10)}-${agora.slice(11, 13)}.json.gz`;
+  const nome = `painel-${agora.slice(0, 10)}-${agora.slice(11, 13)}.json.gz.enc`;
   const lista = await fetch(`${G}${encodeURIComponent(PASTA)}:/children?$select=name,size&$top=500`, { headers: gh });
   if (!lista.ok && lista.status !== 404) throw new Error('listar pasta de backup HTTP ' + lista.status);
   const existentes = lista.ok ? (await lista.json()).value : [];
@@ -47,12 +51,12 @@ export async function backupDiario(segredo, accessToken) {
   if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
   const dump = { geradoEm: new Date().toISOString(), tabelas: {} };
   const tabs = await tabelasDoBanco(h);
-  for (const t of tabs) dump.tabelas[t.nome] = await lerTabela(t, h);
-  const buf = gzipSync(Buffer.from(JSON.stringify(dump)));
+  for (const t of tabs) dump.tabelas[t.nome] = semProibidos(await lerTabela(t, h));
+  const buf = cifrarBuf(gzipSync(Buffer.from(JSON.stringify(dump))), chaveCi, 'tuf-backup-v1');
 
   const url = `${G}${encodeURIComponent(PASTA)}/${encodeURIComponent(nome)}:/`;
   if (buf.length < 3.5e6) {
-    const r = await fetch(url + 'content', { method: 'PUT', headers: { ...gh, 'Content-Type': 'application/gzip' }, body: buf });
+    const r = await fetch(url + 'content', { method: 'PUT', headers: { ...gh, 'Content-Type': 'application/octet-stream' }, body: buf });
     if (!r.ok) throw new Error('upload HTTP ' + r.status);
   } else {
     const s = await fetch(url + 'createUploadSession', { method: 'POST', headers: { ...gh, 'Content-Type': 'application/json' }, body: JSON.stringify({ item: { '@microsoft.graph.conflictBehavior': 'replace' } }) });

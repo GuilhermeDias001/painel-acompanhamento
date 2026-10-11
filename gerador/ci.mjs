@@ -64,7 +64,7 @@ if (process.env.SUPABASE_SECRET) {
     await fetch('https://jetujppwmyzyfkaflplj.supabase.co/rest/v1/painel?on_conflict=area', { method: 'POST', headers: hd, body: JSON.stringify([{ area: 'backup_status', dados: corpo, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) }).catch(() => {});
   };
   try {
-    const msg = await backupDiario(process.env.SUPABASE_SECRET, JSON.parse(readFileSync(TOKEN, 'utf8')).access_token);
+    const msg = await backupDiario(process.env.SUPABASE_SECRET, JSON.parse(readFileSync(TOKEN, 'utf8')).access_token, CHAVE);
     console.log(msg);
     if (!msg.includes('já existe')) await statusBackup({ ok: true, em: new Date().toISOString(), resumo: msg });
   } catch (e) {
