@@ -7082,8 +7082,6 @@ function geoGet(l){
     GEO.emFila[k]=1;
     var cid=geoCidade(l)||'São Paulo', alts=[];
     if(geoTemNum(l.end))alts.push({q:fmRua(l.end)+', '+(geoCidade(l)||((l.bairro?l.bairro+', ':'')+'São Paulo'))+', SP',p:'rua'});
-    if(l.bairro&&!geoCidade(l))alts.push({q:l.bairro+', São Paulo, SP',p:'bairro'});
-    alts.push({q:cid+', SP',p:'cidade'});
     GEO.fila.push({k:k,q:q,p:'endereco',max:mx,alts:alts});setTimeout(geoRodar,50);
   }
   return null;
@@ -7114,7 +7112,7 @@ function fmGrupos(turno){
   var iso=sqHoje(), dia=fopDia(iso), cl=fopCalcula(dia.linhas,iso), co=fmCoords(), g={}, sem=[], semBolsa=[];
   dia.linhas.forEach(function(l,i){
     var tu=fopTurno(l.rota); if(turno!=='TODOS'&&tu!==turno)return;
-    var ch=norm(String(l.end||'')).trim(), c=geoGet(l)||co.m[fopRotaChave(l.rota)+'|'+ch]||co.soEnd[ch]||co.m['r|'+fopRotaChave(l.rota)+'|'+fmRua(l.end)]||co.soEnd['r|'+fmRua(l.end)]||geoCentro(l);
+    var ch=norm(String(l.end||'')).trim(), st=co.m[fopRotaChave(l.rota)+'|'+ch]||co.soEnd[ch]||co.m['r|'+fopRotaChave(l.rota)+'|'+fmRua(l.end)]||co.soEnd['r|'+fmRua(l.end)]||null, c=(st&&/google|numero/i.test(st.prec||''))?st:(geoGet(l)||st);
     var itens=fopPartes(l.bolsa).length;
     if(!itens||!cl.efet[i]){if(c)semBolsa.push({end:l.end,rota:l.rota,lat:c.lat,lng:c.lng});return}
     var k=cl.efet[i]+'|'+tu; if(!g[k])g[k]={nome:cl.efet[i],turno:tu,paradas:[],itens:0,ord:i};
