@@ -23,6 +23,7 @@ writeFileSync(join(AQUI, 'senha.txt'), s.senha);
 writeFileSync(join(AQUI, '.sal.json'), JSON.stringify(s.sal));
 if (s.fixos) writeFileSync(join(AQUI, 'fixos.json'), JSON.stringify(s.fixos));
 if (s.extras) writeFileSync(join(AQUI, 'lojas-extra.json'), JSON.stringify(s.extras));
+if (s.farmoEnderecos) writeFileSync(join(AQUI, 'farmo-enderecos.json'), JSON.stringify(s.farmoEnderecos)); // endereços de pacientes (só no cofre)
 // cache das coordenadas das lojas (mapa): cifrado no repositório, aberto só durante a execução
 // caches cifrados no repositório, abertos só durante a execução: coordenadas das lojas e histórico do quadro
 const CACHES = [['geocache.enc', 'geocache.json', 'coordenadas'], ['historico-quadro.enc', 'historico-quadro.json', 'histórico do quadro']]

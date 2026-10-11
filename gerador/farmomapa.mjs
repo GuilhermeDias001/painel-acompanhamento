@@ -2,6 +2,8 @@
 // (+ bairro da Operação). Geocodificação com a mesma infra do mapa das lojas (Nominatim, 1 pedido/s, cache cifrado). O traçado por estrada e o km são
 // calculados no navegador. Vai só para a área logada 'farmo_mapa' do Supabase: nunca em dados.js nem dados.enc.json.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { nominatim, geocodificar } from './mapa.mjs';
 
 const txt = (v) => (v == null ? '' : String(v)).trim();
@@ -24,8 +26,13 @@ let COMPLETOS = null;
 function carregarCompletos() {
   if (COMPLETOS) return COMPLETOS;
   try {
-    const j = JSON.parse(readFileSync(new URL('./lojas-extra.json', import.meta.url), 'utf8'));
-    COMPLETOS = (j._farmo_enderecos || []).map((x) => {
+    // endereços de pacientes (auditoria 11/10): arquivo próprio, fora do OneDrive. No Actions vem do cofre (gerador/farmo-enderecos.json);
+    // no PC fica em ~/.tuf-segredos/. O _farmo_enderecos antigo do lojas-extra.json só vale se nenhum dos dois existir.
+    const caminhos = [new URL('./farmo-enderecos.json', import.meta.url), join(homedir(), '.tuf-segredos', 'farmo-enderecos.json')];
+    const achado = caminhos.find((c) => existsSync(c));
+    const lista = achado ? JSON.parse(readFileSync(achado, 'utf8'))
+      : (JSON.parse(readFileSync(new URL('./lojas-extra.json', import.meta.url), 'utf8'))._farmo_enderecos || []);
+    COMPLETOS = lista.map((x) => {
       const p = x.completo.split(',').map((v) => v.trim()); const cid = (p[p.length - 1] || '').replace(/-[A-Z]{2}$/, '');
       return { ...x, tokens: tokensRua(x.completo), bairro: p.length >= 3 ? p[p.length - 2] : '', cidade: cid };
     });
