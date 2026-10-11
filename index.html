@@ -279,6 +279,7 @@ html::-webkit-scrollbar{display:none}
 .carga-pontos i:nth-child(3){animation-delay:.3s}
 @keyframes cargaSobe{0%,70%,100%{transform:translateY(0);opacity:.55}35%{transform:translateY(-20px);opacity:1}}
 @media (prefers-reduced-motion:reduce){.carga-pontos i{animation:none;opacity:.8}}
+#perfilModal.sobre-auth{z-index:120}
 .auth-screen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
 .auth-card{width:100%;max-width:320px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 24px;text-align:center}
 .auth-card .mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:var(--accent-fg);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:18px;margin:0 auto 16px}
@@ -1721,7 +1722,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <section class="banner">
         <div><p class="eyebrow" id="sqEyebrow">SISTEMA · HOJE</p><h1 id="sqTitulo">Operação</h1></div>
         <div class="sq-presenca" id="sqPresenca" aria-label="Quem está neste quadro agora"></div>
-        <span class="pill programado">Protótipo · salva neste navegador</span>
+        <span class="pill programado" id="sqSelo">Protótipo · salva neste navegador</span>
       </section>
       <section class="sis-grade" id="sisOpMenu" hidden style="display:none">
         <button type="button" class="sis-card on" data-sis="quadro"><b>Quadro do dia</b><span id="sqCardTxt">Status, motivo, faltante e reposição por vaga</span></button>
@@ -2051,4 +2052,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=d8503bafa06c"></script>
+<script src="app.js?v=bbe970eb51dc"></script>
