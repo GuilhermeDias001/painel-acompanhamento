@@ -1397,6 +1397,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       </div>
       <a class="nav-item" href="#" data-view="ti" aria-label="T.I" title="T.I"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span class="nav-label">T.I</span></a>
       <a class="nav-item" href="#" data-view="rh" aria-label="Recursos Humanos" title="Recursos Humanos"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10.5" r="2.2"/><path d="M5.8 16.5a3.4 3.4 0 0 1 6.4 0M14.5 9.5H18M14.5 13H18"/></svg><span class="nav-label">Recursos Humanos</span></a>
+      <a class="nav-item" href="#" data-view="adm" aria-label="ADM" title="ADM"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg><span class="nav-label">ADM</span></a>
     </nav>
     <button type="button" class="nav-item rail-sair" id="railSair" aria-label="Sair da conta" title="Sair da conta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span class="nav-label">Sair</span></button>
   </aside>
@@ -1647,6 +1648,29 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <p class="sub" id="fodSub" style="margin:10px 0 14px"></p>
         <div class="fod-blocos" id="fodBlocos"></div>
         <p class="est-regra" id="fodNota" style="margin-top:12px"></p>
+      </section>
+    </div>
+    <div class="view" id="viewAdm" style="display:none">
+      <section class="banner"><div><p class="eyebrow">ADMINISTRAÇÃO</p><h1>ADM</h1></div></section>
+      <section class="card">
+        <div class="pf-barra" id="admAbas">
+          <button type="button" class="perfil-btn" data-adm="alt">Alterações</button>
+          <button type="button" class="perfil-btn sec" data-adm="ac">Acessos</button>
+        </div>
+        <div id="admAltBox">
+          <div class="pf-barra" style="margin-top:10px">
+            <label>De<input type="date" id="admDe"></label>
+            <label>Até<input type="date" id="admAte"></label>
+            <label>Onde<select id="admOnde"><option value="">Tudo</option></select></label>
+            <label class="pf-busca">Quem ou o quê<input type="search" id="admBusca" placeholder="Nome de quem alterou, loja, campo ou valor" autocomplete="off"></label>
+          </div>
+          <p class="sub" id="admSub" style="margin:10px 0 8px"></p>
+          <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>Quando</th><th>Quem</th><th>Onde</th><th>Registro</th><th>Campo</th><th>Antes</th><th>Depois</th><th>Ação</th></tr></thead><tbody id="admCorpo"></tbody></table></div>
+        </div>
+        <div id="admAcBox" hidden>
+          <p class="sub" id="admAcSub" style="margin:10px 0 8px"></p>
+          <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>E-mail</th><th>Perfil</th><th>Último acesso</th><th>Autenticador</th></tr></thead><tbody id="admAcCorpo"></tbody></table></div>
+        </div>
       </section>
     </div>
     <div class="view" id="viewPfMotivo" style="display:none">
@@ -2053,4 +2077,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=5c86d9aac360"></script>
+<script src="app.js?v=ca763f07508b"></script>
