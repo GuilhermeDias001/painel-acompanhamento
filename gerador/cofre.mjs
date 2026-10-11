@@ -2,7 +2,24 @@
 // vão juntos num arquivo cifrado (segredos.enc, AES-256-GCM) que fica no repositório.
 // A chave (32 bytes aleatórios, base64) existe só no segredo CHAVE_CI do GitHub e no
 // arquivo .chave-ci deste PC — nunca no repositório.
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, randomBytes, hkdfSync } from 'node:crypto';
+
+// Arquivos binários (backups do banco, auditoria 11/10 A3): AES-256-GCM com chave DERIVADA da CHAVE_CI por HKDF e um rótulo
+// (a chave do backup nunca é a mesma do cofre). Formato: 'TUFB1' + iv(12) + tag(16) + conteúdo cifrado.
+const MAGICO = Buffer.from('TUFB1');
+const derivada = (b64, rotulo) => Buffer.from(hkdfSync('sha256', chave(b64), Buffer.alloc(0), Buffer.from(rotulo), 32));
+export function cifrarBuf(buf, chaveB64, rotulo) {
+  const iv = randomBytes(12);
+  const c = createCipheriv('aes-256-gcm', derivada(chaveB64, rotulo), iv);
+  const ct = Buffer.concat([c.update(buf), c.final()]);
+  return Buffer.concat([MAGICO, iv, c.getAuthTag(), ct]);
+}
+export function decifrarBuf(buf, chaveB64, rotulo) {
+  if (!buf.subarray(0, 5).equals(MAGICO)) throw new Error('arquivo não é um backup cifrado TUFB1');
+  const d = createDecipheriv('aes-256-gcm', derivada(chaveB64, rotulo), buf.subarray(5, 17));
+  d.setAuthTag(buf.subarray(17, 33));
+  return Buffer.concat([d.update(buf.subarray(33)), d.final()]);
+}
 
 const chave = (b64) => {
   const k = Buffer.from(String(b64 || '').trim(), 'base64');
