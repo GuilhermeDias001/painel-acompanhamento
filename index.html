@@ -1337,7 +1337,6 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     <input type="email" id="authEmail" placeholder="E-mail" autocomplete="username">
     <input type="password" id="authSenha" placeholder="Senha" autocomplete="current-password">
     <button type="button" id="authBtn">Entrar</button>
-    <button type="button" id="authAlt" class="auth-link">Usar a senha de acesso</button>
     <p class="auth-status" id="authStatus"></p>
   </div>
 </div>
@@ -2057,9 +2056,9 @@ function tcase(s){
   }).join(' ');
 }
 
-// === carregamento: window.DADOS direto (local/artefato) ou senha + dados.enc.json ===
+// === carregamento: dados locais (so no arquivo de desenvolvimento) ou login por pessoa (Supabase) ===
 // atencao: NAO inicializar DADOS aqui (nem com =null) - "var DADOS" e global e
-// colidiria com o window.DADOS que o <script src="dados.js"> ja pode ter setado
+// colidiria com o window.DADOS que o script local de dados ja pode ter setado
 // antes desta linha rodar, zerando o dado real.
 var DADOS, FIXOS={}, modoCarregamento=null, chaveAtual=null, primeiraCarga=true;
 
@@ -2440,7 +2439,7 @@ function sqSomaHistorico(velho,novo){
 }
 function tentarAtualizar(novoDados){
   if(!DADOS){startApp(novoDados);return}
-  // nunca troca por um dado mais antigo (o dados.json local pode ser uma copia velha)
+  // nunca troca por um dado mais antigo (o arquivo local de dados pode ser uma copia velha)
   if(String(novoDados.geradoEm||'')<=String(DADOS.geradoEm||''))return;
   // e nao perde areas que o dado novo ainda nao traz
   ['quadro','historicoQuadro','contratos','colaboradores','mapa','farmoOp','farmoMapa'].forEach(function(k){if(!novoDados[k]&&DADOS[k])novoDados[k]=DADOS[k]});
@@ -7908,60 +7907,18 @@ function mapaMostrar(){
   },60000);
 })();
 
-// === boot: window.DADOS direto (local/artefato) ou senha + dados.enc.json (GitHub Pages) ===
-function tentarChaveGuardada(enc){
-  var guardado=null;
-  try{guardado=JSON.parse(localStorage.getItem('tuf-chave')||'null')}catch(e){}
-  if(!guardado||guardado.salt!==enc.salt)return Promise.resolve(false);
-  return crypto.subtle.importKey('raw',b64ToBuf(guardado.key),{name:'AES-GCM'},true,['decrypt']).then(function(chave){
-    return decifrar(enc,chave).then(function(dados){
-      chaveAtual=chave;
-      startApp(dados);
-      return true;
-    });
-  }).catch(function(){
-    try{localStorage.removeItem('tuf-chave')}catch(e){}
-    return false;
-  });
-}
-// tela de entrada: dois modos - "email" (Supabase, por pessoa) e "senha" (senha unica de acesso, dados.enc.json)
-var authModo='email', authEnc=null;
+// === boot ===
+var authModo='email';
 function authAplicarModo(m){
-  authModo=m;
-  var email=document.getElementById('authEmail');
-  email.style.display=m==='email'?'':'none';
-  document.getElementById('authMsg').textContent=m==='email'?'Entre com seu e-mail e senha.':'Digite a senha para abrir o painel.';
-  document.getElementById('authBtn').textContent=m==='email'?'Entrar':'Abrir';
+  document.getElementById('authMsg').textContent='Entre com seu e-mail e senha.';
+  document.getElementById('authBtn').textContent='Entrar';
   document.getElementById('authBtn').disabled=false;
-  document.getElementById('authAlt').textContent=m==='email'?'Usar a senha de acesso':'Entrar com e-mail';
   document.getElementById('authSenha').value='';
   document.getElementById('authStatus').textContent='';
-  (m==='email'?email:document.getElementById('authSenha')).focus();
-}
-function authSenhaAntiga(enc){
-  var input=document.getElementById('authSenha'), btn=document.getElementById('authBtn'), status=document.getElementById('authStatus');
-  var senha=input.value; if(!senha)return;
-  btn.disabled=true;status.textContent='Abrindo…';
-  derivarChave(senha,enc.salt,enc.iter).then(function(chave){
-    return decifrar(enc,chave).then(function(dados){
-      chaveAtual=chave; modoCarregamento='senha';
-      try{
-        crypto.subtle.exportKey('raw',chave).then(function(raw){
-          localStorage.setItem('tuf-chave',JSON.stringify({salt:enc.salt,key:bufToB64(raw)}));
-        }).catch(function(){});
-      }catch(e){}
-      status.textContent='';
-      document.getElementById('authScreen').style.display='none';
-      startApp(dados);
-    });
-  }).catch(function(){
-    status.textContent='Senha incorreta.';
-    btn.disabled=false;
-  });
+  document.getElementById('authEmail').focus();
 }
 function authEntrar(){
   var btn=document.getElementById('authBtn'), status=document.getElementById('authStatus');
-  if(authModo==='senha'){if(authEnc)authSenhaAntiga(authEnc);return}
   var email=document.getElementById('authEmail').value.trim(), senha=document.getElementById('authSenha').value;
   if(!email||!senha){status.textContent='Informe e-mail e senha.';return}
   var c=sbCliente(); if(!c){status.textContent='Não foi possível carregar o login. Atualize a página.';return}
@@ -7976,19 +7933,6 @@ function authEntrar(){
 }
 document.getElementById('authBtn').addEventListener('click',authEntrar);
 ['authEmail','authSenha'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')authEntrar()})});
-document.getElementById('authAlt').addEventListener('click',function(){
-  if(authModo==='senha'){authAplicarModo('email');return}
-  var st=document.getElementById('authStatus');
-  if(authEnc){authAplicarModo('senha');return}
-  st.textContent='Carregando…';
-  fetch('dados.enc.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(enc){authEnc=enc;authAplicarModo('senha')}).catch(function(){st.textContent='A senha de acesso não está disponível.'});
-});
-function mostrarTelaSenha(enc){
-  telaCargaOcultar(0);
-  authEnc=enc;
-  document.getElementById('authScreen').style.display='flex';
-  authAplicarModo('senha');
-}
 
 // === Supabase: login por pessoa; le public.painel (area, dados, versao) ===
 var SB_URL='https://jetujppwmyzyfkaflplj.supabase.co', SB_KEY='sb_publishable_YcpuHMfj_lFqs9BiG6GVag_lPNGkadJ';
@@ -8065,23 +8009,24 @@ function sbIniciar(){
     else sbMostrarLogin();
   }).catch(sbMostrarLogin);
 }
-function iniciarFluxoSenha(){
-  fetch('dados.enc.json',{cache:'no-store'}).then(function(r){
-    if(!r.ok)throw new Error('sem dados.enc.json');
-    return r.json();
-  }).then(function(enc){
-    return tentarChaveGuardada(enc).then(function(ok){
-      if(!ok)mostrarTelaSenha(enc);
-    });
-  }).catch(function(){
-    document.querySelector('main').innerHTML='<div class="dados-aviso">Dados não carregados — rode atualizar-dados.mjs ou confira o dados.enc.json.</div>';
-  });
-}
+
 document.getElementById('railSair').addEventListener('click',function(){document.getElementById('sairBtn').click()});
+// ao sair: envia o que estiver pendente (quadro e Farmo) e apaga TUDO o que o site guardou neste navegador (menos o tema)
+function tufLimparLocal(){
+  try{
+    Object.keys(localStorage).forEach(function(k){if(/^tuf-/.test(k)&&k!=='tuf-theme')localStorage.removeItem(k)});
+    sessionStorage.clear();
+  }catch(e){}
+  try{indexedDB.deleteDatabase('tuf-anexos')}catch(e){}
+}
 document.getElementById('sairBtn').addEventListener('click',function(){
-  try{localStorage.removeItem('tuf-chave')}catch(e){}
-  if(modoCarregamento==='supabase'&&SB){SB.auth.signOut().then(function(){location.reload()},function(){location.reload()});return}
-  location.reload();
+  var pend=[]; try{if(typeof fsSync==='function')pend.push(fsSync())}catch(e){} try{if(typeof qdbSync==='function')Object.keys(QDB.vivo||{}).forEach(function(d){pend.push(qdbSync(d))})}catch(e){}
+  var fim=function(){
+    tufLimparLocal();
+    if(modoCarregamento==='supabase'&&SB){SB.auth.signOut().then(function(){location.reload()},function(){location.reload()});return}
+    location.reload();
+  };
+  Promise.race([Promise.all(pend).catch(function(){}),new Promise(function(r){setTimeout(r,3000)})]).then(fim,fim);
 });
 
 // ?supabase na URL ignora o window.DADOS do dados.js local e forca o login (para testar o Supabase no arquivo local)
@@ -8100,26 +8045,12 @@ window.tufAtualizarAgora=function(){
     try{sbCarregar(false)}catch(e){}
     setTimeout(fim,900);return;
   }
-  if(modoCarregamento==='script')buscar=fetch('dados.json',{cache:'no-store'}).then(function(r){return r.json()});
-  else if(chaveAtual)buscar=fetch('dados.enc.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(enc){return decifrar(enc,chaveAtual)});
-  else{fim();return}
-  buscar.then(function(d){tentarAtualizar(d)}).catch(function(){}).then(fim);
+  fim();
 };
-if(window.DADOS&&!forcarSupabase){
-  modoCarregamento='script';
-  startApp(window.DADOS);
-  setInterval(function(){
-    fetch('dados.json',{cache:'no-store'}).then(function(r){return r.json()}).then(tentarAtualizar).catch(function(){});
-  },120000);
+if(window.supabase){
+  modoCarregamento='supabase'; sbIniciar();
+  setInterval(function(){if(SB)sbCarregar(false)},120000);
 }else{
-  if(window.supabase){modoCarregamento='supabase';sbIniciar()}
-  else{modoCarregamento='senha';iniciarFluxoSenha()}
-  setInterval(function(){
-    if(modoCarregamento==='supabase'){if(SB)sbCarregar(false);return}
-    if(!chaveAtual)return;
-    fetch('dados.enc.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(enc){
-      return decifrar(enc,chaveAtual);
-    }).then(tentarAtualizar).catch(function(){});
-  },120000);
+  document.querySelector('main').innerHTML='<div class="dados-aviso">Não foi possível carregar o login. Atualize a página.</div>';
 }
 </script>
