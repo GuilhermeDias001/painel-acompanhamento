@@ -2039,11 +2039,11 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     <div class="ficha-corpo" id="contModalCorpo" style="display:block"></div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css" integrity="sha384-MinO0mNliZ3vwppuPOUnGa+iq619pfMhLVUXfC4LHwSCvF9H+6P/KO4Q7qBOYV5V" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
 <script>
 Chart.register(ChartDataLabels);
 function tk(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
@@ -2273,9 +2273,11 @@ function renderAvisos(){
     amanha:{data:diasSemana[amanhaDate.getDay()],itens:itensDoDia(amanhaDate)}
   };
   var tagLabel={programado:'Programado',esporadico:'Esporádico'};
+  function escAv(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function renderCol(tit,bloco){
     var itensHtml=bloco.itens.length?bloco.itens.map(function(a){
-      return '<li class="aviso-item"><span class="pill '+a.tipo+'">'+tagLabel[a.tipo]+'</span><span class="txt">'+a.txt+'</span></li>';
+      var tp=(a.tipo==='programado'||a.tipo==='esporadico')?a.tipo:'programado';
+      return '<li class="aviso-item"><span class="pill '+tp+'">'+tagLabel[tp]+'</span><span class="txt">'+escAv(a.txt)+'</span></li>';
     }).join(''):'<li class="aviso-empty">Nenhum aviso.</li>';
     return '<div class="aviso-col"><div class="aviso-head"><span class="tit">'+tit+'</span><span class="dt">'+bloco.data+'</span></div><ul class="aviso-list">'+itensHtml+'</ul></div>';
   }
@@ -3191,7 +3193,7 @@ function opDados(){return DADOS&&DADOS[opModo==='planejamento'?'planejamento':'o
   document.addEventListener('mousemove',function(e){
     var s=e.target.closest&&e.target.closest('.op-seg');
     if(!s){tip.hidden=true;return}
-    tip.innerHTML='<b>'+s.getAttribute('data-nome')+'</b> · '+s.getAttribute('data-qtd')+' ('+s.getAttribute('data-pct')+'%)';
+    var tb=document.createElement('b'); tb.textContent=s.getAttribute('data-nome')||''; tip.replaceChildren(tb,' · '+s.getAttribute('data-qtd')+' ('+s.getAttribute('data-pct')+'%)');
     tip.hidden=false;
     tip.style.left=Math.min(e.clientX+14,window.innerWidth-tip.offsetWidth-8)+'px';
     tip.style.top=(e.clientY+16)+'px';
@@ -3584,7 +3586,7 @@ function sqpEntrar(){
     var apelido=''; try{apelido=localStorage.getItem('tuf-perfil-nome')||''}catch(e){}
     var nome=apelido||String(u.email||'').split('@')[0]||'Alguém';
     SQP.eu=u.id; SQP.nomeEu=nome;
-    var ch=c.channel('tuf-quadro-'+chave,{config:{presence:{key:u.id}}});
+    var ch=c.channel('tuf-quadro-'+chave,{config:{private:true,presence:{key:u.id}}});
     ch.on('presence',{event:'sync'},function(){SQP.estado=ch.presenceState();sqpRender()});
     ch.subscribe(function(st){if(st==='SUBSCRIBED')ch.track({nome:nome,desde:Date.now()})});
     SQP.canal=ch;
@@ -3692,7 +3694,7 @@ function fdbIniciar(){
   if(!fdbAtivo()||FDB.canal)return;
   fdbCarregar();
   try{
-    FDB.canal=sbCliente().channel('ficha-edicao').on('postgres_changes',{event:'INSERT',schema:'public',table:'ficha_edicao'},function(p){
+    FDB.canal=sbCliente().channel('ficha-edicao',{config:{private:true}}).on('postgres_changes',{event:'INSERT',schema:'public',table:'ficha_edicao'},function(p){
       var n=p&&p.new; if(!n||!n.funcionario_chave)return;
       var o=FUNC_DB[n.funcionario_chave]||(FUNC_DB[n.funcionario_chave]={}), v=n.valor==null?'':String(n.valor);
       if(o[n.campo]===v)return; // eco da propria edicao
@@ -3822,7 +3824,7 @@ function qdbIniciar(){
   QDB.pronto=true; var c=sbCliente();
   qdbCarregarDias();
   try{
-    c.channel('quadro-dias').on('postgres_changes',{event:'INSERT',schema:'public',table:'quadro_dia'},function(p){
+    c.channel('quadro-dias',{config:{private:true}}).on('postgres_changes',{event:'INSERT',schema:'public',table:'quadro_dia'},function(p){
       var d=p&&p.new; if(d&&d.fonte==='sistema'&&String(d.dia).slice(0,10)>=sqHoje())qdbCarregarDia(String(d.dia).slice(0,10));
     }).subscribe();
   }catch(e){}
@@ -3834,7 +3836,7 @@ function qdbAssinar(dia){
   if(QDB.canais[dia])return;
   var c=sbCliente();
   try{
-    QDB.canais[dia]=c.channel('quadro-'+dia).on('postgres_changes',{event:'*',schema:'public',table:'quadro_linha',filter:'dia=eq.'+dia},function(p){qdbEvento(dia,p)})
+    QDB.canais[dia]=c.channel('quadro-'+dia,{config:{private:true}}).on('postgres_changes',{event:'*',schema:'public',table:'quadro_linha',filter:'dia=eq.'+dia},function(p){qdbEvento(dia,p)})
       .subscribe(function(st){if(st==='SUBSCRIBED'){if(QDB.visto[dia])qdbCarregarDia(dia);QDB.visto[dia]=1}}); // reconectou: refaz o SELECT (eventos perdidos nao voltam)
   }catch(e){}
 }
@@ -4214,7 +4216,7 @@ function sqTempo(l){
   var m=Math.max(0,Math.floor((fim-l.ini)/60000));
   return Math.floor(m/60)+':'+String(m%60).padStart(2,'0')+'h';
 }
-function sqOpts(lista,atual){return lista.map(function(o){return '<option value="'+esc(o)+'"'+(o===atual?' selected':'')+'>'+o+'</option>'}).join('')}
+function sqOpts(lista,atual){return lista.map(function(o){return '<option value="'+esc(o)+'"'+(o===atual?' selected':'')+'>'+esc(o)+'</option>'}).join('')}
 function sqRender(){
   var corpo=document.getElementById('sqCorpo'); if(!corpo)return;
   if(!SQ_LINHAS)sqSetModo(SQ_MODO);
@@ -6495,7 +6497,7 @@ function fsAssinar(iso){
   try{if(FS.canal)c.removeChannel(FS.canal)}catch(e){}
   FS.canalDia=iso; FS.visto=false;
   try{
-    FS.canal=c.channel('farmo-'+iso)
+    FS.canal=c.channel('farmo-'+iso,{config:{private:true}})
       .on('postgres_changes',{event:'*',schema:'public',table:'farmo_operacao_linha',filter:'dia=eq.'+iso},function(p){fsEvOp(iso,p)})
       .on('postgres_changes',{event:'*',schema:'public',table:'farmo_devolucao_linha',filter:'dia=eq.'+iso},function(p){fsEvDv(iso,p)})
       .subscribe(function(st){if(st==='SUBSCRIBED'){if(FS.visto)fsRecarregar();FS.visto=true}});
@@ -6882,14 +6884,14 @@ function fcRastrear(){
   }
   local();
   if(!fsAtivo()){mostra(achou);return}
-  var c=sbCliente(), pat='%'+q.replace(/[,()%]/g,'')+'%';
-  Promise.all([
-    c.from('farmo_operacao_linha').select('dia,rota,endereco,portador,bolsa,termometro').or('bolsa.ilike.'+pat+',termometro.ilike.'+pat).order('dia',{ascending:false}).limit(150),
-    c.from('farmo_devolucao_linha').select('dia,turno,bolsa_p,bolsa_m,bolsa_g,termometro1,termometro2').or('bolsa_p.ilike.'+pat+',bolsa_m.ilike.'+pat+',bolsa_g.ilike.'+pat+',termometro1.ilike.'+pat+',termometro2.ilike.'+pat).order('dia',{ascending:false}).limit(100)
-  ]).then(function(r){
+  var c=sbCliente();
+  c.rpc('farmo_buscar_bolsa',{p_texto:q}).then(function(r){
+    if(r.error)throw r.error;
     var db=[], vistos={};
-    (r[0].data||[]).forEach(function(x){db.push({dia:x.dia,onde:fopRotaNome(x.rota||'Operação'),end:x.endereco,port:x.portador,cod:[x.bolsa,x.termometro].filter(Boolean).join(' · ')})});
-    (r[1].data||[]).forEach(function(x){db.push({dia:x.dia,onde:'Devolução '+(x.turno==='manha'?'manhã':'tarde'),end:'',port:'',cod:[x.bolsa_p,x.bolsa_m,x.bolsa_g,x.termometro1,x.termometro2].filter(Boolean).join(' · ')})});
+    (r.data||[]).forEach(function(x){
+      var dev=/dev/i.test(String(x.origem||'')); 
+      db.push({dia:x.dia,onde:dev?('Devolução '+(x.turno==='manha'?'manhã':x.turno==='tarde'?'tarde':String(x.turno||''))):fopRotaNome(x.rota||'Operação'),end:dev?'':(x.endereco||''),port:dev?'':(x.portador||''),cod:Array.isArray(x.valores)?x.valores.filter(Boolean).join(' · '):String(x.valores||'')});
+    });
     var todos=db.concat(achou).filter(function(x){var k=x.dia+'|'+x.onde+'|'+x.end+'|'+x.cod;if(vistos[k])return false;vistos[k]=1;return true});
     mostra(todos);
   }).catch(function(){mostra(achou)});
