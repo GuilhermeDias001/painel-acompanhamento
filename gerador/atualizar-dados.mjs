@@ -417,7 +417,7 @@ if (existsSync(join(AQUI, 'fixos.json'))) dados.fixos = JSON.parse(readFileSync(
 const json = JSON.stringify(dados);
 // dados.json (completo) só é lido pelo Actions para gravar nas áreas LOGADAS do Supabase. Os arquivos que podem ir parar num lugar público
 // (dados.js local e dados.enc.json do modo senha) saem SEM os dados pessoais da ficha (Guilherme, 10/10: só na área logada, nunca no arquivo público).
-const PESSOAIS = ['celularProprio', 'celularEmergencia', 'cpf', 'email', 'parentesco', 'endereco', 'bairro', 'cep', 'placa', 'cnh'];
+const PESSOAIS = ['celularProprio', 'celularEmergencia', 'cpf', 'email', 'parentesco', 'endereco', 'bairro', 'cep', 'placa', 'cnh', 'pix', 'chavePix', 'pin'];
 const semPessoais = (lista) => (Array.isArray(lista) ? lista.map((x) => { const o = { ...x }; for (const k of PESSOAIS) delete o[k]; return o; }) : lista);
 const jsonPublico = JSON.stringify({ ...dados, farmoMapa: undefined, colaboradores: semPessoais(dados.colaboradores), cadastroRH: semPessoais(dados.cadastroRH), cadastroMotoristas: semPessoais(dados.cadastroMotoristas) });
 writeFileSync(join(AQUI, 'dados.json'), json);
@@ -508,28 +508,8 @@ async function cadastroMotoristas(tk) {
   const fimAtivos = iGeral >= 0 ? iGeral : E.length;
   for (let i = 1; i < fimAtivos; i++) add(i, true);            // linha 2 até antes de CADASTRO GERAL
   if (iGeral >= 0) for (let i = iGeral + 2; i < E.length; i++) add(i, false); // pula o rótulo e o cabeçalho
-  // chave PIX: autorizada pelo Guilherme no chat em 03/10, inteira, só dentro do arquivo cifrado.
-  // A aba Pagamento é um registro de pagamentos; vale a chave da última linha da pessoa por data.
-  // Lê só A (data), E (nome) e G (chave) — nunca valor pago nem dados bancários.
-  const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim();
-  const fimPag = await ultimaLinha(tk, 'Pagamento');
-  const fimP = Math.max(fimPag, 2);
-  const pd = await faixa(tk, 'Pagamento', `A2:A${fimP}`);
-  const pn = await faixa(tk, 'Pagamento', `E2:E${fimP}`);
-  const pk = await faixa(tk, 'Pagamento', `G2:G${fimP}`);
-  const pix = new Map();
-  pd.forEach((l, i) => {
-    const data = typeof l[0] === 'number' ? l[0] : null;
-    const nome = semAcento(txt(pn[i][0]));
-    const chave = txt(pk[i][0]).trim();
-    if (data == null || !nome || !chave) return;
-    const atual = pix.get(nome);
-    if (!atual || data >= atual.data) pix.set(nome, { data, chave });
-  });
-  for (const r of reg.values()) {
-    const p = pix.get(semAcento(r.nome));
-    if (p) r.pix = p.chave;
-  }
+  // Chave PIX: NÃO é mais lida (auditoria 11/10, falha C1). A regra do Guilherme é "Pix nunca" no sistema; a leitura antiga
+  // (aba Pagamento, autorizada em 03/10 só para o arquivo cifrado) acabou indo para o Supabase junto com a área 'motoristas'.
   return [...reg.values()].sort((a, b) => (b.ativo - a.ativo) || a.nome.localeCompare(b.nome));
 }
 

@@ -2,7 +2,7 @@
 //  1) HISTÓRICO inteiro: a aba Historico (A:J operação, L:R devolução) vira dias FECHADOS no banco; dia que já existe no banco só recebe o que está vazio.
 //  2) DIA DE HOJE: os lançamentos do Excel só são copiados depois das 23:30 (SP) e SÓ onde o site não preencheu; o que foi preenchido no site prevalece.
 // Liga com painel.area='ingestao_farmo' = {de:'AAAA-MM-DD'}. Roda só no Actions (precisa da chave secreta do Supabase). Nunca lê Pix/CPF (a aba Motorista não é tocada).
-import { SUPABASE_URL } from './supabase.mjs';
+import { SUPABASE_URL, erroSeguro } from './supabase.mjs';
 import { tokensRua, sim } from './farmomapa.mjs';
 
 const txt = (v) => (v == null ? '' : String(v)).trim();
@@ -15,7 +15,7 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
   if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
   const rest = (p) => `${SUPABASE_URL}/rest/v1/${p}`;
   const get = async (p) => { const r = await fetch(rest(p), { headers: h }); if (!r.ok) throw new Error(`HTTP ${r.status} ${p.slice(0, 50)}`); return r.json(); };
-  const send = async (p, metodo, corpo, extra = '') => { const r = await fetch(rest(p), { method: metodo, headers: { ...h, Prefer: 'return=minimal' + extra }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${metodo} ${p.slice(0, 40)} HTTP ${r.status}: ${(await r.text()).slice(0, 150)}`); };
+  const send = async (p, metodo, corpo, extra = '') => { const r = await fetch(rest(p), { method: metodo, headers: { ...h, Prefer: 'return=minimal' + extra }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${metodo} ${p.split("?")[0]} ${await erroSeguro(r)}`); };
   const cfg = (await get('painel?select=dados&area=eq.ingestao_farmo'))[0]?.dados;
   if (!cfg?.de) return 'Farmo histórico: desligado';
   const log = [];
@@ -87,7 +87,7 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
     if (compl || inseridas) log.push(`histórico em dias já existentes: ${compl} campos completados, ${inseridas} linhas inseridas`);
   }
 
-  // ---------- 1b) endereço completo (TNS) nas linhas do dia ABERTO: sobrepõe o número antigo, só onde o Guilherme não editou o endereço ----------
+  // ---------- 1b) endereço completo (TNS) nas linhas do dia ABERTO: sobrepõe o número antigo, só onde nenhuma PESSOA editou o endereço (qualquer usuário, não só o Guilherme) ----------
   {
     const sp0 = new Date(Date.now() - 3 * 3600000), hoje0 = sp0.toISOString().slice(0, 10);
     const comp = (farmoOp?.operacaoHoje || []).filter((x) => x.enderecoCompleto);
@@ -95,7 +95,7 @@ export async function sincronizarFarmo(ler, farmoOp, segredo) {
       const padrao = (ec) => { const p = ec.split(',').map((v) => v.trim()); const rua = p[0].replace(/^(.*\S)\s+(\d+[A-Z]?(?:\/\d+)?)$/, '$1, $2'); return `${rua} - ${p[1] || ''}, ${(p[2] || '').replace(/-([A-Z]{2})$/, ' - $1')}`; };
       const jaPadrao = /, .* - [A-Z]{2}$/;
       const atuais = await get(`farmo_operacao_linha?select=id,linha,rota,endereco,bairro,codigo_pnet&dia=eq.${hoje0}&limit=1000`);
-      const editados = new Set((await get(`farmo_auditoria?select=registro&dia=eq.${hoje0}&campo=eq.endereco&quem=ilike.diasguilherme*&limit=2000`)).map((a) => String(a.registro)));
+      const editados = new Set((await get(`farmo_auditoria?select=registro&dia=eq.${hoje0}&campo=eq.endereco&quem=not.ilike.sistema*&limit=2000`)).map((a) => String(a.registro)));
       const nr = (s) => txt(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ');
       const usadas = new Set(); let n = 0;
       for (const x of comp) {

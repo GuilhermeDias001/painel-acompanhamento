@@ -44,21 +44,35 @@ export async function semearQuadro(dados, segredo) {
     if (!q?.data || q.data < t.aPartirDe || !q.linhas?.length) continue;
     if ((await get(`quadro_dia?select=dia&dia=eq.${q.data}`)).length) continue;
     const rd = await fetch(`${SUPABASE_URL}/rest/v1/quadro_dia`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify({ dia: q.data, fonte: 'sistema' }) });
-    if (!rd.ok) throw new Error(`quadro_dia HTTP ${rd.status}: ${(await rd.text()).slice(0, 150)}`);
+    if (!rd.ok) throw new Error(`quadro_dia ${await erroSeguro(rd)}`);
     // carimbos do Excel (serial de data/hora, ou só hora no layout antigo) -> instante em UTC (SP = UTC-3)
     const [ya, ma, da] = q.data.split('-').map(Number);
     const inst = (v) => (typeof v !== 'number' ? null : new Date(v >= 1 ? (v - 25569) * 86400000 + 3 * 3600000 : Date.UTC(ya, ma - 1, da) + v * 86400000 + 3 * 3600000).toISOString());
     const rows = q.linhas.map((l, i) => ({ dia: q.data, ordem: i, loja: l.loja || '', colab: l.colab || '', status: l.status || '', motivo: l.motivo || '', tipo: l.tipo || '',
       valor: typeof l.valor === 'number' ? l.valor : null, entrada: l.entrada || '', saida: l.saida || '', faltante: l.faltante || '', obs: l.obs || '', origem_edicao: 'seed', inicio_em: inst(l.inicio), fim_em: inst(l.fim), status_anterior: l.status || '' }));
     const rl = await fetch(`${SUPABASE_URL}/rest/v1/quadro_linha`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(rows) });
-    if (!rl.ok) throw new Error(`quadro_linha HTTP ${rl.status}: ${(await rl.text()).slice(0, 150)}`);
+    if (!rl.ok) throw new Error(`quadro_linha ${await erroSeguro(rl)}`);
     feitos.push(`${q.data} (${rows.length} linhas)`);
   }
   return feitos.length ? 'Quadro no banco: criado ' + feitos.join(', ') : 'Quadro no banco: nada a criar';
 }
 
+// Trava final (auditoria 11/10, C1): nenhum campo chamado pix/chave pix/pin chega ao banco, venha de onde vier.
+const PROIBIDO = /^(pix|chave_?pix|chavepix|pin)$/i;
+export function semProibidos(v) {
+  if (Array.isArray(v)) return v.map(semProibidos);
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).filter(([k]) => !PROIBIDO.test(k)).map(([k, x]) => [k, semProibidos(x)]));
+  return v;
+}
+
+// Erro de API para o log público do Actions: só código e mensagem curta, nunca o 'details' (o Postgres põe a linha inteira ali).
+export async function erroSeguro(r) {
+  let j = {}; try { j = JSON.parse(await r.text()); } catch { /* corpo não-JSON */ }
+  return `HTTP ${r.status}${j.code ? ' ' + j.code : ''}${j.message ? ': ' + String(j.message).replace(/\(.*\)/g, '(…)').slice(0, 90) : ''}`;
+}
+
 export async function gravarSupabase(dados, segredo) {
-  const linhas = Object.entries(areasDe(dados))
+  const linhas = Object.entries(semProibidos(areasDe(dados)))
     .filter(([, v]) => v !== undefined)
     .map(([area, v]) => ({ area, dados: v, versao: createHash('sha256').update(JSON.stringify(v)).digest('hex').slice(0, 16), atualizado_em: new Date().toISOString() }));
   // só regrava as áreas que mudaram: compara com as versões guardadas
@@ -66,7 +80,7 @@ export async function gravarSupabase(dados, segredo) {
   const h = { apikey: segredo, 'Content-Type': 'application/json' };
   if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
   const ra = await fetch(`${SUPABASE_URL}/rest/v1/painel?select=area,versao`, { headers: h });
-  if (!ra.ok) throw new Error(`Supabase leitura HTTP ${ra.status}: ${(await ra.text()).slice(0, 200)}`);
+  if (!ra.ok) throw new Error(`Supabase leitura ${await erroSeguro(ra)}`);
   const atuais = await ra.json();
   const ver = new Map((Array.isArray(atuais) ? atuais : []).map((x) => [x.area, x.versao]));
   const mudaram = linhas.filter((l) => ver.get(l.area) !== l.versao);
@@ -74,7 +88,7 @@ export async function gravarSupabase(dados, segredo) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/painel?on_conflict=area`, {
     method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(mudaram),
   });
-  if (!r.ok) throw new Error(`Supabase HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  if (!r.ok) throw new Error(`Supabase ${await erroSeguro(r)}`);
   return 'Supabase: ' + mudaram.map((l) => l.area).join(', ');
 }
 
@@ -86,7 +100,7 @@ export async function ingerirDiasFechados(ler, nomesAbas, hojeIso, segredo, limi
   const h = { apikey: segredo, 'Content-Type': 'application/json' };
   if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
   const get = async (p) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${p}`, { headers: h }); if (!r.ok) throw new Error(`HTTP ${r.status} ${p.slice(0, 40)}`); return r.json(); };
-  const post = async (tabela, corpo) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} HTTP ${r.status}: ${(await r.text()).slice(0, 150)}`); };
+  const post = async (tabela, corpo) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} ${await erroSeguro(r)}`); };
   const cfg = (await get('painel?select=dados&area=eq.ingestao'))[0]?.dados;
   if (!cfg?.de) return 'Ingestão do quadro: desligada';
   const { lerDiaCompleto, dataDaAba } = await import('./quadro.mjs');

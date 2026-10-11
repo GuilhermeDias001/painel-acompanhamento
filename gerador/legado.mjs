@@ -1,7 +1,7 @@
 // Cópia fiel das abas legadas das planilhas para o banco (Guilherme, 10/10: "puxar todos os dados, menos Pix e PIN").
 // Cada aba vira linhas em legado_linha {arquivo, aba, linha, dados:{coluna: valor}} + um registro em legado_aba. Só roda uma vez por aba.
 // FICAM DE FORA: só as colunas cujo título case com PIX ou PIN (decisão do Guilherme, 10/10; ele liberou banco/agência/conta/favorecido e o Login do TUF Log). Liga com painel.area='importacao_legado' = {ativo:true}. Só no Actions (chave secreta).
-import { SUPABASE_URL } from './supabase.mjs';
+import { SUPABASE_URL, erroSeguro } from './supabase.mjs';
 
 const EXCLUIR = /(^|[^a-z])(pix|pin)([^a-z]|$)/i; // Guilherme, 10/10: só Pix e PIN ficam de fora (banco/agência/conta/favorecido e Login foram liberados)
 const LETRA = (i) => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
@@ -36,7 +36,7 @@ export async function importarLegado(lerPor, segredo, orcamento = 30000) {
   if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
   const rest = (p) => `${SUPABASE_URL}/rest/v1/${p}`;
   const get = async (p) => { if (seco) return p.startsWith('painel') ? [{ dados: { ativo: true } }] : []; const r = await fetch(rest(p), { headers: h }); if (!r.ok) throw new Error(`HTTP ${r.status} ${p.slice(0, 40)}`); return r.json(); };
-  const post = async (p, corpo, extra = '') => { if (seco) return; const r = await fetch(rest(p), { method: 'POST', headers: { ...h, Prefer: 'return=minimal' + extra }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`POST ${p.slice(0, 30)} HTTP ${r.status}: ${(await r.text()).slice(0, 120)}`); };
+  const post = async (p, corpo, extra = '') => { if (seco) return; const r = await fetch(rest(p), { method: 'POST', headers: { ...h, Prefer: 'return=minimal' + extra }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`POST ${p.split("?")[0]} ${await erroSeguro(r)}`); };
   const cfg = (await get('painel?select=dados&area=eq.importacao_legado'))[0]?.dados;
   if (!cfg?.ativo) return 'Legado: desligado';
   const feitas = new Set((await get('legado_aba?select=arquivo,aba&limit=500')).map((x) => x.arquivo + '|' + x.aba));
