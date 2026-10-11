@@ -83,6 +83,19 @@ export async function gravarSupabase(dados, segredo) {
   if (!ra.ok) throw new Error(`Supabase leitura ${await erroSeguro(ra)}`);
   const atuais = await ra.json();
   const ver = new Map((Array.isArray(atuais) ? atuais : []).map((x) => [x.area, x.versao]));
+  // farmo_mapa nunca perde a origem (Farmoterápica/Base) nem fica vazio: se o gerador não achou, mantém o que já estava no banco (11/10)
+  const fm = linhas.find((l) => l.area === 'farmo_mapa');
+  if (fm) {
+    try {
+      const rv = await fetch(`${SUPABASE_URL}/rest/v1/painel?select=dados&area=eq.farmo_mapa`, { headers: h });
+      const antigo = rv.ok ? (await rv.json())[0]?.dados : null;
+      if (antigo) {
+        if (!fm.dados.origem && antigo.origem) fm.dados.origem = antigo.origem;
+        if (!(fm.dados.paradas || []).length && (antigo.paradas || []).length) { linhas.splice(linhas.indexOf(fm), 1); console.log('farmo_mapa: lista nova vazia, mantido o que já existia'); }
+        else fm.versao = createHash('sha256').update(JSON.stringify(fm.dados)).digest('hex').slice(0, 16);
+      }
+    } catch { /* sem leitura: segue */ }
+  }
   const mudaram = linhas.filter((l) => ver.get(l.area) !== l.versao);
   if (!mudaram.length) return 'Supabase: nada mudou';
   const r = await fetch(`${SUPABASE_URL}/rest/v1/painel?on_conflict=area`, {
