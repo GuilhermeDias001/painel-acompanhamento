@@ -47,8 +47,6 @@ for (const c of CACHES) {
   if (depois !== c.antes) { writeFileSync(c.enc, cifrar(JSON.parse(depois), CHAVE)); console.log(`cofre: ${c.nome} atualizado`); }
 }
 
-const enc = join(AQUI, 'publicar', 'dados.enc.json');
-if (!existsSync(enc)) throw new Error('dados.enc.json não foi gerado');
 // Supabase (Fase 3): só grava se o segredo SUPABASE_SECRET existir; falha aqui não derruba o site
 if (process.env.SUPABASE_SECRET) {
   try {
@@ -72,8 +70,15 @@ if (process.env.SUPABASE_SECRET) {
     await statusBackup({ ok: false, em: new Date().toISOString(), erro: String(e.message).slice(0, 200) });
   }
 }
+// Site antigo (GitHub Pages) DESATIVADO (auditoria 11/10, M4/F-07): não publica mais o painel nem o dados.enc.json;
+// só uma página que leva ao endereço novo (Cloudflare). O 404.html faz o mesmo para qualquer caminho antigo.
 const SITE = join(RAIZ, '_site');
 mkdirSync(SITE, { recursive: true });
-copyFileSync(join(RAIZ, 'index.html'), join(SITE, 'index.html'));
-copyFileSync(enc, join(SITE, 'dados.enc.json'));
-console.log('site pronto em _site/');
+const NOVO = 'https://painel-site.pages.dev/';
+const redirecionar = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url=${NOVO}"><title>Painel de Controle mudou de endereço</title></head>
+<body style="font:16px system-ui,sans-serif;margin:40px"><p>O Painel de Controle mudou de endereço: <a href="${NOVO}">${NOVO}</a></p>
+<script>location.replace('${NOVO}'+location.hash)</script></body></html>`;
+writeFileSync(join(SITE, 'index.html'), redirecionar);
+writeFileSync(join(SITE, '404.html'), redirecionar);
+console.log('site antigo: só redirecionamento em _site/');
