@@ -37,6 +37,7 @@ jobs:
         env:
           CHAVE_CI: ${{ secrets.CHAVE_CI }}
           SUPABASE_SECRET: ${{ secrets.SUPABASE_SECRET }}
+          GOOGLE_GEOCODE_KEY: ${{ secrets.GOOGLE_GEOCODE_KEY }}
         run: node gerador/ci.mjs
 
       - name: Guardar token renovado

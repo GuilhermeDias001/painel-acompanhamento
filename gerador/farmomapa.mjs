@@ -50,17 +50,39 @@ export function completarEnderecos(farmoOp) {
   return n;
 }
 
+// Google Geocoding (segredo GOOGLE_GEOCODE_KEY no GitHub; a chave nunca vai para o log nem para o repositório).
+// Só aceita resultado PRECISO (ROOFTOP = no endereço; RANGE_INTERPOLATED = no número, interpolado na rua) e sem partial_match.
+// Centro de rua/bairro/cidade (GEOMETRIC_CENTER / APPROXIMATE) é recusado: fica "sem coordenada" (Guilherme, 10/10: sem aproximação).
+let chamadasGoogle = 0;
+const LIMITE_GOOGLE = 150; // trava de custo por execução
+async function geocodificarGoogle(completo) {
+  const key = process.env.GOOGLE_GEOCODE_KEY;
+  if (!key || chamadasGoogle >= LIMITE_GOOGLE) return undefined; // undefined = Google indisponível
+  const q = completo.replace(/-([A-Z]{2})$/, ', $1').replace(/\s+(S\/N|SN)\b/i, '') + ', Brasil';
+  chamadasGoogle++;
+  const r = await fetch('https://maps.googleapis.com/maps/api/geocode/json?' + new URLSearchParams({ address: q, components: 'country:BR', region: 'br', language: 'pt-BR', key }));
+  if (!r.ok) throw new Error('Google HTTP ' + r.status);
+  const j = await r.json();
+  if (j.status === 'ZERO_RESULTS') return null;
+  if (j.status !== 'OK') throw new Error('Google ' + j.status); // REQUEST_DENIED / OVER_QUERY_LIMIT: para e não grava nada errado
+  const x = j.results[0];
+  if (x.partial_match || !['ROOFTOP', 'RANGE_INTERPOLATED'].includes(x.geometry?.location_type)) return null;
+  return { lat: x.geometry.location.lat, lng: x.geometry.location.lng, fonte: 'google' };
+}
+
 async function acharCompletoGeo(completo) {
+  try {
+    const g = await geocodificarGoogle(completo);
+    if (g !== undefined) return g; // com a chave, o Google decide (preciso ou nada)
+  } catch (e) { console.log('farmoMapa: ' + String(e.message).slice(0, 80)); }
   const p = completo.split(',').map((v) => v.trim());
   const cidade = (p[p.length - 1] || '').replace(/-([A-Z]{2})$/, ', $1');
   const rua = p[0].replace(/\s+(S\/N|SN)$/i, '').replace(/(\d+[A-Z]?)\/\d+[A-Z]?$/, '$1'); // 914/904 -> 914
-  const semNum = rua.replace(/\s+[0-9]+[A-Z]?$/, '');
-  const tent = [[`${rua}, ${cidade}`, 'numero'], [`${rua}, ${p[1] || ''}, ${cidade}`, 'numero'], [`${semNum}, ${cidade}`, 'rua'], [`${semNum}, ${p[1] || ''}, ${cidade}`, 'rua']];
-  for (const [q, precisao] of tent) {
+  // plano B gratuito (Nominatim), só com número; sem número/aproximação: fica "sem coordenada"
+  for (const q of [`${rua}, ${cidade}`, `${rua}, ${p[1] || ''}, ${cidade}`]) {
     const g = await nominatim(q).catch(() => null);
-    if (g) return { ...g, fonte: precisao };
+    if (g && /\d/.test(rua)) return { ...g, fonte: 'numero' };
   }
-  // sem aproximação por bairro/cidade (Guilherme, 10/10): se não achou a rua, fica "sem coordenada"
   return null;
 }
 
@@ -94,12 +116,21 @@ export async function montarFarmoMapa({ farmoOp, base, cacheArq, limite = 100 })
   let novos = 0; const paradas = [], semCoordenada = [];
   for (const p of lista) {
     const ck = p.enderecoCompleto ? `fm2|${sem(p.enderecoCompleto)}` : `fm1|${sem(p.endereco)}|${sem(p.bairro)}`;
-    if (cache[ck] == null) { // inclui falhas anteriores (null): tenta de novo com as buscas melhoradas
+    // coordenada antiga que não é de Google, 'numero' ou 'google' (ex.: 'rua', 'bairro') é aproximação: descartada e refeita
+    if (p.enderecoCompleto && cache[ck] && !cache[ck].nf && !['google', 'numero'].includes(cache[ck].fonte)) cache[ck] = null;
+    // com a chave do Google, coordenada do Nominatim ('numero') é refeita uma vez no Google
+    if (p.enderecoCompleto && process.env.GOOGLE_GEOCODE_KEY && cache[ck] && cache[ck].fonte === 'numero') cache[ck] = null;
+    // sem endereço completo (só a rua) não há coordenada confiável: nada de aproximação (Guilherme, 10/10)
+    if (!p.enderecoCompleto) { semCoordenada.push({ ...p, motivo: 'sem endereço completo' }); continue; }
+    // "não achou" fica guardado por 24 h ({nf, em}) para não repetir consulta (e custo) a cada ciclo
+    const nf = cache[ck]?.nf && Date.now() - Date.parse(cache[ck].em) < 24 * 3600e3;
+    if (cache[ck] == null || (cache[ck].nf && !nf)) {
       if (novos >= limite) { semCoordenada.push({ ...p, pendente: true }); continue; }
-      cache[ck] = p.enderecoCompleto ? await acharCompletoGeo(p.enderecoCompleto) : await achar(p.endereco, p.bairro); novos++;
+      const r = await acharCompletoGeo(p.enderecoCompleto); novos++;
+      cache[ck] = r || { nf: true, em: new Date().toISOString() };
     }
     const g = cache[ck];
-    if (!g) { semCoordenada.push(p); continue; }
+    if (!g || g.nf) { semCoordenada.push({ ...p, motivo: 'endereço não localizado com precisão' }); continue; }
     paradas.push({ ...p, lat: g.lat, lng: g.lng, precisao: g.fonte });
   }
   if (novos) writeFileSync(cacheArq, JSON.stringify(cache));
