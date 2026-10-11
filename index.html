@@ -6098,6 +6098,15 @@ function fopCalcula(ls,iso){
 function fopSugestao(l){return ''}
 // endereco completo (rua, numero, bairro, cidade) que o gerador casou com o cadastro: aparece como dica; o campo continua com o endereco original
 var FOP_ENDC={ref:null,m:{}};
+// padrao do banco: 'RUA X, 777 - BAIRRO, CIDADE - UF' (o TNS manda 'RUA X 777, BAIRRO, CIDADE-SP')
+function fopEndPadrao(t){
+  var x=String(t||'').trim().replace(/\s+/g,' '); if(!x)return x;
+  if(/^[^,]+,\s*\d[^,]*\s-\s[^,]+,\s*[^,]+\s-\s[A-Za-z]{2}$/.test(x))return x; // ja esta no padrao
+  var p=x.split(/\s*,\s*/); if(p.length!==3)return x;
+  var m=p[0].match(/^(.*\S)\s+(\d+[A-Za-z]?(?:\s*[\/-]\s*\d+)?|S\/N)$/i); if(!m)return x;
+  var cid=p[2].match(/^(.*?)\s*-\s*([A-Za-z]{2})$/); if(!cid)return x;
+  return m[1]+', '+m[2]+' - '+p[1]+', '+cid[1]+' - '+cid[2].toUpperCase();
+}
 function fopEndCompleto(l){
   var op=window.DADOS&&DADOS.farmoOp; if(!op)return '';
   if(FOP_ENDC.ref!==op){
@@ -6136,7 +6145,7 @@ function fopDia(iso){
   // dia vazio e reconstruido a partir do cadastro de paradas
   var c=fopCfg(), base=(c.operacaoDia&&c.operacaoDia[iso])||(c.operacaoHoje&&c.dataHoje===iso?c.operacaoHoje:null), cad=fopCad();
   if(!base&&cad&&cad.rotas){base=[];cad.rotas.forEach(function(r){r.paradas.forEach(function(x){base.push({rota:r.rota,end:x.end,hor:x.hor,bairro:x.bairro,pnet:x.pnet})})})}
-  d=FOP.dias[iso]={linhas:base?base.map(function(x){return {rota:x.rota||'',end:x.enderecoCompleto||x.endereco||x.end||'',hor:x.horario||x.hor||'',bairro:x.bairro||'',pnet:x.codigoPnet||x.pnet||'',port:'',bolsa:'',term:''}}):[]};
+  d=FOP.dias[iso]={linhas:base?base.map(function(x){return {rota:x.rota||'',end:fopEndPadrao(x.enderecoCompleto)||x.endereco||x.end||'',hor:x.horario||x.hor||'',bairro:x.bairro||'',pnet:x.codigoPnet||x.pnet||'',port:'',bolsa:'',term:''}}):[]};
   d.linhas=fopLayAplica(d.linhas);
   return d;
 }
@@ -6410,7 +6419,7 @@ function fsPreparar(){
       FS.snapOp={}; FS.snapDev={};
       if(ops.length){ // o banco manda
         if(info.status!=='fechado')ops.forEach(function(x){ // linha so com a rua: usa o endereco completo conhecido (o texto curto antigo e substituido; o snapshot guarda o antigo e o sync grava a diferenca)
-          if(x.endereco&&!/d/.test(x.endereco)){var ec=fopEndCompleto({rota:x.rota,end:x.endereco}); if(ec)x._novoEnd=ec}
+          if(x.endereco&&!/d/.test(x.endereco)){var ec=fopEndCompleto({rota:x.rota,end:x.endereco}); if(ec)x._novoEnd=fopEndPadrao(ec)}
         });
         FOP.dias[iso]={linhas:ops.map(function(x){return {rota:x.rota,end:x._novoEnd||x.endereco,hor:x.horario,bairro:x.bairro,pnet:x.codigo_pnet,port:x.portador,bolsa:x.bolsa,term:x.termometro}})};
         ops.forEach(function(x){FS.snapOp[x.linha]=JSON.stringify(fsLinhaOp({rota:x.rota,end:x.endereco,hor:x.horario,bairro:x.bairro,pnet:x.codigo_pnet,port:x.portador,bolsa:x.bolsa,term:x.termometro},x.linha,iso,x.sugestao))});
