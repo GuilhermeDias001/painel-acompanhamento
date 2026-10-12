@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cifrar, decifrar } from './cofre.mjs';
-import { gravarSupabase, semearQuadro } from './supabase.mjs';
+import { gravarSupabase, semearQuadro, importarCadastro } from './supabase.mjs';
 import { backupDiario } from './backup.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -57,6 +57,16 @@ if (process.env.SUPABASE_SECRET) {
   try {
     console.log(await semearQuadro(JSON.parse(readFileSync(join(AQUI, 'dados.json'), 'utf8')), process.env.SUPABASE_SECRET));
   } catch (e) { console.log('FALHA quadro no banco: ' + String(e.message).slice(0, 200)); }
+  if (s.cadastroImport) {
+    try {
+      const msg = await importarCadastro(s.cadastroImport, process.env.SUPABASE_SECRET);
+      console.log(msg);
+      // feito: tira a lista (1 MB) do cofre para ele não crescer a cada renovação do token
+      const atual = decifrar(readFileSync(COFRE, 'utf8'), CHAVE); delete atual.cadastroImport;
+      writeFileSync(COFRE, cifrar(atual, CHAVE)); console.log('cofre: lista do cadastro único removida');
+    }
+    catch (e) { console.log('FALHA importação do cadastro: ' + String(e.message).slice(0, 200)); }
+  }
   // resultado do backup fica no banco (painel.area='backup_status'): o site pode mostrar "último backup" e alertar se parar
   const statusBackup = async (corpo) => {
     const k = process.env.SUPABASE_SECRET, hd = { apikey: k, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' };

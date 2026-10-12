@@ -135,3 +135,27 @@ export async function ingerirDiasFechados(ler, nomesAbas, hojeIso, segredo, limi
   }
   return `Ingestão do quadro: ${feitos.length ? feitos.join(' ') : 'nada novo'}${vazios.length ? ' | abas sem linhas: ' + vazios.join(' ') : ''}${alvo.length > limite ? ` | faltam ${alvo.length - limite}` : ''}`;
 }
+
+// Importação ÚNICA do cadastro único (Guilherme autorizou em 12/10): grava cadastro_pessoa (dados que qualquer perfil lê) e
+// cadastro_pessoa_pessoal (CPF, e-mail, telefones, endereço, placa: só admin/operador). NUNCA sobrescreve linha que já exista
+// (decisões dele na fila 'Confirmar cadastro' valem mais): só completa o que falta. Controle por painel.area='import_cadastro'.
+export async function importarCadastro(lista, segredo) {
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const get = async (p) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${p}`, { headers: h }); if (!r.ok) throw new Error(`leitura ${await erroSeguro(r)}`); return r.json(); };
+  if ((await get('painel?select=area&area=eq.import_cadastro')).length) return 'Cadastro único: importação já feita';
+  const antes = await get('cadastro_pessoa?select=chave&limit=5000');
+  const jaTem = new Set(antes.map((x) => x.chave));
+  const novos = lista.filter((p) => !jaTem.has(p.chave));
+  const conflitos = lista.length - novos.length;
+  const post = async (tabela, corpo) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${tabela}?on_conflict=chave`, { method: 'POST', headers: { ...h, Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} ${await erroSeguro(r)}`); };
+  for (let i = 0; i < novos.length; i += 150) {
+    const lote = novos.slice(i, i + 150);
+    await post('cadastro_pessoa', lote.map((p) => ({ chave: p.chave, cod: p.cod || '', nome: p.nome, dados: p.dados, origem: p.origem || '' })));
+    await post('cadastro_pessoa_pessoal', lote.filter((p) => p.pessoal && Object.keys(p.pessoal).length).map((p) => ({ chave: p.chave, dados: p.pessoal })));
+  }
+  const depois = await get('cadastro_pessoa?select=chave&limit=5000');
+  const msg = `Cadastro único: ${lista.length} na lista, ${novos.length} gravadas, ${conflitos} já existiam (mantidas); antes ${antes.length}, depois ${depois.length}`;
+  await fetch(`${SUPABASE_URL}/rest/v1/painel?on_conflict=area`, { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: 'import_cadastro', dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
+  return msg;
+}
