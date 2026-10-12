@@ -429,7 +429,7 @@ try {
         const porNome = new Map(); for (const p of pessoas) { const k = norm(p.nome); porNome.set(k, porNome.has(k) ? null : p.chave); } // null = homônimo: não decide
         const sem = new Set(); let ok = 0;
         for (const l of dados.contratos.lojas) for (const v of l.vagasDetalhe || []) {
-          const nm = norm(v.titular); if (!nm || /^falta( d+)?$/.test(nm)) continue;
+          const nm = norm(v.titular); if (!nm || /^falta( d+)?$/.test(nm) || /^encerrado$|funcionario propria loja|loja/.test(nm)) continue; // placeholders (ENCERRADO, FUNCIONARIO DA PROPRIA LOJA, RODRIGO (LOJA)) não são pessoas
           const ch = porNome.get(nm); if (ch) { v.titularChave = ch; ok++; } else sem.add(v.titular);
         }
         dados.contratos.titularesSemCadastro = [...sem].sort();
