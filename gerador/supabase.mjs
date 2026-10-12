@@ -159,3 +159,42 @@ export async function importarCadastro(lista, segredo) {
   await fetch(`${SUPABASE_URL}/rest/v1/painel?on_conflict=area`, { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: 'import_cadastro', dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
   return msg;
 }
+
+// Fila de análise (Guilherme, 12/10: "olha apenas a Escala das lojas e preenche as vagas e os Elites; o restante vai para análise").
+// ÚNICA vez (painel.area='import_analise'): 1) insere os registros em cadastro_pendente; 2) ESTACIONA em cadastro_pessoa_estacionada
+// as pessoas que não ficam e as tira de cadastro_pessoa (os dados pessoais seguem em cadastro_pessoa_pessoal, sem FK, e voltam a casar
+// pela chave se forem aprovadas). Nada é perdido: a linha completa fica na tabela estacionada.
+export async function importarAnalise(obj, segredo) {
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const rest = (p) => `${SUPABASE_URL}/rest/v1/${p}`;
+  const get = async (p) => { const r = await fetch(rest(p), { headers: h }); if (!r.ok) throw new Error(`leitura ${await erroSeguro(r)}`); return r.json(); };
+  if ((await get('painel?select=area&area=eq.import_analise')).length) return 'Fila de análise: importação já feita';
+  const paginar = async (p) => { const t = []; for (let o = 0; ; o += 1000) { const l = await get(`${p}&limit=1000&offset=${o}`); t.push(...l); if (l.length < 1000) break; } return t; };
+  const ficam = new Set(obj.ficam);
+  const pessoas = await paginar('cadastro_pessoa?select=*&order=chave');
+  const pendAntes = (await paginar('cadastro_pendente?select=id&order=id')).length;
+  const sair = pessoas.filter((p) => !ficam.has(p.chave));
+  const faltam = [...ficam].filter((k) => !pessoas.some((p) => p.chave === k));
+  if (faltam.length) throw new Error(`${faltam.length} chaves de 'ficam' não estão em cadastro_pessoa; abortado sem alterar nada`);
+  if (obj.pendentes.length !== sair.length) throw new Error(`pendentes (${obj.pendentes.length}) ≠ pessoas a sair (${sair.length}); abortado sem alterar nada`);
+  const post = async (tabela, corpo, extra = '') => { const r = await fetch(rest(tabela), { method: 'POST', headers: { ...h, Prefer: 'return=minimal' + extra }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} ${await erroSeguro(r)}`); };
+  // 1) estaciona (cópia completa) ANTES de apagar
+  for (let i = 0; i < sair.length; i += 150) await post('cadastro_pessoa_estacionada?on_conflict=chave', sair.slice(i, i + 150).map((p) => ({ ...p, motivo: 'fora da Escala (vaga/Elite): vai para análise (12/10)' })), ',resolution=ignore-duplicates');
+  const est = (await paginar('cadastro_pessoa_estacionada?select=chave&order=chave')).length;
+  if (est < sair.length) throw new Error(`estacionadas ${est} < ${sair.length}; abortado antes de apagar`);
+  // 2) fila
+  for (let i = 0; i < obj.pendentes.length; i += 100) await post('cadastro_pendente', obj.pendentes.slice(i, i + 100).map((p) => ({ origem: p.origem, nome: p.nome, duvida: p.duvida, proposta: p.proposta, candidatos: p.candidatos || [], status: 'pendente' })));
+  // 3) tira de cadastro_pessoa
+  for (let i = 0; i < sair.length; i += 40) {
+    const lista = sair.slice(i, i + 40).map((p) => `"${String(p.chave).replace(/"/g, '\\"')}"`).join(',');
+    const r = await fetch(rest(`cadastro_pessoa?chave=in.(${encodeURIComponent(lista)})`), { method: 'DELETE', headers: { ...h, Prefer: 'return=minimal' } });
+    if (!r.ok) throw new Error(`apagar ${await erroSeguro(r)}`);
+  }
+  const depoisP = (await paginar('cadastro_pessoa?select=chave&order=chave')).length;
+  const pend = (await paginar('cadastro_pendente?select=id&status=eq.pendente&order=id')).length;
+  const pess = (await paginar('cadastro_pessoa_pessoal?select=chave&order=chave')).length;
+  const msg = `Fila de análise: pessoas ${pessoas.length} -> ${depoisP}; estacionadas ${est}; pendentes antes ${pendAntes}, pendentes agora ${pend}; pessoais ${pess}`;
+  await fetch(rest('painel?on_conflict=area'), { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: 'import_analise', dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
+  return msg;
+}
