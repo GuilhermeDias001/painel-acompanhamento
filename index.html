@@ -883,7 +883,12 @@ html.mapa-modo main{padding-bottom:0}
 .cont-h3{margin:14px 0 8px;font-size:14px}
 .cont-conta{font-weight:400;font-size:12px;color:var(--fg-faint);margin-left:6px}
 #contModal .cont-vagas{font-size:12.5px}
-#contModal .cont-vagas td.cont-hr{white-space:nowrap}
+#contModal .cont-vagas td.cont-hr{white-space:nowrap;text-align:center!important}
+#contModal .cont-vagas th:nth-child(n+3):nth-child(-n+10),#contModal .cont-vagas td:nth-child(10){text-align:center!important}
+#selo-teste{position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;padding:3px 14px;border-radius:0 0 10px 10px;background:#f5c400;color:#111;font:800 11px var(--font-sys);letter-spacing:.08em;pointer-events:none}
+.cont-vaga-add{border:1px dashed var(--border-strong);background:transparent;color:var(--fg);border-radius:8px;padding:5px 10px;font:600 12px var(--font-sys);cursor:pointer}
+.cont-vaga-add:hover{border-color:var(--n-vermelho);color:var(--n-vermelho)}
+.cont-vaga-in{width:100%;min-width:190px}
 #fichaModal{z-index:70}
 .cont-perfil{color:inherit;text-decoration:none}
 .esc-abrir{cursor:pointer}
@@ -2134,4 +2139,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=73cc93be8974"></script>
+<script src="app.js?v=32e09677996f"></script>
