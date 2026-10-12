@@ -419,6 +419,23 @@ try {
     // Contratos completo (todas as lojas/vagas, não só as do mapa) + escalas alternadas (AR:AU)
     const alt = await lerAcomp(tk, 'Contratos', 'AR2:AU760', NOVA_OP);
     dados.contratos = montarContratos({ linhas: ac, alt, mapa: dados.mapa });
+    // cadastro único (12/10): cada titular das vagas aponta para a chave de cadastro_pessoa (titularChave); só no Actions (chave do banco).
+    // Casa por nome normalizado EXATO (sem acento, sem de/da/do/dos/das/e); o que não casar com certeza fica listado em contratos.titularesSemCadastro (nada é inventado).
+    if (process.env.SUPABASE_SECRET && dados.contratos) {
+      try {
+        const hh = { apikey: process.env.SUPABASE_SECRET }; if (process.env.SUPABASE_SECRET.startsWith('eyJ')) hh.Authorization = 'Bearer ' + process.env.SUPABASE_SECRET;
+        const pessoas = []; for (let o = 0; ; o += 1000) { const r = await fetch(`https://jetujppwmyzyfkaflplj.supabase.co/rest/v1/cadastro_pessoa?select=chave,nome&order=chave&limit=1000&offset=${o}`, { headers: hh }); if (!r.ok) throw new Error('HTTP ' + r.status); const l = await r.json(); pessoas.push(...l); if (l.length < 1000) break; }
+        const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z ]/g, ' ').split(/s+/).filter((w) => w && !['de', 'da', 'do', 'dos', 'das', 'e'].includes(w)).join(' ');
+        const porNome = new Map(); for (const p of pessoas) { const k = norm(p.nome); porNome.set(k, porNome.has(k) ? null : p.chave); } // null = homônimo: não decide
+        const sem = new Set(); let ok = 0;
+        for (const l of dados.contratos.lojas) for (const v of l.vagasDetalhe || []) {
+          const nm = norm(v.titular); if (!nm || /^falta( d+)?$/.test(nm)) continue;
+          const ch = porNome.get(nm); if (ch) { v.titularChave = ch; ok++; } else sem.add(v.titular);
+        }
+        dados.contratos.titularesSemCadastro = [...sem].sort();
+        console.log(`contratos: ${ok} titulares ligados ao cadastro único, ${sem.size} sem cadastro`);
+      } catch (e) { console.log('FALHA titularChave: ' + String(e.message).slice(0, 160)); }
+    }
   } catch (e) { console.log(`FALHA mapa: ${String(e.message).slice(0, 200)}`); }
 } catch (e) { console.log(`FALHA operação: ${String(e.message).slice(0, 200)}`); }
 if (existsSync(join(AQUI, 'fixos.json'))) dados.fixos = JSON.parse(readFileSync(join(AQUI, 'fixos.json'), 'utf8'));
