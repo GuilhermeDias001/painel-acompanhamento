@@ -882,12 +882,24 @@ html.mapa-modo main{padding-bottom:0}
 #contModal th,#contModal td{text-align:left!important}
 .cont-h3{margin:14px 0 8px;font-size:14px}
 .cont-conta{font-weight:400;font-size:12px;color:var(--fg-faint);margin-left:6px}
-#contModal .cont-vagas{font-size:12.5px}
+#contModal .cont-vagas{font-size:12px;width:100%;table-layout:auto}
+#contModal .cont-vagas th,#contModal .cont-vagas td{padding-left:6px;padding-right:6px}
+#contModal .cont-vagas td.cont-vnome{min-width:190px}
+.cont-vtag{margin-left:6px;font-size:10.5px;vertical-align:middle}
 #contModal .cont-vagas td.cont-hr{white-space:nowrap;text-align:center!important}
-#contModal .cont-vagas th:nth-child(n+3):nth-child(-n+10),#contModal .cont-vagas td:nth-child(10){text-align:center!important}
+#contModal .cont-vagas th:nth-child(1),#contModal .cont-vagas td:nth-child(1),#contModal .cont-vagas th:nth-child(n+3):nth-child(-n+10),#contModal .cont-vagas td:nth-child(n+3):nth-child(-n+10){text-align:center!important}
+#contModal .cont-vagas td.cont-hoje,#contModal .cont-vagas th.cont-hoje{color:var(--n-ciano)}
+#contModal .cont-vagas td.cont-hoje .aviso-empty{color:color-mix(in srgb,var(--n-ciano) 55%,transparent)}
+#contModal .cont-vagas td.cont-vtipo{font-weight:600;font-size:11.5px}
+#contModal .cont-vagas .cont-hr{font-size:11.5px}
 #selo-teste{position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;padding:3px 14px;border-radius:0 0 10px 10px;background:#f5c400;color:#111;font:800 11px var(--font-sys);letter-spacing:.08em;pointer-events:none}
-.cont-vaga-add{border:1px dashed var(--border-strong);background:transparent;color:var(--fg);border-radius:8px;padding:5px 10px;font:600 12px var(--font-sys);cursor:pointer}
-.cont-vaga-add:hover{border-color:var(--n-vermelho);color:var(--n-vermelho)}
+.cont-vbtn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--fg-faint);cursor:pointer}
+.cont-vbtn:hover,.cont-vbtn:focus-visible{color:var(--fg);border-color:var(--border-strong);outline:none}
+.cont-vadd{color:var(--n-verde,#35d07f)}
+#contModal .cont-vagas td.cont-vdel-td{white-space:nowrap;text-align:right}
+.cont-ved-in{width:74px;min-width:0;text-align:center;padding:4px 2px;font-size:11px}
+.cont-ved-dom{display:grid;gap:3px;justify-items:center}.cont-ved-dom label{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--fg-faint)}
+.cont-ved-acoes{display:grid;gap:4px;justify-items:stretch}
 .cont-vaga-in{width:100%;min-width:190px}
 #fichaModal{z-index:70}
 .cont-perfil{color:inherit;text-decoration:none}
@@ -1181,6 +1193,9 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sqx-sug{position:fixed;z-index:200;min-width:220px;max-height:272px;overflow:auto;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px;margin:0;list-style:none}
 .sqx-sug li{padding:7px 10px;border-radius:6px;font:600 12.5px var(--font-sys);color:var(--fg);cursor:pointer;white-space:nowrap}
 .ficha-sens{width:100%}
+.adm-ac-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 14px;align-items:end;margin:12px 0;padding:14px;border:1px solid var(--border-strong);border-radius:12px}
+.adm-ac-acoes{display:flex;gap:8px}
+.adm-cad-row{cursor:pointer}.adm-cad-row:hover,.adm-cad-row:focus-visible{background:color-mix(in srgb,var(--n-vermelho) 10%,transparent);outline:none}
 .func-pend{background:transparent;color:var(--fg);border:1px solid var(--border-strong)}
 .func-pend b{display:inline-block;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--n-vermelho);color:#fff;font-size:11.5px;text-align:center}
 .func-pend b:empty{display:none}
@@ -1705,12 +1720,35 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>Quando</th><th>Quem</th><th>Onde</th><th>Registro</th><th>Campo</th><th>Antes</th><th>Depois</th><th>Ação</th></tr></thead><tbody id="admCorpo"></tbody></table></div>
         </div>
         <div id="admCadBox" hidden>
-          <p class="sub" id="admCadSub" style="margin:10px 0 8px"></p>
-          <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>Onde</th><th>Nome usado</th><th>Situação</th><th>Nome no cadastro</th></tr></thead><tbody id="admCadCorpo"></tbody></table></div>
+          <div class="pf-barra">
+            <label class="pf-busca">Pessoa<input type="search" id="admCadBusca" placeholder="Nome, COD, loja ou função" autocomplete="off"></label>
+            <label>Situação<select id="admCadSit"><option value="ATIVO">Ativos</option><option value="INATIVO">Inativos</option><option value="">Todos</option></select></label>
+            <label>Contratação<select id="admCadTipo"><option value="">Todas</option><option>CLT</option><option>MEI</option><option>Prestador</option></select></label>
+            <button type="button" class="func-novo" id="admCadNovo"><span>+</span> Novo cadastro</button>
+            <button type="button" class="func-novo func-pend" id="admCadFila">Confirmar cadastro <b id="admCadFilaN"></b></button>
+          </div>
+          <p class="sub" id="admCadLSub" style="margin:10px 0 8px"></p>
+          <div class="mot-cad-wrap"><table class="mot-cad pf-tab adm-cad"><thead><tr><th>Nome</th><th>COD</th><th>Contratação</th><th>Função</th><th>Posição</th><th>Loja</th><th>Situação</th></tr></thead><tbody id="admCadLCorpo"></tbody></table></div>
+          <p style="text-align:center;margin:10px 0 0"><button type="button" class="perfil-btn sec" id="admCadMais" hidden>Mostrar mais</button></p>
+          <details style="margin-top:18px"><summary style="cursor:pointer"><b>Nomes em uso que não batem com o cadastro</b> <span class="cont-conta" id="admCadDivN"></span></summary>
+            <p class="sub" id="admCadSub" style="margin:10px 0 8px"></p>
+            <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>Onde</th><th>Nome usado</th><th>Situação</th><th>Nome no cadastro</th></tr></thead><tbody id="admCadCorpo"></tbody></table></div>
+          </details>
         </div>
         <div id="admAcBox" hidden>
+          <div class="pf-barra" style="justify-content:space-between">
+            <span class="sub" style="margin:0">Quem entra no painel e com que perfil. Só administradores criam acessos.</span>
+            <button type="button" class="func-novo" id="admAcNovo"><span>+</span> Novo acesso</button>
+          </div>
+          <form id="admAcForm" class="adm-ac-form" hidden autocomplete="off">
+            <label class="perfil-campo"><span>Nome *</span><input type="text" id="admAcNome" maxlength="80" required></label>
+            <label class="perfil-campo"><span>E-mail *</span><input type="email" id="admAcEmail" maxlength="120" required></label>
+            <label class="perfil-campo"><span>Perfil *</span><select id="admAcPerfil"><option value="leitor">Leitor: só vê</option><option value="operador">Operador: vê e edita a operação</option><option value="admin">Administrador: tudo, inclusive acessos</option></select></label>
+            <div class="adm-ac-acoes"><button type="submit" class="perfil-btn">Criar acesso</button><button type="button" class="perfil-btn sec" id="admAcCancelar">Cancelar</button></div>
+            <p class="perfil-status" id="admAcMsg" role="status" style="grid-column:1/-1;margin:0"></p>
+          </form>
           <p class="sub" id="admAcSub" style="margin:10px 0 8px"></p>
-          <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Último acesso</th><th>Autenticador</th></tr></thead><tbody id="admAcCorpo"></tbody></table></div>
+          <div class="mot-cad-wrap"><table class="mot-cad pf-tab"><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Último acesso</th><th>Autenticador</th><th></th></tr></thead><tbody id="admAcCorpo"></tbody></table></div>
         </div>
       </section>
     </div>
@@ -1974,6 +2012,11 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       </div>
       <label class="perfil-campo"><span>Função</span><input type="text" id="nfFuncao" maxlength="60" placeholder="Ex.: Motofretista" value="Motofretista"></label>
       <label class="perfil-campo"><span>Empresa / loja</span><input type="text" id="nfLocal" list="nfLojas" maxlength="80" placeholder="Escolha uma loja do cadastro de contratos"><datalist id="nfLojas"></datalist></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>CPF</span><input type="text" id="nfCpf" maxlength="14" inputmode="numeric" placeholder="Só números"></label>
+        <label class="perfil-campo"><span>Celular</span><input type="text" id="nfCel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
+      </div>
+      <label class="perfil-campo"><span>E-mail</span><input type="email" id="nfEmail" maxlength="90" autocomplete="off"></label>
       <label class="perfil-campo"><span>Escala</span><input type="text" id="nfEscala" maxlength="120" placeholder="Ex.: Seg a Sex - 08:00 às 18:00"></label>
       <div class="nf-linha">
         <label class="perfil-campo"><span>Folga</span><input type="text" id="nfFolga" maxlength="60" placeholder="Ex.: Sábado e Domingo"></label>
@@ -2139,4 +2182,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=32e09677996f"></script>
+<script src="app.js?v=4e417192132e"></script>
