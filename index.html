@@ -1381,6 +1381,11 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 #sqSugMenu{position:fixed;z-index:91;min-width:240px;max-width:340px;max-height:280px;overflow-y:auto;margin:0;padding:6px;list-style:none;background:var(--surface);border:1px solid var(--border-strong);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 #sqSugMenu[hidden]{display:none}
 #sqSugMenu li{padding:7px 10px;border-radius:6px;font:500 13px var(--font-sys);color:var(--fg);cursor:pointer;display:flex;justify-content:space-between;gap:14px}
+#sqSugMenu li{align-items:center}
+#sqSugMenu li>span{flex:1 1 auto}
+.sq-sug-wa{flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;padding:0;border:1px solid var(--border-strong);border-radius:6px;background:var(--surface-2);color:var(--n-vermelho);cursor:pointer}
+.sq-sug-wa.wa-lig,.wa-lig .sq-sug-wa{color:var(--n-verde)}
+.sq-sug-wa:hover{border-color:currentColor}
 #sqSugMenu li small{color:var(--fg-faint);font-size:11px;white-space:nowrap}
 #sqSugMenu li:hover,#sqSugMenu li:focus{background:color-mix(in srgb,var(--fg) 9%,transparent);outline:0}
 #sqSugMenu li.cab{cursor:default;color:var(--fg-faint);font-size:11px;letter-spacing:.06em;text-transform:uppercase;pointer-events:none}
@@ -2249,4 +2254,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=bd9d0694dcde"></script>
+<script src="app.js?v=24506e0df594"></script>
