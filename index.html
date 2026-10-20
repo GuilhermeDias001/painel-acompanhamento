@@ -1072,6 +1072,11 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 #remParaMenu li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border-radius:6px;font:600 13px var(--font-sys);color:var(--fg);cursor:pointer}
 #remParaMenu li:hover,#remParaMenu li:focus{background:color-mix(in srgb,var(--fg) 9%,transparent);outline:0}
 .rem-falta1{flex:none;padding:2px 8px;border-radius:999px;border:1px solid var(--n-vermelho);color:var(--n-vermelho);background:color-mix(in srgb,var(--n-vermelho) 14%,transparent);font:700 10.5px var(--font-sys);letter-spacing:.06em}
+.rep-como{margin:0 0 12px;font-size:12.5px;color:var(--fg-muted)}
+.rep-como summary{cursor:pointer;font-weight:600;color:var(--fg)}
+.rep-como ul{margin:6px 0 6px 18px;padding:0}
+.rep-como li,.rep-como p{margin:4px 0;line-height:1.45}
+.rep-tab tbody tr{cursor:pointer}
 .rem-esc{display:block;margin-top:5px;font-size:11.5px;line-height:1.4;color:var(--fg-muted)}
 .rem-esc b{color:var(--fg)}
 #remDetModal{z-index:84}
@@ -1887,6 +1892,17 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Quem considerar</span><select id="repTipo" class="ficha-in"><option value="">Todos</option><option value="MEI">MEI</option><option value="PRESTADOR">Prestador</option><option value="Folguista">Folguista</option></select></label>
         </div>
         <p class="sub" id="repSub" style="margin:0 0 12px">Escolha a loja e o dia: o ranking considera as regiões onde a pessoa costuma trabalhar, quantas vezes ela já trabalhou nessa loja, a distância (estimada pelo CEP) e se ela está disponível no dia.</p>
+        <details class="rep-como"><summary>Como o ranking é calculado</summary>
+          <p><b>Pontos (até 100)</b>, do maior para o menor:</p>
+          <ul>
+            <li><b>Experiência: até 30.</b> Por loja: quantas vezes a pessoa já trabalhou nela (10 vezes ou mais = 30). Por região: quantas vezes trabalhou na região (20 ou mais = 30).</li>
+            <li><b>Região: até 25.</b> A fatia do que a pessoa trabalha na região da vaga. Quem trabalha só ali ganha tudo. No ranking por loja, pesa 60% a fatia e 40% o volume (15 vezes ou mais).</li>
+            <li><b>Distância: até 25.</b> Até 2 km vale 25 e cai de forma linear até 0 em 25 km. É a menor entre a casa estimada pelo CEP e as 3 lojas onde mais trabalha. Sem CEP nem histórico, não pontua.</li>
+            <li><b>Disponibilidade: até 20.</b> Livre no dia (folga ou folguista) 20; a confirmar 12; escalado no dia 4.</li>
+          </ul>
+          <p><b>Quem entra:</b> ativos que já trabalharam na região (ou, por loja, já cobriram a loja), além de MEI, prestador e folguista. Por loja, ficam de fora quem já está numa vaga naquele dia e o CLT que a escala manda trabalhar. Por região, todos entram e só perdem pontos de disponibilidade.</p>
+          <p><b>Estimativas:</b> a distância usa o CEP de casa, que só aparece para admin e operador, e as coordenadas das lojas. O endereço não sai do navegador. Dê dois cliques numa linha para abrir o perfil.</p>
+        </details>
         <div class="mot-cad-wrap func-wrap">
           <table class="mot-cad rep-tab">
             <thead><tr><th>#</th><th>Colaborador</th><th>Tipo</th><th>Bairro</th><th>Região onde atua</th><th>Na região da loja</th><th>Na loja</th><th>Distância</th><th>Disponibilidade</th><th>Pontos</th><th></th></tr></thead>
@@ -2279,4 +2295,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=87c45206988c"></script>
+<script src="app.js?v=3f430fcd684d"></script>
