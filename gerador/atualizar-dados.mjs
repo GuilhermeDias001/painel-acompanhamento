@@ -387,6 +387,31 @@ try {
       if (process.env.SUPABASE_SECRET) {
         try { console.log(await ingerirDiasFechados(lerNO, abas, dataDaAba(hojeNome), process.env.SUPABASE_SECRET)); }
         catch (e) { console.log(`FALHA ingestão do quadro: ${String(e.message).slice(0, 200)}`); }
+        // 20/10: o histórico do quadro também vem do BANCO (quadro_linha, últimos 60 dias). As abas de dia somem quando o Guilherme arquiva
+        // (Arquivar Operação apaga a aba), e o ranking de Reposição ficou com 6 dias. Para a mesma data vale o banco; abas só completam o que o banco não tem.
+        try {
+          const hh = { apikey: process.env.SUPABASE_SECRET }; if (process.env.SUPABASE_SECRET.startsWith('eyJ')) hh.Authorization = 'Bearer ' + process.env.SUPABASE_SECRET;
+          const hojeIso = dataDaAba(hojeNome);
+          const desde = new Date(Date.parse(hojeIso + 'T12:00:00Z') - 60 * 86400000).toISOString().slice(0, 10);
+          const porData = new Map();
+          for (const l of hq.linhas) { if (!porData.has(l.data)) porData.set(l.data, []); porData.get(l.data).push(l); }
+          const doBanco = new Map();
+          for (let o = 0; ; o += 1000) {
+            const r = await fetch(`https://jetujppwmyzyfkaflplj.supabase.co/rest/v1/quadro_linha?select=dia,loja,colab,entrada,saida,status,motivo,faltante&dia=gte.${desde}&dia=lt.${hojeIso}&order=dia,ordem&limit=1000&offset=${o}`, { headers: hh });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const lote = await r.json();
+            for (const x of lote) {
+              if (!x.loja || !(x.colab || x.faltante)) continue;
+              if (!doBanco.has(x.dia)) doBanco.set(x.dia, []);
+              doBanco.get(x.dia).push({ data: x.dia, loja: x.loja, colab: x.colab || '', entrada: x.entrada || '', saida: x.saida || '', status: x.status || '', motivo: x.motivo || '', faltante: x.faltante || '' });
+            }
+            if (lote.length < 1000) break;
+          }
+          for (const [d, ls] of doBanco) porData.set(d, ls);
+          const datas = [...porData.keys()].filter((d) => d >= desde && d < hojeIso).sort();
+          dados.historicoQuadro = { linhas: datas.flatMap((d) => porData.get(d)), dias: datas.length };
+          console.log(`historicoQuadro: ${dados.historicoQuadro.dias} dias, ${dados.historicoQuadro.linhas.length} linhas (banco ${doBanco.size} dias + abas ${hq.dias})`);
+        } catch (e) { console.log(`FALHA historicoQuadro do banco: ${String(e.message).slice(0, 160)}`); }
       }
     } catch (e) { console.log(`FALHA quadro: ${String(e.message).slice(0, 200)}`); }
     // Farmoterápica operacional (Operação, Devolução, Rotas, Escalas, Historico): área 'farmo_op' (a área 'farmo' é o painel de entregas)
