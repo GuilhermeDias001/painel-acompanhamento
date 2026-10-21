@@ -1094,6 +1094,13 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .fecha-conf-card{max-width:380px;width:calc(100% - 32px);padding:18px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);box-shadow:0 18px 50px rgba(0,0,0,.5)}
 .fecha-conf-t{margin:0 0 14px;font-weight:600;line-height:1.45}
 .fecha-conf-ac{display:flex;gap:8px;justify-content:flex-end}
+.aviso-card{position:relative}
+.aviso-mais{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid var(--n-vermelho);background:color-mix(in srgb,var(--n-vermelho) 14%,transparent);color:var(--n-vermelho);font:700 20px/1 var(--font-sys);cursor:pointer;display:grid;place-items:center;padding:0}
+.aviso-mais[hidden]{display:none}
+.aviso-mais:hover{background:var(--n-vermelho);color:#fff}
+.aviso-x{margin-left:auto;border:0;background:transparent;color:var(--fg-faint);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+.aviso-x:hover{color:var(--n-vermelho)}
+.aviso-rec{color:var(--fg-faint);font-size:11px}
 .bm-calc{margin:6px 0 0;font-weight:700;color:var(--n-verde);min-height:1.2em}
 .bm-abas{display:flex;gap:6px;margin:0 0 14px;border-bottom:1px solid var(--border)}
 .bm-abas button{padding:9px 16px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--fg-muted);font:600 13px var(--font-sys);cursor:pointer}
@@ -1654,8 +1661,10 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       </div>
     </section>
 
-    <section class="card">
+    <section class="card aviso-card">
+      <button type="button" class="aviso-mais" id="avisoMais" title="Adicionar aviso" aria-label="Adicionar aviso" hidden>+</button>
       <h2>Quadro de avisos</h2>
+      <p class="sub" id="avisoMsg" style="margin:0 0 8px" hidden></p>
       <div class="aviso-grid" id="avisoGrid"></div>
     </section>
 
@@ -2479,6 +2488,24 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     </form>
   </div>
 </div>
+<div class="ficha-modal" id="avisoModal" hidden>
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="avisoTitulo" style="max-width:520px">
+    <header class="ficha-head"><div><h2 id="avisoTitulo">Novo aviso</h2><p style="font-size:11.5px">Aparece no Quadro de avisos para todos</p></div><button type="button" id="avisoFechar" aria-label="Fechar">×</button></header>
+    <form class="ficha-corpo nf-form" id="avisoForm" style="display:block" autocomplete="off">
+      <label class="perfil-campo"><span>Aviso *</span><textarea id="avisoTxt" maxlength="300" rows="3" style="width:100%;resize:vertical;font:500 14px var(--font-sys);color:var(--fg);background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:9px 12px" placeholder="Escreva o aviso"></textarea></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Tipo</span><select id="avisoTipo"><option value="programado">Programado</option><option value="esporadico">Esporádico</option></select></label>
+        <label class="perfil-campo"><span>Quando</span><select id="avisoQuando"><option value="data">Em uma data</option><option value="semana">Toda semana</option></select></label>
+      </div>
+      <div class="nf-linha">
+        <label class="perfil-campo" id="avisoDataBox"><span>Data</span><input type="date" id="avisoData"></label>
+        <label class="perfil-campo" id="avisoSemBox" hidden><span>Dia da semana</span><select id="avisoSem"><option value="1">Segunda</option><option value="2">Terça</option><option value="3">Quarta</option><option value="4">Quinta</option><option value="5">Sexta</option><option value="6">Sábado</option><option value="0">Domingo</option></select></label>
+      </div>
+      <p class="perfil-status" id="avisoSt" role="status"></p>
+      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="avisoCancelar">Cancelar</button><button type="submit" class="perfil-btn">Salvar</button></div>
+    </form>
+  </div>
+</div>
 <div class="ficha-modal" id="pixModal" hidden>
   <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="pixTitulo" style="max-width:440px">
     <header class="ficha-head">
@@ -2540,4 +2567,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=a66f406061f7"></script>
+<script src="app.js?v=9d1f34e568eb"></script>
