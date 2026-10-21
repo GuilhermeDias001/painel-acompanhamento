@@ -1092,6 +1092,10 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .rep-sug-li small{display:block;color:var(--fg-faint);font-size:11.5px}
 @media(max-width:640px){.rep-stop-l{grid-template-columns:1fr}}
 .rep-serv{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:12px 14px;border:1px solid var(--n-verde);border-radius:10px;background:color-mix(in srgb,var(--n-verde) 9%,transparent);font-size:13px;line-height:1.5}
+.esp-tab td{vertical-align:top}
+.esp-traj{max-width:380px;font-size:12px;line-height:1.45}
+.esp-acoes{white-space:nowrap}
+.esp-ac,.rep-atr{padding:4px 10px!important;font-size:12px!important}
 .rep-serv{cursor:pointer}
 .rep-serv:hover{border-color:color-mix(in srgb,var(--n-verde) 70%,var(--fg))}
 .rep-serv button{cursor:pointer}
@@ -1520,6 +1524,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="nav-sub">
           <a class="nav-subitem" href="#" data-view="farmoop"><span class="nav-label">Operação</span></a>
           <a class="nav-subitem" href="#" data-view="farmobm"><span class="nav-label">Bolsa Multi</span></a>
+          <a class="nav-subitem" href="#" data-view="esporadico"><span class="nav-label">Esporádico</span></a>
           <a class="nav-subitem" href="#" data-view="farmodev"><span class="nav-label">Devolução</span></a>
           <a class="nav-subitem" href="#" data-view="motoristas"><span class="nav-label">Motoristas</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
@@ -1937,6 +1942,22 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         </div>
       </section>
     </div>
+    <div class="view" id="viewEsporadico" style="display:none">
+      <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA</p><h1>Esporádico</h1></div></section>
+      <section class="card">
+        <div class="func-top" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <p class="sub" id="espSub" style="margin:0;flex:1 1 260px">Serviços esporádicos oferecidos e atribuídos.</p>
+          <select id="espFiltro" class="ficha-in" style="width:auto" aria-label="Filtrar por situação"><option value="">Todos</option><option value="oferecido">Oferecidos</option><option value="atribuido">Atribuídos</option><option value="concluido">Concluídos</option><option value="cancelado">Cancelados</option></select>
+          <button type="button" class="func-novo" id="espNovoBtn"><span>+</span> Novo serviço</button>
+        </div>
+        <div class="mot-cad-wrap func-wrap">
+          <table class="mot-cad esp-tab">
+            <thead><tr><th>Data</th><th>Região</th><th>Trajeto</th><th>Km</th><th>Valor</th><th>Quem fez</th><th>Situação</th><th></th></tr></thead>
+            <tbody id="espCorpo"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
     <div class="view" id="viewEmBreve" style="display:none">
       <section class="banner"><div><p class="eyebrow">EM BREVE</p><h1 id="embreveTitulo"></h1></div></section>
       <section class="card">
@@ -2279,6 +2300,24 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     </form>
   </div>
 </div>
+<div class="ficha-modal" id="espAtrModal" hidden>
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="espAtrTitulo" style="max-width:520px">
+    <header class="ficha-head">
+      <div><h2 id="espAtrTitulo">Atribuir serviço</h2><p id="espAtrSub" style="font-size:11.5px"></p></div>
+      <button type="button" id="espAtrFechar" aria-label="Fechar">×</button>
+    </header>
+    <form class="ficha-corpo nf-form" id="espAtrForm" style="display:block" autocomplete="off">
+      <label class="perfil-campo"><span>Quem fez o serviço *</span><input type="text" id="espAtrNome" list="espAtrNomes" maxlength="90" placeholder="Digite o nome e escolha na lista"><datalist id="espAtrNomes"></datalist></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Situação</span><select id="espAtrSit"><option value="atribuido">Atribuído</option><option value="concluido">Concluído</option></select></label>
+        <label class="perfil-campo"><span>Data do serviço</span><input type="date" id="espAtrData"></label>
+      </div>
+      <label class="perfil-campo"><span>Observação</span><input type="text" id="espAtrObs" maxlength="200" placeholder="Opcional"></label>
+      <p class="perfil-status" id="espAtrStatus" role="status"></p>
+      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="espAtrCancelar">Cancelar</button><button type="submit" class="perfil-btn">Salvar</button></div>
+    </form>
+  </div>
+</div>
 <div class="ficha-modal" id="pixModal" hidden>
   <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="pixTitulo" style="max-width:440px">
     <header class="ficha-head">
@@ -2340,4 +2379,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=def2e3511f2c"></script>
+<script src="app.js?v=02c6cef63757"></script>
