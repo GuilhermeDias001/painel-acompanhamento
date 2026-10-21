@@ -1105,8 +1105,11 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .esp-tab td:last-child,.esp-tab th:last-child{padding-right:8px}
 .esp-tab td:nth-child(3),.esp-tab td:nth-child(4){white-space:nowrap!important;min-width:0!important}
 .esp-tr{display:inline-block;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
-.esp-tab tbody tr{cursor:default}
-.esp-tab tbody tr[title^="Dois"]{cursor:pointer}
+.esp-tab tbody tr{cursor:pointer}
+.esp-tab tbody tr:hover td{background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.esp-nome{color:inherit;text-decoration:underline dotted}
+.esp-resumo{margin:0 0 12px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);font-size:12.5px;line-height:1.5}
+.esp-resumo-m{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;color:var(--fg-muted)}
 .esp-acoes{white-space:nowrap}
 .esp-ac,.rep-atr{padding:4px 10px!important;font-size:12px!important}
 .rep-serv[hidden]{display:none}
@@ -2318,10 +2321,11 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <div class="ficha-modal" id="espAtrModal" hidden>
   <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="espAtrTitulo" style="max-width:520px">
     <header class="ficha-head">
-      <div><h2 id="espAtrTitulo">Atribuir serviço</h2><p id="espAtrSub" style="font-size:11.5px"></p></div>
+      <div><h2 id="espAtrTitulo">Serviço esporádico</h2><p id="espAtrSub" style="font-size:11.5px"></p></div>
       <button type="button" id="espAtrFechar" aria-label="Fechar">×</button>
     </header>
     <form class="ficha-corpo nf-form" id="espAtrForm" style="display:block" autocomplete="off">
+      <div class="esp-resumo" id="espAtrResumo"></div>
       <label class="perfil-campo"><span>Quem fez o serviço *</span><input type="text" id="espAtrNome" list="espAtrNomes" maxlength="90" placeholder="Digite o nome e escolha na lista"><datalist id="espAtrNomes"></datalist></label>
       <div class="nf-linha">
         <label class="perfil-campo"><span>Situação</span><select id="espAtrSit"><option value="atribuido">Atribuído</option><option value="concluido">Concluído</option></select></label>
@@ -2394,4 +2398,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=6e4ee01e99af"></script>
+<script src="app.js?v=57e3f4687c68"></script>
