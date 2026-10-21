@@ -459,6 +459,38 @@ try {
       }
       if (aj.length) console.log(`contratos: ${n} de ${aj.length} ajustes da Escala aplicados`);
     } catch (e) { console.log('FALHA ajustes dos contratos: ' + String(e.message).slice(0, 160)); }
+    // 21/10: esporádicos conforme a aba Esporadico da Escala das lojas (verdade). esporadicos-ajustes.json = [{loja, remover:[{slots:[[dia,horario]...]}], adicionar:[{horario, dia}]}].
+    // Remove só a vaga esporádica que tem EXATAMENTE aqueles horários e adiciona a que falta; se o Excel for corrigido, o ajuste deixa de achar o que remover/adicionar... (adicionar é conferido: não duplica).
+    try {
+      const ajE = existsSync(join(AQUI, 'esporadicos-ajustes.json')) ? JSON.parse(readFileSync(join(AQUI, 'esporadicos-ajustes.json'), 'utf8')) : [];
+      const nrm2 = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+      const hor2 = (s) => { const m = /(\d{1,2})[:h](\d{2})\s*(?:as|às|a|-)\s*(\d{1,2})[:h](\d{2})/i.exec(String(s)); return m ? `${m[1].padStart(2, '0')}:${m[2]}-${m[3].padStart(2, '0')}:${m[4]}` : ''; };
+      const slotsDe2 = (v) => { const s = []; for (const d of ['seg', 'ter', 'qua', 'qui', 'sex', 'sab']) { const h = hor2(v.horarios?.[d]); if (h) s.push([d, h]); } (v.horarios?.dom || []).forEach((x, i) => { const h = hor2(x); if (h) s.push(['d' + (i + 1), h]); }); return s; };
+      const DIAS2 = { SEGUNDA: ['seg'], TERCA: ['ter'], QUARTA: ['qua'], QUINTA: ['qui'], SEXTA: ['sex'], SABADO: ['sab'], 'TODOS OS DOMINGOS': [0, 1, 2, 3, 4], 'PRIMEIRO DOMINGO': [0], 'SEGUNDO DOMINGO': [1], 'TERCEIRO DOMINGO': [2], 'QUARTO DOMINGO': [3], 'ULTIMO DOMINGO': [3], 'PENULTIMO DOMINGO': [2] };
+      let nAdd = 0, nRem = 0;
+      for (const o of ajE) {
+        const l = dados.contratos?.lojas?.find((x) => nrm2(x.nome) === nrm2(o.loja)); if (!l) continue;
+        for (const r of o.remover || []) {
+          const alvo = JSON.stringify(r.slots);
+          const i = l.vagasDetalhe.findIndex((v) => /ESPORAD/i.test(v.tipoVaga) && JSON.stringify(slotsDe2(v)) === alvo);
+          if (i >= 0) { l.vagasDetalhe.splice(i, 1); nRem++; }
+        }
+        for (const a of o.adicionar || []) {
+          const dias = DIAS2[nrm2(a.dia)]; if (!dias) continue;
+          const hr = String(a.horario).replace(/\s*às\s*/i, ' as ').trim();
+          const horarios = { seg: 'FECHADO', ter: 'FECHADO', qua: 'FECHADO', qui: 'FECHADO', sex: 'FECHADO', sab: 'FECHADO', dom: ['FECHADO', 'FECHADO', 'FECHADO', 'FECHADO', 'FECHADO'] };
+          let semanal = dias.length === 5;
+          for (const d of dias) { if (typeof d === 'number') horarios.dom[d] = hr; else horarios[d] = hr; }
+          if (dias.length === 1 && typeof dias[0] === 'number' && dias[0] >= 2) horarios.dom[4] = ''; // convenção do Excel: 3º/4º/penúltimo/último domingo deixam a 5ª posição em branco
+          const jaTem = l.vagasDetalhe.some((v) => /ESPORAD/i.test(v.tipoVaga) && JSON.stringify(slotsDe2(v)) === JSON.stringify(slotsDe2({ horarios })));
+          if (jaTem) continue;
+          l.vagasDetalhe.push({ titular: 'ESPORADICO FIXO', tipoVaga: 'ESPORADICO FIXO', horarios, pausa: '', pausaExcecao: '', obs: '', modalidade: '', funcao: '', ajusteEscala: true });
+          nAdd++;
+        }
+        l.vagas = l.vagasDetalhe.length;
+      }
+      if (ajE.length) { dados.contratos.totais.vagas = dados.contratos.lojas.reduce((n, x) => n + x.vagas, 0); console.log(`contratos: esporadicos +${nAdd} -${nRem} conforme a Escala`); }
+    } catch (e) { console.log('FALHA ajustes dos esporadicos: ' + String(e.message).slice(0, 160)); }
     // cadastro único (12/10): cada titular das vagas aponta para a chave de cadastro_pessoa (titularChave); só no Actions (chave do banco).
     // Casa por nome normalizado EXATO (sem acento, sem de/da/do/dos/das/e); o que não casar com certeza fica listado em contratos.titularesSemCadastro (nada é inventado).
     if (process.env.SUPABASE_SECRET && dados.contratos) {

@@ -25,6 +25,7 @@ if (s.fixos) writeFileSync(join(AQUI, 'fixos.json'), JSON.stringify(s.fixos));
 if (s.extras) writeFileSync(join(AQUI, 'lojas-extra.json'), JSON.stringify(s.extras));
 if (s.farmoEnderecos) writeFileSync(join(AQUI, 'farmo-enderecos.json'), JSON.stringify(s.farmoEnderecos)); // endereços de pacientes (só no cofre)
 if (s.contratosAjustes) writeFileSync(join(AQUI, 'contratos-ajustes.json'), JSON.stringify(s.contratosAjustes)); // titulares conforme a Escala das lojas
+if (s.esporadicosAjustes) writeFileSync(join(AQUI, 'esporadicos-ajustes.json'), JSON.stringify(s.esporadicosAjustes)); // esporadicos conforme a Escala das lojas
 if (s.farmoCoordenadas) writeFileSync(join(AQUI, 'farmo-coordenadas.json'), JSON.stringify(s.farmoCoordenadas)); // coordenadas conferidas à mão
 // cache das coordenadas das lojas (mapa): cifrado no repositório, aberto só durante a execução
 // caches cifrados no repositório, abertos só durante a execução: coordenadas das lojas e histórico do quadro
