@@ -1094,6 +1094,26 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .fecha-conf-card{max-width:380px;width:calc(100% - 32px);padding:18px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);box-shadow:0 18px 50px rgba(0,0,0,.5)}
 .fecha-conf-t{margin:0 0 14px;font-weight:600;line-height:1.45}
 .fecha-conf-ac{display:flex;gap:8px;justify-content:flex-end}
+.bm-calc{margin:6px 0 0;font-weight:700;color:var(--n-verde);min-height:1.2em}
+.bm-abas{display:flex;gap:6px;margin:0 0 14px;border-bottom:1px solid var(--border)}
+.bm-abas button{padding:9px 16px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--fg-muted);font:600 13px var(--font-sys);cursor:pointer}
+.bm-abas button.on{color:var(--fg);border-bottom-color:var(--n-vermelho)}
+.bm-tab td.bm-end{white-space:normal;text-align:left!important;min-width:260px}
+.bm-tab td.bm-obs{white-space:normal;max-width:240px;text-align:left!important}
+.bm-tab tbody tr{cursor:default}
+.bm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:0 0 18px}
+.bm-card{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface-2)}
+.bm-card span{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted)}
+.bm-card b{font-size:22px;font-variant-numeric:tabular-nums}
+.bm-card small{color:var(--fg-faint);font-size:11.5px}
+.bm-card.tot{border-color:var(--n-verde)}
+.bm-card.tot b{color:var(--n-verde)}
+.bm-h3{margin:4px 0 8px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted)}
+.bm-tab th,.bm-tab td{text-align:center!important;white-space:nowrap}
+.bm-tab th:first-child,.bm-tab td:first-child{text-align:left!important}
+.bm-tab tbody tr{cursor:pointer}
+.bm-tab tbody tr:hover td,.bm-tab tr.bm-sel td{background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.bm-tab tr.bm-tot td{border-top:1px solid var(--border-strong);font-weight:700;cursor:default}
 .rep-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .rep-chip{padding:3px 10px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface-2);color:var(--fg);font:600 11.5px var(--font-sys);cursor:pointer}
 .rep-chip:hover{border-color:var(--n-verde);color:var(--n-verde)}
@@ -1971,6 +1991,28 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         </div>
       </section>
     </div>
+    <div class="view" id="viewBolsaMulti" style="display:none">
+      <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA</p><h1>Bolsa Multi</h1></div></section>
+      <section class="card">
+        <div class="bm-abas" role="tablist"><button type="button" role="tab" class="on" data-bm-aba="ent">Lançar entregas</button><button type="button" role="tab" data-bm-aba="end">Cadastro de endereços</button></div>
+        <p class="sub" id="bmMsg" style="margin:0 0 10px"></p>
+        <div id="bmEntSec">
+          <div class="func-top" style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+            <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Mês</span><input type="month" id="bmMesF"></label>
+            <label class="perfil-campo" style="flex:1 1 240px;margin:0"><span>Buscar</span><input type="text" id="bmEntBusca" autocomplete="off" maxlength="90" placeholder="Endereço, apelido, NF ou observação"></label>
+            <button type="button" class="func-novo" id="bmEntNovo" style="flex:0 0 auto"><span>+</span> Nova entrega</button>
+          </div>
+          <div class="mot-cad-wrap func-wrap"><table class="mot-cad bm-tab"><thead><tr><th>Dia</th><th>Endereço</th><th>Modo</th><th>Tabela</th><th>Nota</th><th>Adicional</th><th>Total</th><th>NF</th><th>Observação</th><th></th></tr></thead><tbody id="bmEntCorpo"></tbody></table></div>
+        </div>
+        <div id="bmEndSec" hidden>
+          <div class="func-top" style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+            <label class="perfil-campo" style="flex:1 1 260px;margin:0"><span>Buscar</span><input type="text" id="bmEndBusca" autocomplete="off" maxlength="90" placeholder="Apelido, rua, bairro, cidade ou CEP"></label>
+            <button type="button" class="func-novo" id="bmEndNovo" style="flex:0 0 auto"><span>+</span> Novo endereço</button>
+          </div>
+          <div class="mot-cad-wrap func-wrap"><table class="mot-cad bm-tab"><thead><tr><th>Cod Sipro</th><th>Endereço</th><th>Bairro</th><th>Cidade</th><th>CEP</th><th>KM</th><th>Valor</th><th>Entregas</th><th></th></tr></thead><tbody id="bmEndCorpo"></tbody></table></div>
+        </div>
+      </section>
+    </div>
     <div class="view" id="viewEsporadico" style="display:none">
       <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA</p><h1>Esporádico</h1></div></section>
       <section class="card">
@@ -2387,6 +2429,56 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     </form>
   </div>
 </div>
+<div class="ficha-modal" id="bmEntModal" hidden>
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="bmEntTitulo" style="max-width:560px">
+    <header class="ficha-head"><div><h2 id="bmEntTitulo">Nova entrega</h2><p style="font-size:11.5px">Bolsa Multi</p></div><button type="button" id="bmEntFechar" aria-label="Fechar">×</button></header>
+    <form class="ficha-corpo nf-form" id="bmEntForm" style="display:block" autocomplete="off">
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Dia *</span><input type="date" id="bmEntDia" required></label>
+        <label class="perfil-campo"><span>Modo *</span><select id="bmEntModo"><option>D+1</option><option>D+0</option><option>SÁBADO</option><option>DOMINGO/FERIADO</option><option>PÓS 18H</option></select></label>
+      </div>
+      <label class="perfil-campo"><span>Endereço *</span><input type="text" id="bmEntEnd" data-list="bmEntEnds" maxlength="120" placeholder="Digite 2 letras do apelido, da rua ou do CEP"><datalist id="bmEntEnds"></datalist><small class="rem-esc" id="bmEntEndInfo"></small></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Tabela (R$)</span><input type="text" id="bmEntTab" inputmode="decimal" maxlength="10" data-list="bmEntTabs" placeholder="Ex.: 315"><datalist id="bmEntTabs"></datalist></label>
+        <label class="perfil-campo"><span>Nota (R$)</span><input type="text" id="bmEntNota" inputmode="decimal" maxlength="14" placeholder="Valor da nota"></label>
+      </div>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>NF</span><input type="text" id="bmEntNF" maxlength="30" placeholder="Número da nota fiscal"></label>
+        <label class="perfil-campo"><span>Observação</span><input type="text" id="bmEntObs" maxlength="200"></label>
+      </div>
+      <p class="bm-calc" id="bmEntCalc"></p>
+      <p class="perfil-status" id="bmEntSt" role="status"></p>
+      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="bmEntCancelar">Cancelar</button><button type="submit" class="perfil-btn">Salvar</button></div>
+    </form>
+  </div>
+</div>
+<div class="ficha-modal" id="bmEndModal" hidden>
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="bmEndTitulo" style="max-width:600px">
+    <header class="ficha-head"><div><h2 id="bmEndTitulo">Novo endereço</h2><p style="font-size:11.5px">Cadastro de endereços da Bolsa Multi · o CEP preenche o restante</p></div><button type="button" id="bmEndFechar" aria-label="Fechar">×</button></header>
+    <form class="ficha-corpo nf-form" id="bmEndForm" style="display:block" autocomplete="off">
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Cod Sipro</span><input type="text" id="bmEndSipro" maxlength="20" placeholder="Ex.: SAHOME"></label>
+        <label class="perfil-campo"><span>KM até a entrega</span><input type="text" id="bmEndKm" inputmode="decimal" maxlength="8" placeholder="Ex.: 41,9"></label>
+        <label class="perfil-campo"><span>Valor (R$)</span><input type="text" id="bmEndValor" inputmode="decimal" maxlength="10" placeholder="Ex.: 420"></label>
+      </div>
+      <label class="perfil-campo"><span>Apelido (opcional)</span><input type="text" id="bmEndApelido" maxlength="80" placeholder="Como vocês chamam este ponto"></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>CEP *</span><input type="text" id="bmEndCep" inputmode="numeric" maxlength="9" placeholder="00000-000"></label>
+        <label class="perfil-campo"><span>Número *</span><input type="text" id="bmEndNum" maxlength="12" placeholder="Ex.: 251 ou S/N"></label>
+        <label class="perfil-campo"><span>Complemento</span><input type="text" id="bmEndComp" maxlength="60"></label>
+      </div>
+      <label class="perfil-campo"><span>Rua</span><input type="text" id="bmEndRua" maxlength="120"></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Bairro</span><input type="text" id="bmEndBairro" maxlength="80"></label>
+        <label class="perfil-campo"><span>Cidade</span><input type="text" id="bmEndCidade" maxlength="80"></label>
+        <label class="perfil-campo" style="max-width:90px"><span>UF</span><input type="text" id="bmEndUf" maxlength="2"></label>
+      </div>
+      <label class="perfil-campo"><span>Observação</span><input type="text" id="bmEndObs" maxlength="200"></label>
+      <p class="perfil-status" id="bmEndSt" role="status"></p>
+      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="bmEndCancelar">Cancelar</button><button type="submit" class="perfil-btn">Salvar</button></div>
+    </form>
+  </div>
+</div>
 <div class="ficha-modal" id="pixModal" hidden>
   <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="pixTitulo" style="max-width:440px">
     <header class="ficha-head">
@@ -2448,4 +2540,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=e7067c32f553"></script>
+<script src="app.js?v=a66f406061f7"></script>
