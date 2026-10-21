@@ -1072,6 +1072,28 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 #remParaMenu li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border-radius:6px;font:600 13px var(--font-sys);color:var(--fg);cursor:pointer}
 #remParaMenu li:hover,#remParaMenu li:focus{background:color-mix(in srgb,var(--fg) 9%,transparent);outline:0}
 .rem-falta1{flex:none;padding:2px 8px;border-radius:999px;border:1px solid var(--n-vermelho);color:var(--n-vermelho);background:color-mix(in srgb,var(--n-vermelho) 14%,transparent);font:700 10.5px var(--font-sys);letter-spacing:.06em}
+.rep-stop{margin:0 0 8px;padding:8px 10px 10px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2)}
+.rep-stop-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rep-stop-h b{font-size:13px;min-width:62px}
+.rep-stop-h .rs-tipo{width:auto!important;font:600 12px var(--font-sys);padding:3px 6px;border-radius:7px;border:1px solid var(--border-strong);background:var(--surface);color:var(--fg)}
+.rep-stop-ac{margin-left:auto;display:flex;gap:3px}
+.rep-stop-ac button{width:24px;height:24px;padding:0;font-size:10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--surface);color:var(--fg);cursor:pointer}
+.rep-stop-ac button:disabled{opacity:.35;cursor:default}
+.rep-stop .rs-geo{color:var(--fg-faint);font-size:11px;white-space:nowrap}
+.rep-stop .perfil-campo{margin:0;gap:2px}
+.rep-stop .perfil-campo span{font-size:10.5px}
+.rep-stop input.rs-cep,.rep-stop input.rs-num,.rep-stop input.rs-comp,.rep-stop input.rs-end{padding:6px 9px;font-size:13px}
+.rep-stop-l{display:grid;grid-template-columns:110px 70px 1fr;gap:8px;margin-bottom:6px}
+.rep-sol-add{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.rep-sol-km{margin-left:auto;font-weight:700;color:var(--n-verde)}
+.rep-sol-sug{margin:6px 0 10px}
+.rep-sol-sug h4{margin:0 0 6px;font-size:12.5px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em}
+.rep-sug-li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 4px;border-bottom:1px solid var(--border)}
+.rep-sug-li small{display:block;color:var(--fg-faint);font-size:11.5px}
+@media(max-width:640px){.rep-stop-l{grid-template-columns:1fr}}
+.rep-serv{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:12px 14px;border:1px solid var(--n-verde);border-radius:10px;background:color-mix(in srgb,var(--n-verde) 9%,transparent);font-size:13px;line-height:1.5}
+.rep-serv small{color:var(--fg-muted);font-size:12px}
+.rep-serv-ac{display:flex;gap:8px}
 .rep-como{margin:0 0 12px;font-size:12.5px;color:var(--fg-muted)}
 .rep-como summary{cursor:pointer;font-weight:600;color:var(--fg)}
 .rep-como ul{margin:6px 0 6px 18px;padding:0}
@@ -1887,11 +1909,12 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <section class="card">
         <div class="func-top" style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap">
           <label class="perfil-campo" style="flex:1 1 260px;margin:0"><span>Loja da vaga ou regiões</span><input type="text" id="repLoja" list="repLojas" autocomplete="off" placeholder="Loja ou região (ex.: sul, ou centro e norte)" maxlength="90"><datalist id="repLojas"></datalist></label>
-          <label class="perfil-campo" style="flex:0 0 190px;margin:0"><span>Ou só por região</span><select id="repReg" class="ficha-in"><option value="">—</option></select></label>
+          <button type="button" class="func-novo" id="repSolBtn" style="flex:0 0 auto"><span>+</span> Solicitar serviço</button>
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Dia</span><input type="date" id="repDia"></label>
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Quem considerar</span><select id="repTipo" class="ficha-in"><option value="">Todos</option><option value="MEI">MEI</option><option value="PRESTADOR">Prestador</option><option value="Folguista">Folguista</option></select></label>
         </div>
         <p class="sub" id="repSub" style="margin:0 0 12px">Escolha a loja e o dia: o ranking considera as regiões onde a pessoa costuma trabalhar, quantas vezes ela já trabalhou nessa loja, a distância (estimada pelo CEP) e se ela está disponível no dia.</p>
+        <div class="rep-serv" id="repServBox" hidden></div>
         <details class="rep-como"><summary>Como o ranking é calculado</summary>
           <p><b>Pontos (até 100)</b>, do maior para o menor:</p>
           <ul>
@@ -2234,6 +2257,25 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     </form>
   </div>
 </div>
+<div class="ficha-modal" id="repSolModal" hidden>
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="repSolTitulo" style="max-width:780px">
+    <header class="ficha-head">
+      <div><h2 id="repSolTitulo">Solicitar serviço</h2><p style="text-transform:uppercase;letter-spacing:.04em;font-size:11.5px">Monte o trajeto, veja a distância e escolha quem recebe a oferta</p></div>
+      <button type="button" id="repSolFechar" aria-label="Fechar">×</button>
+    </header>
+    <form class="ficha-corpo nf-form" id="repSolForm" style="display:block" autocomplete="off">
+      <div id="repSolParadas"></div>
+      <div class="rep-sol-add"><button type="button" class="perfil-btn sec" id="repSolAddC">+ Coleta</button><button type="button" class="perfil-btn sec" id="repSolAddE">+ Entrega</button><span class="rep-sol-km" id="repSolKm"></span></div>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Valor pago (R$) *</span><input type="text" id="repSolValor" inputmode="decimal" maxlength="10" placeholder="Ex.: 80,00"></label>
+        <label class="perfil-campo"><span>Região *</span><input type="text" id="repSolReg" list="repSolRegs" maxlength="90" placeholder="Ex.: sul, ou centro e norte"><datalist id="repSolRegs"></datalist><small class="rem-esc" id="repSolRegInfo"></small></label>
+      </div>
+      <div class="rep-sol-sug" id="repSolSug"></div>
+      <p class="perfil-status" id="repSolStatus" role="status"></p>
+      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="repSolCancelar">Cancelar</button><button type="submit" class="perfil-btn">Usar na tela e buscar pessoas</button></div>
+    </form>
+  </div>
+</div>
 <div class="ficha-modal" id="pixModal" hidden>
   <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="pixTitulo" style="max-width:440px">
     <header class="ficha-head">
@@ -2295,4 +2337,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=176ec19fe927"></script>
+<script src="app.js?v=1d3da82dbbbe"></script>

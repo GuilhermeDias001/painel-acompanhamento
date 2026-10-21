@@ -449,7 +449,7 @@ try {
     try {
       const aj = existsSync(join(AQUI, 'contratos-ajustes.json')) ? JSON.parse(readFileSync(join(AQUI, 'contratos-ajustes.json'), 'utf8')) : [];
       const nrm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
-      const hor = (s) => { const m = /(d{1,2})[:h](d{2})s*(?:as|às|a|-)s*(d{1,2})[:h](d{2})/i.exec(String(s)); return m ? `${m[1].padStart(2, '0')}:${m[2]}-${m[3].padStart(2, '0')}:${m[4]}` : ''; };
+      const hor = (s) => { const m = /(\d{1,2})[:h](\d{2})\s*(?:as|às|a|-)\s*(\d{1,2})[:h](\d{2})/i.exec(String(s)); return m ? `${m[1].padStart(2, '0')}:${m[2]}-${m[3].padStart(2, '0')}:${m[4]}` : ''; };
       const horsDe = (v) => { const set = new Set(); for (const d of ['seg', 'ter', 'qua', 'qui', 'sex', 'sab']) { const h = hor(v.horarios?.[d]); if (h) set.add(h); } for (const x of v.horarios?.dom || []) { const h = hor(x); if (h) set.add(h); } return set; };
       let n = 0;
       for (const a of aj) {
