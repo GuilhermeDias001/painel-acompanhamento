@@ -57,6 +57,15 @@ if (process.env.SUPABASE_SECRET) {
   try {
     console.log(await semearQuadro(JSON.parse(readFileSync(join(AQUI, 'dados.json'), 'utf8')), process.env.SUPABASE_SECRET));
   } catch (e) { console.log('FALHA quadro no banco: ' + String(e.message).slice(0, 200)); }
+  // foto do cadastro único e da fila no banco, CIFRADA, para a conferência feita no PC (sem dado pessoal: CPF/e-mail/telefones ficam de fora)
+  try {
+    const hh = { apikey: process.env.SUPABASE_SECRET }; if (process.env.SUPABASE_SECRET.startsWith('eyJ')) hh.Authorization = 'Bearer ' + process.env.SUPABASE_SECRET;
+    const todas = async (tab, cols) => { const t = []; for (let o = 0; ; o += 1000) { const r = await fetch(`https://jetujppwmyzyfkaflplj.supabase.co/rest/v1/${tab}?select=${cols}&order=${tab === 'cadastro_pessoa' ? 'chave' : 'criado_em'}&limit=1000&offset=${o}`, { headers: hh }); if (!r.ok) throw new Error(tab + ' HTTP ' + r.status); const l = await r.json(); t.push(...l); if (l.length < 1000) break; } return t; };
+    const snap = { geradoEm: new Date().toISOString(), pessoas: await todas('cadastro_pessoa', 'chave,cod,nome,dados,origem,criado_em,atualizado_em'), pendentes: await todas('cadastro_pendente', 'id,origem,nome,duvida,proposta,candidatos,status,decisao,criado_em,decidido_em') };
+    const f = join(RAIZ, 'snapshot-cadastro.enc'); const novo = JSON.stringify({ ...snap, geradoEm: undefined });
+    let igual = false; try { igual = JSON.stringify({ ...decifrar(readFileSync(f, 'utf8'), CHAVE), geradoEm: undefined }) === novo; } catch { /* primeira vez */ }
+    if (!igual) { writeFileSync(f, cifrar(snap, CHAVE)); console.log(`snapshot do cadastro: ${snap.pessoas.length} pessoas, ${snap.pendentes.length} pendentes`); }
+  } catch (e) { console.log('FALHA snapshot cadastro: ' + String(e.message).slice(0, 160)); }
   if (s.cadastroImport) {
     try {
       const msg = await importarCadastro(s.cadastroImport, process.env.SUPABASE_SECRET);
