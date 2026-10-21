@@ -198,3 +198,46 @@ export async function importarAnalise(obj, segredo) {
   await fetch(rest('painel?on_conflict=area'), { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: 'import_analise', dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
   return msg;
 }
+
+// Correções óbvias do cadastro (Guilherme, 21/10: "corrija os mais óbvios; os corrigidos já saem da avaliação e viram definitivos").
+// ÚNICA vez por pacote (painel.area = 'import_<id>'): 1) fila -> definitivo (só se ainda estiver 'pendente'); 2) novos definitivos; 3) novos na fila.
+// Nunca sobrescreve pessoa que já existe; tudo auditável em cadastro_pendente.decisao.
+export async function importarCorrecoes(pac, segredo) {
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const rest = (p) => `${SUPABASE_URL}/rest/v1/${p}`;
+  const get = async (p) => { const r = await fetch(rest(p), { headers: h }); if (!r.ok) throw new Error(`leitura ${await erroSeguro(r)}`); return r.json(); };
+  const flag = `import_${pac.id}`;
+  if ((await get(`painel?select=area&area=eq.${flag}`)).length) return `Correções ${pac.id}: já aplicadas`;
+  const post = async (tabela, corpo, extra = '') => { const r = await fetch(rest(tabela), { method: 'POST', headers: { ...h, Prefer: 'return=minimal' + extra }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`${tabela} ${await erroSeguro(r)}`); };
+  let aprov = 0, pulou = 0, defin = 0, fila = 0;
+  const pessoal = (chave, dados) => (dados && Object.keys(dados).length ? [{ chave, dados }] : []);
+  // 1) fila -> definitivo
+  for (const a of pac.aprovarFila) {
+    const [p] = await get(`cadastro_pendente?select=id,status&id=eq.${a.id}`);
+    if (!p || p.status !== 'pendente') { pulou++; continue; }
+    await post('cadastro_pessoa?on_conflict=chave', [{ chave: a.pessoa.chave, cod: a.pessoa.cod || '', nome: a.pessoa.nome, dados: a.pessoa.dados, origem: a.pessoa.origem || '' }], ',resolution=ignore-duplicates');
+    if (pessoal(a.pessoa.chave, a.pessoal).length) await post('cadastro_pessoa_pessoal?on_conflict=chave', pessoal(a.pessoa.chave, a.pessoal), ',resolution=ignore-duplicates');
+    const r = await fetch(rest(`cadastro_pendente?id=eq.${a.id}&status=eq.pendente`), { method: 'PATCH', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify({ status: 'aprovado', decidido_em: new Date().toISOString(), decisao: { automatico: true, pacote: pac.id, motivo: a.motivo } }) });
+    if (!r.ok) throw new Error(`aprovar ${await erroSeguro(r)}`); aprov++;
+  }
+  // 2) novos definitivos
+  for (let i = 0; i < pac.novosDefinitivos.length; i += 50) {
+    const lote = pac.novosDefinitivos.slice(i, i + 50);
+    await post('cadastro_pessoa?on_conflict=chave', lote.map((p) => ({ chave: p.chave, cod: p.cod || '', nome: p.nome, dados: p.dados, origem: p.origem || '' })), ',resolution=ignore-duplicates');
+    const ps = lote.flatMap((p) => pessoal(p.chave, p.pessoal)); if (ps.length) await post('cadastro_pessoa_pessoal?on_conflict=chave', ps, ',resolution=ignore-duplicates');
+    defin += lote.length;
+  }
+  // 3) novos na fila (sem duplicar nome já na fila)
+  const existentes = new Set((await get('cadastro_pendente?select=nome&limit=5000')).map((x) => x.nome));
+  const novos = pac.novosPendentes.filter((n) => !existentes.has(n.nome));
+  for (let i = 0; i < novos.length; i += 50) {
+    const lote = novos.slice(i, i + 50);
+    await post('cadastro_pendente', lote.map((n) => ({ origem: n.origem, nome: n.nome, duvida: n.duvida, proposta: n.proposta, candidatos: n.candidatos || [], status: 'pendente' })));
+    const ps = lote.flatMap((n) => pessoal(n.proposta.chave, n.pessoal)); if (ps.length) await post('cadastro_pessoa_pessoal?on_conflict=chave', ps, ',resolution=ignore-duplicates');
+    fila += lote.length;
+  }
+  const msg = `Correções ${pac.id}: ${aprov} aprovados da fila (${pulou} já decididos), ${defin} novos definitivos, ${fila} novos na fila`;
+  await fetch(rest('painel?on_conflict=area'), { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: flag, dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
+  return msg;
+}
