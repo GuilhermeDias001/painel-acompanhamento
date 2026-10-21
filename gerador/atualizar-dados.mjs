@@ -444,6 +444,21 @@ try {
     // Contratos completo (todas as lojas/vagas, não só as do mapa) + escalas alternadas (AR:AU)
     const alt = await lerAcomp(tk, 'Contratos', 'AR2:AU760', NOVA_OP);
     dados.contratos = montarContratos({ linhas: ac, alt, mapa: dados.mapa });
+    // 21/10: contratos x Escala das lojas (verdade). contratos-ajustes.json = {loja, horario, de, para}: onde o titular do Excel está desatualizado em relação à
+    // Escala, troca por quem a Escala diz. Só vale enquanto o titular atual for o "de" (se alguém corrigir o Excel, o ajuste para sozinho de valer).
+    try {
+      const aj = existsSync(join(AQUI, 'contratos-ajustes.json')) ? JSON.parse(readFileSync(join(AQUI, 'contratos-ajustes.json'), 'utf8')) : [];
+      const nrm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+      const hor = (s) => { const m = /(d{1,2})[:h](d{2})s*(?:as|às|a|-)s*(d{1,2})[:h](d{2})/i.exec(String(s)); return m ? `${m[1].padStart(2, '0')}:${m[2]}-${m[3].padStart(2, '0')}:${m[4]}` : ''; };
+      const horsDe = (v) => { const set = new Set(); for (const d of ['seg', 'ter', 'qua', 'qui', 'sex', 'sab']) { const h = hor(v.horarios?.[d]); if (h) set.add(h); } for (const x of v.horarios?.dom || []) { const h = hor(x); if (h) set.add(h); } return set; };
+      let n = 0;
+      for (const a of aj) {
+        const l = dados.contratos?.lojas?.find((x) => nrm(x.nome) === nrm(a.loja)); if (!l) continue;
+        const v = (l.vagasDetalhe || []).find((x) => nrm(x.titular) === nrm(a.de) && horsDe(x).has(a.horario) && !/ESPORAD|BASE|ELITE/i.test(x.tipoVaga));
+        if (v) { v.titularAnterior = v.titular; v.titular = a.para; v.ajusteEscala = true; n++; }
+      }
+      if (aj.length) console.log(`contratos: ${n} de ${aj.length} ajustes da Escala aplicados`);
+    } catch (e) { console.log('FALHA ajustes dos contratos: ' + String(e.message).slice(0, 160)); }
     // cadastro único (12/10): cada titular das vagas aponta para a chave de cadastro_pessoa (titularChave); só no Actions (chave do banco).
     // Casa por nome normalizado EXATO (sem acento, sem de/da/do/dos/das/e); o que não casar com certeza fica listado em contratos.titularesSemCadastro (nada é inventado).
     if (process.env.SUPABASE_SECRET && dados.contratos) {
