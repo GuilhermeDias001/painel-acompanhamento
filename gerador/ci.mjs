@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cifrar, decifrar } from './cofre.mjs';
-import { gravarSupabase, semearQuadro, importarCadastro, importarAnalise, importarCorrecoes } from './supabase.mjs';
+import { gravarSupabase, semearQuadro, importarCadastro, importarAnalise, importarCorrecoes, importarContatos } from './supabase.mjs';
 import { backupDiario } from './backup.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -76,6 +76,13 @@ if (process.env.SUPABASE_SECRET) {
       writeFileSync(COFRE, cifrar(atual, CHAVE)); console.log('cofre: lista do cadastro único removida');
     }
     catch (e) { console.log('FALHA importação do cadastro: ' + String(e.message).slice(0, 200)); }
+  }
+  if (s.contatosImport) {
+    try {
+      console.log(await importarContatos(s.contatosImport, process.env.SUPABASE_SECRET));
+      const atual = decifrar(readFileSync(COFRE, 'utf8'), CHAVE); delete atual.contatosImport;
+      writeFileSync(COFRE, cifrar(atual, CHAVE)); console.log('cofre: pacote de contatos removido');
+    } catch (e) { console.log('FALHA contatos: ' + String(e.message).slice(0, 220)); }
   }
   if (s.correcoesImport) {
     try {

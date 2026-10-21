@@ -241,3 +241,28 @@ export async function importarCorrecoes(pac, segredo) {
   await fetch(rest('painel?on_conflict=area'), { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: flag, dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
   return msg;
 }
+
+// Celulares vindos dos contatos do WhatsApp Business (Guilherme, 21/10): só PREENCHE celular que está VAZIO em cadastro_pessoa_pessoal; nunca troca um existente.
+export async function importarContatos(pac, segredo) {
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const rest = (p) => `${SUPABASE_URL}/rest/v1/${p}`;
+  const get = async (p) => { const r = await fetch(rest(p), { headers: h }); if (!r.ok) throw new Error(`leitura ${await erroSeguro(r)}`); return r.json(); };
+  const flag = `import_${pac.id}`;
+  if ((await get(`painel?select=area&area=eq.${flag}`)).length) return `Contatos ${pac.id}: já aplicados`;
+  let preenchidos = 0, jaTinha = 0, semFicha = 0;
+  for (const it of pac.itens) {
+    const [row] = await get(`cadastro_pessoa_pessoal?select=chave,dados&chave=eq.${encodeURIComponent(it.chave)}`);
+    if (!row) { // sem ficha pessoal ainda: cria só com o celular
+      const r = await fetch(rest('cadastro_pessoa_pessoal?on_conflict=chave'), { method: 'POST', headers: { ...h, Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify([{ chave: it.chave, dados: { celularProprio: it.celular, fontes: { celularProprio: 'WhatsApp Business 21/10' } } }]) });
+      if (!r.ok) throw new Error(`criar ${await erroSeguro(r)}`); semFicha++; continue;
+    }
+    if (String(row.dados?.celularProprio || '').replace(/\D/g, '').length >= 10) { jaTinha++; continue; }
+    const dados = { ...row.dados, celularProprio: it.celular, fontes: { ...(row.dados?.fontes || {}), celularProprio: 'WhatsApp Business 21/10' } };
+    const r = await fetch(rest(`cadastro_pessoa_pessoal?chave=eq.${encodeURIComponent(it.chave)}`), { method: 'PATCH', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify({ dados }) });
+    if (!r.ok) throw new Error(`atualizar ${await erroSeguro(r)}`); preenchidos++;
+  }
+  const msg = `Contatos ${pac.id}: ${preenchidos} celulares preenchidos, ${semFicha} fichas criadas, ${jaTinha} já tinham celular (mantidos)`;
+  await fetch(rest('painel?on_conflict=area'), { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: flag, dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
+  return msg;
+}
