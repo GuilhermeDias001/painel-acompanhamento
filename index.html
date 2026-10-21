@@ -1086,14 +1086,27 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .rep-stop-l{display:grid;grid-template-columns:110px 70px 1fr;gap:8px;margin-bottom:6px}
 .rep-sol-add{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .rep-sol-km{margin-left:auto;font-weight:700;color:var(--n-verde)}
+.fecha-conf{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(0,0,0,.5)}
+.fecha-conf[hidden]{display:none}
+.fecha-conf-card{max-width:380px;width:calc(100% - 32px);padding:18px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.fecha-conf-t{margin:0 0 14px;font-weight:600;line-height:1.45}
+.fecha-conf-ac{display:flex;gap:8px;justify-content:flex-end}
+.rep-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rep-chip{padding:3px 10px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface-2);color:var(--fg);font:600 11.5px var(--font-sys);cursor:pointer}
+.rep-chip:hover{border-color:var(--n-verde);color:var(--n-verde)}
 .rep-sol-sug{margin:6px 0 10px}
 .rep-sol-sug h4{margin:0 0 6px;font-size:12.5px;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em}
 .rep-sug-li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 4px;border-bottom:1px solid var(--border)}
 .rep-sug-li small{display:block;color:var(--fg-faint);font-size:11.5px}
 @media(max-width:640px){.rep-stop-l{grid-template-columns:1fr}}
 .rep-serv{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:12px 14px;border:1px solid var(--n-verde);border-radius:10px;background:color-mix(in srgb,var(--n-verde) 9%,transparent);font-size:13px;line-height:1.5}
-.esp-tab td{vertical-align:top}
-.esp-traj{max-width:380px;font-size:12px;line-height:1.45}
+.esp-tab th,.esp-tab td{text-align:center!important;vertical-align:middle;white-space:nowrap}
+.esp-tab th:first-child,.esp-tab td:first-child{text-align:left!important}
+.esp-tab td:last-child,.esp-tab th:last-child{padding-right:8px}
+.esp-tab td:nth-child(3),.esp-tab td:nth-child(4){white-space:nowrap!important;min-width:0!important}
+.esp-tr{display:inline-block;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.esp-tab tbody tr{cursor:default}
+.esp-tab tbody tr[title^="Dois"]{cursor:pointer}
 .esp-acoes{white-space:nowrap}
 .esp-ac,.rep-atr{padding:4px 10px!important;font-size:12px!important}
 .rep-serv{cursor:pointer}
@@ -1945,11 +1958,12 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     <div class="view" id="viewEsporadico" style="display:none">
       <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA</p><h1>Esporádico</h1></div></section>
       <section class="card">
-        <div class="func-top" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-          <p class="sub" id="espSub" style="margin:0;flex:1 1 260px">Serviços esporádicos oferecidos e atribuídos.</p>
-          <select id="espFiltro" class="ficha-in" style="width:auto" aria-label="Filtrar por situação"><option value="">Todos</option><option value="oferecido">Oferecidos</option><option value="atribuido">Atribuídos</option><option value="concluido">Concluídos</option><option value="cancelado">Cancelados</option></select>
-          <button type="button" class="func-novo" id="espNovoBtn"><span>+</span> Novo serviço</button>
+        <div class="func-top" style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <label class="perfil-campo" style="flex:1 1 260px;margin:0"><span>Buscar</span><input type="text" id="espBusca" autocomplete="off" placeholder="Região, endereço ou quem fez" maxlength="90"></label>
+          <label class="perfil-campo" style="flex:0 0 190px;margin:0"><span>Situação</span><select id="espFiltro" class="ficha-in"><option value="">Todas</option><option value="oferecido">Oferecidos</option><option value="atribuido">Atribuídos</option><option value="concluido">Concluídos</option><option value="cancelado">Cancelados</option></select></label>
+          <button type="button" class="func-novo" id="espNovoBtn" style="flex:0 0 auto"><span>+</span> Novo serviço</button>
         </div>
+        <p class="sub" id="espSub" style="margin:0 0 12px">Serviços esporádicos oferecidos e atribuídos.</p>
         <div class="mot-cad-wrap func-wrap">
           <table class="mot-cad esp-tab">
             <thead><tr><th>Data</th><th>Região</th><th>Trajeto</th><th>Km</th><th>Valor</th><th>Quem fez</th><th>Situação</th><th></th></tr></thead>
@@ -2292,7 +2306,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <div class="rep-sol-add"><button type="button" class="perfil-btn sec" id="repSolAddC">+ Coleta</button><button type="button" class="perfil-btn sec" id="repSolAddE">+ Entrega</button><span class="rep-sol-km" id="repSolKm"></span></div>
       <div class="nf-linha">
         <label class="perfil-campo"><span>Valor pago (R$) *</span><input type="text" id="repSolValor" inputmode="decimal" maxlength="10" placeholder="Ex.: 80,00"></label>
-        <label class="perfil-campo"><span>Região *</span><input type="text" id="repSolReg" list="repSolRegs" maxlength="90" placeholder="Ex.: sul, ou centro e norte"><datalist id="repSolRegs"></datalist><small class="rem-esc" id="repSolRegInfo"></small></label>
+        <label class="perfil-campo"><span>Região *</span><input type="text" id="repSolReg" list="repSolRegs" maxlength="90" placeholder="Ex.: sul, ou centro e norte"><datalist id="repSolRegs"></datalist><small class="rem-esc" id="repSolRegInfo"></small><div class="rep-chips" id="repSolRegChips"></div></label>
       </div>
       <div class="rep-sol-sug" id="repSolSug"></div>
       <p class="perfil-status" id="repSolStatus" role="status"></p>
@@ -2379,4 +2393,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=02c6cef63757"></script>
+<script src="app.js?v=2be3704e7a9a"></script>
