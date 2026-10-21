@@ -489,6 +489,19 @@ try {
         }
         l.vagas = l.vagasDetalhe.length;
       }
+      // 21/10: ações por loja para deixar vagas/titulares iguais à Escala: renomear, removerLoja, remover [{titular,tipoVaga?,n?}], titular [{de,para}], adicionar [{titular,modelo(titular a copiar horários),tipoVaga?}]
+      for (const o of ajE) {
+        if (!o.acoes) continue;
+        const a = o.acoes; const nomeAlvo = o.loja;
+        const i = dados.contratos.lojas.findIndex((x) => nrm2(x.nome) === nrm2(nomeAlvo)); if (i < 0) continue;
+        const l = dados.contratos.lojas[i];
+        if (a.removerLoja) { dados.contratos.lojas.splice(i, 1); continue; }
+        for (const r of a.remover || []) { let n = r.n || 1; for (let j = l.vagasDetalhe.length - 1; j >= 0 && n > 0; j--) { const v = l.vagasDetalhe[j]; if (nrm2(v.titular) === nrm2(r.titular) && (!r.tipoVaga || v.tipoVaga === r.tipoVaga)) { l.vagasDetalhe.splice(j, 1); n--; } } }
+        for (const r of a.titular || []) { const v = l.vagasDetalhe.find((x) => nrm2(x.titular) === nrm2(r.de)); if (v) { v.titularAnterior = v.titular; v.titular = r.para; v.ajusteEscala = true; } }
+        for (const r of a.adicionar || []) { const fonte = r.deLoja ? dados.contratos.lojas.find((x) => nrm2(x.nome) === nrm2(r.deLoja)) : l; const m = fonte?.vagasDetalhe.find((x) => nrm2(x.titular) === nrm2(r.modelo)); if (!m) continue; const c = JSON.parse(JSON.stringify(m)); delete c.titularChave; c.titular = r.titular; c.titularAnterior = undefined; if (r.tipoVaga) c.tipoVaga = r.tipoVaga; c.ajusteEscala = true; l.vagasDetalhe.push(c); }
+        if (a.renomear) { l.nomeAnterior = l.nome; l.nome = a.renomear; }
+        l.vagas = l.vagasDetalhe.length;
+      }
       if (ajE.length) { dados.contratos.totais.vagas = dados.contratos.lojas.reduce((n, x) => n + x.vagas, 0); console.log(`contratos: esporadicos +${nAdd} -${nRem} conforme a Escala`); }
     } catch (e) { console.log('FALHA ajustes dos esporadicos: ' + String(e.message).slice(0, 160)); }
     // cadastro único (12/10): cada titular das vagas aponta para a chave de cadastro_pessoa (titularChave); só no Actions (chave do banco).
