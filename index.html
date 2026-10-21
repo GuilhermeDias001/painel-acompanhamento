@@ -979,6 +979,9 @@ html.mapa-modo main{padding-bottom:0}
 .fop-tab input[data-c="hor"]{text-align:center}
 .fop-tab input:focus{outline:2px solid var(--n-vermelho);outline-offset:0}
 .fop-tab input[data-c="end"]:focus{position:relative;z-index:40;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+.nf-sec{margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-muted)}
+.nf-sec:first-child{margin-top:0}
+.nf-form [hidden]{display:none!important}
 .ficha-sel,.ficha-fp{width:100%;height:34px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:500 13px var(--font-sys)}
 .ficha-fr-box{margin-top:8px;display:flex;flex-direction:column;gap:5px}.ficha-fr-box small{color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;font-size:10.5px}
 .ficha-fr{display:flex;gap:8px;align-items:center;font-size:12.5px;cursor:pointer}
@@ -1280,6 +1283,8 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 #fichaCorpo .ficha-c{margin-bottom:2px;min-width:0;gap:0}
 #fichaCorpo .ficha-c dt{font-size:11.5px;line-height:1.25}#fichaCorpo .ficha-c dd{font-size:13px;line-height:1.3}
 #fichaCorpo .ficha-c.ficha-largo{grid-column:1/-1}
+#fichaCorpo .ficha-g dl.ficha-col{grid-auto-flow:column}
+@media(max-width:760px){#fichaCorpo .ficha-g dl.ficha-col{grid-auto-flow:row;grid-template-rows:none!important}}
 .ficha-foto-box{gap:8px!important;padding-top:0!important}
 .ficha-foto-box{position:relative;width:100%;padding:0!important;gap:0!important}
 .ficha-foto-img{width:100%!important;height:auto!important;aspect-ratio:1/1.2;font-size:44px!important;border-radius:12px!important}
@@ -2184,29 +2189,66 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
   </div>
 </div>
 <div class="ficha-modal" id="novoFuncModal" hidden>
-  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="novoFuncTitulo" style="max-width:560px">
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="novoFuncTitulo" style="max-width:700px">
     <header class="ficha-head">
       <div><h2 id="novoFuncTitulo">Novo funcionário</h2><p>Entra no cadastro e passa a poder ser usado na Operação.</p></div>
       <button type="button" id="novoFuncFechar" aria-label="Fechar">×</button>
     </header>
     <form class="ficha-corpo nf-form" id="novoFuncForm" style="display:block" autocomplete="off">
+      <h4 class="nf-sec">Dados pessoais</h4>
       <label class="perfil-campo"><span>Nome completo *</span><input type="text" id="nfNome" maxlength="80" required></label>
       <div class="nf-linha">
+        <label class="perfil-campo"><span>CPF</span><input id="nfCpf" type="text" maxlength="14" inputmode="numeric" placeholder="Só números"></label>
+        <label class="perfil-campo"><span>Celular</span><input id="nfCel" type="text" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
+      </div>
+      <label class="perfil-campo"><span>E-mail</span><input id="nfEmail" type="email" maxlength="90" autocomplete="off"></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Contato de emergência</span><input id="nf_celularEmergencia" type="text" maxlength="40" placeholder="Telefone"></label>
+        <label class="perfil-campo"><span>Grau de parentesco</span><input id="nf_parentesco" type="text" maxlength="40" placeholder="Ex.: Esposa"></label>
+      </div>
+      <label class="perfil-campo"><span>Endereço completo</span><input id="nf_endereco" type="text" maxlength="160" placeholder="Rua e número"></label>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Bairro</span><input id="nf_bairro" type="text" maxlength="60"></label>
+        <label class="perfil-campo"><span>CEP</span><input id="nf_cep" type="text" maxlength="9" inputmode="numeric" placeholder="00000-000"></label>
+      </div>
+      <h4 class="nf-sec">Empresa</h4>
+      <div class="nf-linha">
         <label class="perfil-campo"><span>Tipo *</span><select id="nfTipo" required><option value="">Escolha…</option><option>CLT</option><option>MEI</option><option>Prestador</option></select></label>
-        <label class="perfil-campo"><span>Posição (só CLT)</span><select id="nfPos"><option value="">—</option><option>Titular</option><option>Folguista</option><option>Elite</option><option>Base</option></select></label>
+        <label class="perfil-campo" data-tipos="CLT"><span>Posição</span><select id="nfPos"><option value="">—</option><option>Titular</option><option>Folguista</option><option>Elite</option><option>Base</option></select></label>
       </div>
       <label class="perfil-campo"><span>Função</span><select id="nfFuncao"></select></label>
       <label class="perfil-campo"><span>Empresa / loja</span><input type="text" id="nfLocal" list="nfLojas" maxlength="80" placeholder="Escolha uma loja do cadastro de contratos"><datalist id="nfLojas"></datalist></label>
       <div class="nf-linha">
-        <label class="perfil-campo"><span>CPF</span><input type="text" id="nfCpf" maxlength="14" inputmode="numeric" placeholder="Só números"></label>
-        <label class="perfil-campo"><span>Celular</span><input type="text" id="nfCel" maxlength="20" inputmode="tel" placeholder="(11) 90000-0000"></label>
+        <label class="perfil-campo" data-tipos="CLT"><span>Registro</span><input id="nf_registro" type="text" maxlength="30"></label>
+        <label class="perfil-campo"><span>Veículo / modelo da moto</span><input id="nf_veiculo" type="text" maxlength="60" placeholder="Ex.: CG 160 Titan"></label>
+        <label class="perfil-campo"><span>Placa</span><input id="nf_placa" type="text" maxlength="10" placeholder="ABC1D23"></label>
       </div>
-      <label class="perfil-campo"><span>E-mail</span><input type="email" id="nfEmail" maxlength="90" autocomplete="off"></label>
-      <label class="perfil-campo"><span>Escala</span><input type="text" id="nfEscala" maxlength="120" placeholder="Ex.: Seg a Sex - 08:00 às 18:00"></label>
+      <label class="perfil-campo"><span>Escala</span><input id="nfEscala" type="text" maxlength="120" placeholder="Ex.: Seg a Sex - 08:00 às 18:00"></label>
+      <label class="perfil-campo"><span>Folga</span><input id="nfFolga" type="text" maxlength="60" placeholder="Ex.: Sábado e Domingo"></label>
+      <label class="perfil-campo"><span>Observação</span><input id="nf_observacao" type="text" maxlength="200"></label>
+      <h4 class="nf-sec">Dados para TUF</h4>
       <div class="nf-linha">
-        <label class="perfil-campo"><span>Folga</span><input type="text" id="nfFolga" maxlength="60" placeholder="Ex.: Sábado e Domingo"></label>
-        <label class="perfil-campo"><span>Admissão</span><input type="date" id="nfAdm"></label>
+        <label class="perfil-campo"><span>Integração</span><input id="nf_integracao" type="date"></label>
+        <label class="perfil-campo"><span>Horário da integração</span><input id="nf_horarioIntegracao" type="text" maxlength="20" placeholder="Ex.: 14:30"></label>
       </div>
+      <div class="nf-linha">
+        <label class="perfil-campo" data-tipos="CLT"><span>Admissão</span><input id="nfAdm" type="date"></label>
+        <label class="perfil-campo"><span>Início</span><input id="nf_inicio" type="date"></label>
+      </div>
+      <div class="nf-linha" data-tipos="MEI,Prestador">
+        <label class="perfil-campo" data-tipos="MEI,Prestador"><span>Login TUF Log</span><input id="nf_tufLog" type="text" maxlength="60" autocomplete="off"></label>
+        <label class="perfil-campo" data-tipos="MEI,Prestador"><span>Situação no TUF Log</span><select id="nf_tufLogStatus"><option value="">—</option><option>Pendente</option><option>Aprovado</option><option>Reprovado</option></select></label>
+      </div>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Camiseta</span><input id="nf_camiseta" type="text" maxlength="40" placeholder="Ex.: 3 camisetas"></label>
+        <label class="perfil-campo"><span>Tamanho</span><select id="nf_tamanho"><option value="">—</option><option>PP</option><option>P</option><option>M</option><option>G</option><option>GG</option><option>XG</option></select></label>
+      </div>
+      <div class="nf-linha">
+        <label class="perfil-campo"><span>Baú</span><input id="nf_bau" type="text" maxlength="40" placeholder="Ex.: Baú TUF"></label>
+        <label class="perfil-campo"><span>Celular TUF</span><input id="nf_celularTuf" type="text" maxlength="20" inputmode="tel"></label>
+        <label class="perfil-campo"><span>Chip</span><input id="nf_chip" type="text" maxlength="40"></label>
+      </div>
+      <p class="perfil-status" id="nfInfoSens" style="margin:2px 0 6px">Chave Pix e PIN do Ponto Two entram depois, pela ficha, que guarda esses dados protegidos.</p>
       <p class="perfil-status" id="nfStatus" role="status"></p>
       <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="nfCancelar">Cancelar</button><button type="submit" class="perfil-btn">Cadastrar</button></div>
     </form>
@@ -2406,4 +2448,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=db91ef758ed9"></script>
+<script src="app.js?v=639b60426b11"></script>
