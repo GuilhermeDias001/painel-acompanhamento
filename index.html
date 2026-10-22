@@ -2442,25 +2442,25 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
   </div>
 </div>
 <div class="ficha-modal" id="bmEntModal" hidden>
-  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="bmEntTitulo" style="max-width:560px">
+  <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="bmEntTitulo" style="max-width:640px">
     <header class="ficha-head"><div><h2 id="bmEntTitulo">Nova entrega</h2><p style="font-size:11.5px">Bolsa Multi</p></div><button type="button" id="bmEntFechar" aria-label="Fechar">×</button></header>
     <form class="ficha-corpo nf-form" id="bmEntForm" style="display:block" autocomplete="off">
-      <div class="nf-linha">
+      <div class="nf-linha" style="grid-template-columns:1.1fr 1fr .7fr;gap:10px">
         <label class="perfil-campo"><span>Dia *</span><input type="date" id="bmEntDia" required></label>
+        <label class="perfil-campo"><span>CEP *</span><input type="text" id="bmEntCep" inputmode="numeric" maxlength="9" placeholder="00000-000"></label>
+        <label class="perfil-campo"><span>Número *</span><input type="text" id="bmEntNum" maxlength="12" placeholder="Ex.: 153"></label>
       </div>
-      <div class="perfil-campo"><span>Modo * <small style="text-transform:none;letter-spacing:0">(só o PÓS 18H junta com os outros, ex.: D+0 + PÓS 18H: os acréscimos sobre a tabela somam)</small></span><div class="bm-modos" id="bmEntModos"><button type="button" data-m="D+1">D+1</button><button type="button" data-m="D+0">D+0</button><button type="button" data-m="SÁBADO">SÁBADO</button><button type="button" data-m="DOMINGO/FERIADO">DOMINGO/FERIADO</button><button type="button" data-m="PÓS 18H">PÓS 18H</button></div><input type="hidden" id="bmEntModo" value="D+1"></div>
-      <label class="perfil-campo"><span>Endereço *</span><input type="text" id="bmEntEnd" data-list="bmEntEnds" maxlength="120" placeholder="CEP e número (ex.: 01151-000, 153) ou apelido/rua"><datalist id="bmEntEnds"></datalist><small class="rem-esc" id="bmEntEndInfo"></small></label>
-      <div class="nf-linha">
+            <div class="perfil-campo"><span>Modo * <small style="text-transform:none;letter-spacing:0">(só o PÓS 18H junta com outro; os acréscimos somam)</small></span><div class="bm-modos" id="bmEntModos"><button type="button" data-m="D+1">D+1</button><button type="button" data-m="D+0">D+0</button><button type="button" data-m="SÁBADO">SÁBADO</button><button type="button" data-m="DOMINGO/FERIADO">DOMINGO/FERIADO</button><button type="button" data-m="PÓS 18H">PÓS 18H</button></div><input type="hidden" id="bmEntModo" value="D+1"></div>
+      <small class="rem-esc" id="bmEntEndInfo" style="display:block;min-height:15px;margin:2px 0 6px"></small>
+      <div class="nf-linha" style="grid-template-columns:.9fr 1fr 1fr 1.3fr;gap:10px">
         <label class="perfil-campo"><span>Tabela (R$)</span><input type="text" id="bmEntTab" inputmode="decimal" maxlength="10" data-list="bmEntTabs" placeholder="Ex.: 315"><datalist id="bmEntTabs"></datalist></label>
         <label class="perfil-campo"><span>Nota (R$)</span><input type="text" id="bmEntNota" inputmode="decimal" maxlength="14" placeholder="Valor da nota"></label>
-      </div>
-      <div class="nf-linha">
-        <label class="perfil-campo"><span>NF</span><input type="text" id="bmEntNF" maxlength="30" placeholder="Número da nota fiscal"></label>
+        <label class="perfil-campo"><span>NF</span><input type="text" id="bmEntNF" maxlength="30" placeholder="Nº da nota"></label>
         <label class="perfil-campo"><span>Observação</span><input type="text" id="bmEntObs" maxlength="200"></label>
       </div>
       <p class="bm-calc" id="bmEntCalc"></p>
       <p class="perfil-status" id="bmEntSt" role="status"></p>
-      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="bmEntCancelar">Cancelar</button><button type="submit" class="perfil-btn">Salvar</button></div>
+      <div class="perfil-rodape"><button type="button" class="perfil-btn sec" id="bmEntCancelar">Cancelar</button><button type="button" class="perfil-btn sec" id="bmEntProx">Salvar e lançar próxima</button><button type="submit" class="perfil-btn">Salvar</button></div>
     </form>
   </div>
 </div>
@@ -2570,4 +2570,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=3a9a70a54eca"></script>
+<script src="app.js?v=e94b0ce88ed7"></script>
