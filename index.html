@@ -1099,6 +1099,11 @@ html.fit-modo #viewFarmoDev #fodSub{display:none}#viewFarmoDev .pf-barra{margin:
 .aviso-mais[hidden]{display:none}
 .expand-btn[hidden]{display:none}
 .bm-modos{display:flex;flex-wrap:wrap;gap:6px}
+.bm-tab tbody tr[data-ent],.bm-tab tbody tr[data-end]{cursor:pointer}
+.bm-ic{display:inline-grid;place-items:center;width:28px;height:28px;padding:0;border-radius:7px;border:1px solid var(--border-strong);background:transparent;color:var(--fg-faint);cursor:pointer}
+.bm-ic:hover{color:var(--fg);border-color:var(--fg-faint)}
+.bm-ic.conf{color:#fff;background:var(--n-vermelho);border-color:var(--n-vermelho)}
+.bm-ic svg{pointer-events:none}
 #bmTip{position:fixed;z-index:100000;max-width:270px;padding:9px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--fg);font:500 12px/1.4 var(--font-sys);box-shadow:0 6px 20px rgba(0,0,0,.35);pointer-events:none}
 #bmTip[hidden]{display:none}
 .bm-modos button{padding:6px 11px;border-radius:999px;border:1px solid rgba(128,128,128,.4);background:rgba(128,128,128,.12);color:inherit;font:600 12px/1 var(--font-sys);cursor:pointer}
@@ -2014,6 +2019,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="bm-abas" role="tablist"><button type="button" role="tab" class="on" data-bm-aba="ent">Lançar entregas</button><button type="button" role="tab" data-bm-aba="end">Cadastro de endereços</button></div>
         <p class="sub" id="bmMsg" style="margin:0 0 10px"></p>
         <div id="bmEntSec">
+          <p class="sub" style="margin:0 0 10px;font-size:12px">Para preencher o pedido no ATIVMOB: arraste <a id="bmAtalho" href="#" draggable="true" style="font-weight:700;text-decoration:underline">Preencher ATIVMOB</a> para a barra de favoritos (só uma vez). No portal, abra o endereço, clique no favorito e use Ctrl+V depois de copiar a entrega aqui.</p>
           <div class="func-top" style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap">
             <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Mês</span><input type="month" id="bmMesF"></label>
             <label class="perfil-campo" style="flex:1 1 240px;margin:0"><span>Buscar</span><input type="text" id="bmEntBusca" autocomplete="off" maxlength="90" placeholder="Endereço, apelido, NF ou observação"></label>
@@ -2576,4 +2582,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=e9c148ade789"></script>
+<script src="app.js?v=a01d1b5683f2"></script>
