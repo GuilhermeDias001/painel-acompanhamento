@@ -1177,6 +1177,11 @@ tr.rep-det td b{color:var(--fg)}
 .rep-como ul{margin:6px 0 6px 18px;padding:0}
 .rep-como li,.rep-como p{margin:4px 0;line-height:1.45}
 .rep-tab tbody tr{cursor:pointer}
+.rep-tab th{white-space:normal!important;vertical-align:bottom}
+.rep-tab th,.rep-tab td{text-align:center}
+.rep-tab th:nth-child(3),.rep-tab td:nth-child(3){text-align:left}
+.rep-tab td:nth-child(1),.rep-tab td:nth-child(3),.rep-tab td:nth-child(4){white-space:normal!important;min-width:0!important}
+.rep-tab td:nth-child(4){max-width:240px}
 .rem-esc{display:block;margin-top:5px;font-size:11.5px;line-height:1.4;color:var(--fg-muted)}
 .rem-esc b{color:var(--fg)}
 #remDetModal{z-index:84}
@@ -2013,7 +2018,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         </details>
         <div class="mot-cad-wrap func-wrap">
           <table class="mot-cad rep-tab">
-            <thead><tr><th>#</th><th>Colaborador</th><th>Tipo</th><th>Bairro</th><th>Região onde atua</th><th>Na região da loja</th><th>Na loja</th><th>Distância</th><th>Disponibilidade</th><th>Pontos</th><th></th></tr></thead>
+            <thead><tr><th>Colaborador</th><th>Tipo</th><th>Bairro</th><th>Região onde atua</th><th>Na região da loja</th><th>Na loja</th><th>Distância</th><th>Disponibilidade</th><th>Pontos</th><th></th></tr></thead>
             <tbody id="repCorpo"></tbody>
           </table>
         </div>
@@ -2591,4 +2596,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=25a308a7fc34"></script>
+<script src="app.js?v=e07a06dbce9e"></script>
