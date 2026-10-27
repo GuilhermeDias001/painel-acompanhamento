@@ -123,6 +123,8 @@ export async function montarMapa({ contratos, dia, operacao, cacheArq }) {
   for (const l of lojas.values()) {
     const ck = 'v3|' + l.endereco; // v3: Nominatim rua+número na Grande SP (04/10)
     if (l.endereco === BASE_TUF.endereco) cache[ck] = { lat: BASE_TUF.lat, lng: BASE_TUF.lng, fonte: 'numero' }; // a Farmo fica na base: coordenadas exatas
+    const manual = extraDe(l.nome)?.coordenadas; // 27/10: coordenada conferida no Google Maps vale mais que a geocodificação (ex.: JMC e Droga Leste 38 vinham com coordenada errada)
+    if (manual && typeof manual.lat === 'number' && typeof manual.lng === 'number') cache[ck] = { lat: manual.lat, lng: manual.lng, fonte: 'manual' };
     if (!(ck in cache)) {
       if (novos >= 100) continue; // limita cada execução; o resto entra nas próximas
       cache[ck] = await geocodificar(l.endereco).catch(() => null);
