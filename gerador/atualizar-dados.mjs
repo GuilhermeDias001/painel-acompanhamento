@@ -2,6 +2,7 @@
 // blocos do painel para cada período (ano / mês / semana) e grava dados.js / dados.json.
 // Uso: node atualizar-dados.mjs            (gera)
 //      node atualizar-dados.mjs --conferir (gera e compara o período da planilha com a aba Analise)
+import { normalizarRegioes } from './regioes.mjs';
 import { readFileSync, writeFileSync, renameSync, existsSync, mkdirSync, statSync } from 'node:fs';
 import { createHash, randomBytes, pbkdf2Sync, createCipheriv } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -344,6 +345,7 @@ try {
     const rtu = await lerAcomp(tk, 'Contratos', 'R2:U500', NOVA_OP);
     const contratos = b.map((l, i) => [l[0], rtu[i][0], rtu[i][2], rtu[i][3]]);
     dados.mapa = await montarMapa({ contratos, dia: ent.dia, operacao: dados.operacao, cacheArq: join(AQUI, 'geocache.json') });
+    try { const rg = normalizarRegioes(dados.mapa.lojas); console.log(`regioes das lojas: ${rg.corrigidas.length} corrigidas (zona de SP em cidade de fora), ${rg.padronizadas.length} com nome de cidade padronizado; para revisar: ${rg.revisar.zonaDiferenteDaPosicao.length} zonas x posicao, ${rg.revisar.cidadeDiferenteDoEndereco.length} cidades x endereco, ${rg.revisar.semRegiao.length} sem regiao`); dados.mapa.revisaoRegioes = rg.revisar; } catch (e) { console.log('FALHA regioes das lojas: ' + String(e.message).slice(0, 160)); }
     // Equipes (aba Contratos do site, pedido do ENG-A 05/10): cada linha da Contratos é uma vaga —
     // A funcionário, B loja, C posição. O tipo (CLT/MEI/Prestador) vem do Cadastro Colaboradores!D.
     // A:X da Contratos (funcionário, loja, tipo, horários D:N, pausa O, obs Q, modalidade W, função X).
