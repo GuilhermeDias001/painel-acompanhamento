@@ -3,6 +3,7 @@
 // Uso: node atualizar-dados.mjs            (gera)
 //      node atualizar-dados.mjs --conferir (gera e compara o período da planilha com a aba Analise)
 import { normalizarRegioes } from './regioes.mjs';
+import { escalaFixosDoFarmoOp } from './escala-motoristas.mjs';
 import { readFileSync, writeFileSync, renameSync, existsSync, mkdirSync, statSync } from 'node:fs';
 import { createHash, randomBytes, pbkdf2Sync, createCipheriv } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -526,6 +527,13 @@ try {
   } catch (e) { console.log(`FALHA mapa: ${String(e.message).slice(0, 200)}`); }
 } catch (e) { console.log(`FALHA operação: ${String(e.message).slice(0, 200)}`); }
 if (existsSync(join(AQUI, 'fixos.json'))) dados.fixos = JSON.parse(readFileSync(join(AQUI, 'fixos.json'), 'utf8'));
+// 27/10: a escala fixa dos motoristas (Visão geral: Hoje/Amanhã/Ontem e calendário de folgas) vem da planilha + cadastro, não mais da lista manual do fixos.json
+try {
+  if (dados.farmoOp && (dados.farmoOp.folgasMotoristas || []).length) {
+    const r = escalaFixosDoFarmoOp(dados.farmoOp, dados.cadastroMotoristas, (dados.fixos || {}).escala || {});
+    if (Object.keys(r.escala).length) { dados.fixos = { ...(dados.fixos || {}), escala: r.escala }; console.log(`escala fixa dos motoristas: ${Object.keys(r.escala).length} da planilha (${Object.keys(r.escala).join(', ')})${r.ignorados.length ? '; fora por cadastro inativo: ' + r.ignorados.join(', ') : ''}`); }
+  }
+} catch (e) { console.log('FALHA escala fixa dos motoristas: ' + String(e.message).slice(0, 160)); }
 
 const json = JSON.stringify(dados);
 // dados.json (completo) só é lido pelo Actions para gravar nas áreas LOGADAS do Supabase. Os arquivos que podem ir parar num lugar público
