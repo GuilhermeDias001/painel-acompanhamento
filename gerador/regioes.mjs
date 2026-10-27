@@ -2,7 +2,7 @@
 // A coluna de região da planilha mistura zona de SP ("ZL"), cidade ("GUARULHOS") e abreviações ("Mogi das C."). Aqui:
 //  1) padroniza o nome da cidade (uma só grafia por cidade, para a Reposição não dividir "Mogi das C." e "Mogi das Cruzes");
 //  2) se a planilha põe uma ZONA de São Paulo (ZL/ZN/ZS/ZO) numa loja cujo endereço é de OUTRA cidade, a região vira a cidade do endereço.
-// 27/10 (Guilherme: "aplicar a posição nas 12 e a sugestão nas sem região"): zona de SP diferente da posição do endereço passa a ser a da posição; loja sem região recebe a sugestão. Cidade diferente do endereço NÃO é mexida (lista de revisão).
+// 27/10 (Guilherme: "aplicar a posição nas 12 e a sugestão nas sem região"): zona de SP diferente da posição do endereço passa a ser a da posição; loja sem região recebe a sugestão. 27/10 (2º pedido): região de cidade diferente da cidade do endereço passa a seguir o endereço (capital = zona pela posição; outra cidade = a cidade).
 const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
 const CIDADES = {
   'MOGI DAS C.': 'Mogi das Cruzes', 'MOGI DAS CRUZES': 'Mogi das Cruzes', 'MOGI': 'Mogi das Cruzes',
@@ -29,7 +29,7 @@ const zonaDaPosicao = (l) => {
 const zonaNome = (r) => { const t = norm(r); const z = { L: 'Zona Leste', N: 'Zona Norte', S: 'Zona Sul', O: 'Zona Oeste' }; return /^ZONA /.test(t) ? z[t.split(' ')[1][0]] : (/^Z[LNSO]$/.test(t) ? z[t[1]] : (z[t[0]] || '')); };
 
 export function normalizarRegioes(lojas) {
-  const aplicadas = { zonaPorPosicao: 0, semRegiao: 0 }, corrigidas = [], padronizadas = [], revisar = { zonaDiferenteDaPosicao: [], cidadeDiferenteDoEndereco: [], semRegiao: [] };
+  const aplicadas = { zonaPorPosicao: 0, semRegiao: 0, cidadePeloEndereco: 0 }, corrigidas = [], padronizadas = [], revisar = { zonaDiferenteDaPosicao: [], cidadeDiferenteDoEndereco: [], semRegiao: [] };
   for (const l of lojas || []) {
     const end = l.endereco || ''; if (!end) continue;
     if (/\/\s*LOJA|LOJA\s*\d+\s*:/i.test(end) || (end.match(/ - SP/gi) || []).length > 1) continue; // vários endereços num cadastro só
@@ -43,7 +43,7 @@ export function normalizarRegioes(lojas) {
     if (canon && canon !== antes) { l.regiaoPlanilha = antes; l.regiao = canon; padronizadas.push({ loja: l.nome, de: antes, para: canon }); }
     const atual = l.regiao;
     if (ehZona(atual) && capital) { const der = zonaDaPosicao(l); if (der && der !== zonaNome(atual)) { revisar.zonaDiferenteDaPosicao.push({ loja: l.nome, planilha: atual, posicao: der }); l.regiaoPlanilha = atual; l.regiao = der; aplicadas.zonaPorPosicao++; } }
-    else if (!ehZona(atual) && cidadeCanon(atual) && cidEnd && cidadeCanon(atual) !== (cidadeCanon(cidEnd) || cidEnd)) revisar.cidadeDiferenteDoEndereco.push({ loja: l.nome, regiao: atual, enderecoCidade: cidEnd });
+    else if (!ehZona(atual) && cidadeCanon(atual) && cidEnd && cidadeCanon(atual) !== (cidadeCanon(cidEnd) || cidEnd)) { revisar.cidadeDiferenteDoEndereco.push({ loja: l.nome, regiao: atual, enderecoCidade: cidEnd }); const nova = capital ? zonaDaPosicao(l) : (cidadeCanon(cidEnd) || cidEnd); if (nova) { l.regiaoPlanilha = atual; l.regiao = nova; aplicadas.cidadePeloEndereco++; } }
   }
   return { corrigidas, padronizadas, revisar, aplicadas };
 }
