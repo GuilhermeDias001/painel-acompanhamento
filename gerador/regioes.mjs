@@ -2,7 +2,7 @@
 // A coluna de região da planilha mistura zona de SP ("ZL"), cidade ("GUARULHOS") e abreviações ("Mogi das C."). Aqui:
 //  1) padroniza o nome da cidade (uma só grafia por cidade, para a Reposição não dividir "Mogi das C." e "Mogi das Cruzes");
 //  2) se a planilha põe uma ZONA de São Paulo (ZL/ZN/ZS/ZO) numa loja cujo endereço é de OUTRA cidade, a região vira a cidade do endereço.
-// O resto (zona diferente da posição, cidade diferente do endereço) NÃO é mexido: vai para a lista de revisão.
+// 27/10 (Guilherme: "aplicar a posição nas 12 e a sugestão nas sem região"): zona de SP diferente da posição do endereço passa a ser a da posição; loja sem região recebe a sugestão. Cidade diferente do endereço NÃO é mexida (lista de revisão).
 const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
 const CIDADES = {
   'MOGI DAS C.': 'Mogi das Cruzes', 'MOGI DAS CRUZES': 'Mogi das Cruzes', 'MOGI': 'Mogi das Cruzes',
@@ -29,12 +29,12 @@ const zonaDaPosicao = (l) => {
 const zonaNome = (r) => { const t = norm(r); const z = { L: 'Zona Leste', N: 'Zona Norte', S: 'Zona Sul', O: 'Zona Oeste' }; return /^ZONA /.test(t) ? z[t.split(' ')[1][0]] : (/^Z[LNSO]$/.test(t) ? z[t[1]] : (z[t[0]] || '')); };
 
 export function normalizarRegioes(lojas) {
-  const corrigidas = [], padronizadas = [], revisar = { zonaDiferenteDaPosicao: [], cidadeDiferenteDoEndereco: [], semRegiao: [] };
+  const aplicadas = { zonaPorPosicao: 0, semRegiao: 0 }, corrigidas = [], padronizadas = [], revisar = { zonaDiferenteDaPosicao: [], cidadeDiferenteDoEndereco: [], semRegiao: [] };
   for (const l of lojas || []) {
     const end = l.endereco || ''; if (!end) continue;
     if (/\/\s*LOJA|LOJA\s*\d+\s*:/i.test(end) || (end.match(/ - SP/gi) || []).length > 1) continue; // vários endereços num cadastro só
     const cidEnd = cidadeDoEndereco(end), capital = norm(cidEnd) === 'SAO PAULO', antes = l.regiao || '';
-    if (!antes) { revisar.semRegiao.push({ loja: l.nome, cidade: cidEnd, sugestao: capital ? zonaDaPosicao(l) : (cidadeCanon(cidEnd) || cidEnd) }); continue; }
+    if (!antes) { const sug = capital ? zonaDaPosicao(l) : (cidadeCanon(cidEnd) || cidEnd); revisar.semRegiao.push({ loja: l.nome, cidade: cidEnd, sugestao: sug }); if (sug) { l.regiao = sug; l.regiaoPlanilha = ''; aplicadas.semRegiao++; } continue; }
     if (ehZona(antes) && cidEnd && !capital) {
       const nova = cidadeCanon(cidEnd) || cidEnd.replace(/\b\w/g, (c) => c.toUpperCase());
       l.regiaoPlanilha = antes; l.regiao = nova; corrigidas.push({ loja: l.nome, de: antes, para: nova, cidade: cidEnd }); continue;
@@ -42,8 +42,8 @@ export function normalizarRegioes(lojas) {
     const canon = cidadeCanon(antes);
     if (canon && canon !== antes) { l.regiaoPlanilha = antes; l.regiao = canon; padronizadas.push({ loja: l.nome, de: antes, para: canon }); }
     const atual = l.regiao;
-    if (ehZona(atual) && capital) { const der = zonaDaPosicao(l); if (der && der !== zonaNome(atual)) revisar.zonaDiferenteDaPosicao.push({ loja: l.nome, planilha: atual, posicao: der }); }
+    if (ehZona(atual) && capital) { const der = zonaDaPosicao(l); if (der && der !== zonaNome(atual)) { revisar.zonaDiferenteDaPosicao.push({ loja: l.nome, planilha: atual, posicao: der }); l.regiaoPlanilha = atual; l.regiao = der; aplicadas.zonaPorPosicao++; } }
     else if (!ehZona(atual) && cidadeCanon(atual) && cidEnd && cidadeCanon(atual) !== (cidadeCanon(cidEnd) || cidEnd)) revisar.cidadeDiferenteDoEndereco.push({ loja: l.nome, regiao: atual, enderecoCidade: cidEnd });
   }
-  return { corrigidas, padronizadas, revisar };
+  return { corrigidas, padronizadas, revisar, aplicadas };
 }
