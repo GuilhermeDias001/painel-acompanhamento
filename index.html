@@ -768,6 +768,14 @@ html.mapa-modo main{padding-bottom:0}
 #fmEl{position:absolute;inset:0;background:var(--surface)}
 .fm-wrap{grid-template-columns:minmax(0,1fr) 380px!important}
 .fm-lado{font-size:14px}
+#fmWrap .mapa-card{position:relative}
+.fm-lado-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:5;width:22px;height:56px;border:1px solid var(--border-strong);border-right:0;border-radius:10px 0 0 10px;background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:-2px 0 8px rgba(0,0,0,.25)}
+.fm-lado-btn:hover{background:var(--surface-2)}
+.fm-lado-btn svg{transition:transform .15s}
+#fmWrap.fm-sem-lado{grid-template-columns:minmax(0,1fr)!important}
+#fmWrap.fm-sem-lado .fm-lado{display:none}
+#fmWrap.fm-sem-lado .fm-lado-btn svg{transform:rotate(180deg)}
+.fm-m{cursor:pointer}
 .fm-m{padding:11px 12px}
 .fm-m b{font-size:14.5px}
 .fm-m small{font-size:12.5px}
@@ -1862,7 +1870,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
     <div class="view" id="viewFarmoMapa" style="display:none">
       <section class="banner"><div><p class="eyebrow">FARMOTERÁPICA · MAPA</p><h1>Mapa e rotas do dia</h1></div></section>
       <section class="mapa-wrap fm-wrap" id="fmWrap">
-        <div class="card mapa-card"><div id="fmEl" role="application" aria-label="Mapa da Farmoterápica"></div><p class="aviso-empty mapa-vazio" id="fmVazio" style="display:none"></p></div>
+        <div class="card mapa-card"><div id="fmEl" role="application" aria-label="Mapa da Farmoterápica"></div><button type="button" id="fmLadoBtn" class="fm-lado-btn" aria-label="Esconder o painel lateral" title="Esconder o painel lateral"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button><p class="aviso-empty mapa-vazio" id="fmVazio" style="display:none"></p></div>
         <aside class="card mapa-lado fm-lado">
           <button type="button" class="mapa-ruas" id="fmRuas" aria-pressed="true" style="margin-bottom:10px">Ruas: ligadas</button>
           <label class="fm-sel">Turno<select id="fmTurno"><option value="TODOS">Todos</option><option>MANHÃ</option><option>TARDE</option><option>NOITE</option></select></label>
@@ -2597,4 +2605,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=5d3b4cab4611"></script>
+<script src="app.js?v=540ae0338d43"></script>
