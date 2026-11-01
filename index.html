@@ -1360,7 +1360,23 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
 /* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
 .sq-wrap{height:auto!important;max-height:none!important;overflow:visible!important;position:static;border:0;border-radius:0;background:transparent}
-.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:100%}
+.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:100%;table-layout:fixed}
+.sq-wrap .sq-tab th:nth-child(1){width:38px}
+.sq-wrap .sq-tab th:nth-child(2){width:19%}
+.sq-wrap .sq-tab th:nth-child(3){width:15.5%}
+.sq-wrap .sq-tab th:nth-child(4){width:84px}
+.sq-wrap .sq-tab th:nth-child(5){width:7%}
+.sq-wrap .sq-tab th:nth-child(6){width:42px}
+.sq-wrap .sq-tab th:nth-child(7){width:14%}
+.sq-wrap .sq-tab th:nth-child(8),.sq-wrap .sq-tab th:nth-child(9){width:8%}
+.sq-wrap .sq-tab th:nth-child(10){width:7%}
+.sq-wrap .sq-tab th:nth-child(11){width:11%}
+.sq-wrap .sq-tab th:nth-child(13){width:36px}
+.sq-wrap .sq-tab td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sq-wrap .sq-tab td input,.sq-wrap .sq-tab td select{text-overflow:ellipsis}
+.sq-wrap .sq-tab th:not(.sq-n){padding:6px 10px}
+.sq-wrap .sq-tab td:not(.sq-n):not(:has(>.sq-st)):not(:has(>.sq-colab)){padding:0 4px}
+.sq-wrap .sq-tab td input[type=time]{min-width:0;width:100%}
 .sq-wrap .sq-tab th,.sq-wrap .sq-tab td{border:1px solid var(--border);padding:0;vertical-align:middle}
 .sq-wrap .sq-tab thead th{background:var(--surface-2);padding:6px 8px;color:var(--fg);font:700 11px var(--font-sys);height:30px;text-align:center;box-shadow:none;border-bottom:2px solid var(--border-strong)}
 .sq-wrap .sq-tab tbody td{height:30px}
