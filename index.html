@@ -1359,8 +1359,8 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-fth{display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle}
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
 /* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
-.sq-wrap{height:calc(100dvh - 260px);min-height:320px;overflow:auto;position:relative;border:1px solid var(--border-strong);border-radius:0;background:var(--bg)}
-.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:max-content;min-width:100%}
+.sq-wrap{height:auto!important;max-height:none!important;overflow:visible!important;position:static;border:0;border-radius:0;background:transparent}
+.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:100%}
 .sq-wrap .sq-tab th,.sq-wrap .sq-tab td{border:1px solid var(--border);padding:0;vertical-align:middle}
 .sq-wrap .sq-tab thead th{background:var(--surface-2);padding:6px 8px;color:var(--fg);font:700 11px var(--font-sys);height:30px;text-align:center;box-shadow:none;border-bottom:2px solid var(--border-strong)}
 .sq-wrap .sq-tab tbody td{height:30px}
