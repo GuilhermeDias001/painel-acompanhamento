@@ -1359,7 +1359,17 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-fth{display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle}
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
 /* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
-.sq-wrap{max-height:calc(100dvh - 250px);overflow:auto;position:relative}
+.sq-wrap{height:calc(100dvh - 260px);min-height:320px;overflow:auto;position:relative;border:1px solid var(--border-strong);border-radius:0;background:var(--bg)}
+.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:max-content;min-width:100%}
+.sq-wrap .sq-tab th,.sq-wrap .sq-tab td{border:1px solid var(--border);padding:0;vertical-align:middle}
+.sq-wrap .sq-tab thead th{background:var(--surface-2);padding:6px 8px;color:var(--fg);font:700 11px var(--font-sys);height:30px;text-align:center;box-shadow:none;border-bottom:2px solid var(--border-strong)}
+.sq-wrap .sq-tab tbody td{height:30px}
+.sq-wrap .sq-tab input,.sq-wrap .sq-tab select{border:0;border-radius:0;background:transparent;height:30px;padding:0 8px;margin:0;min-width:0}
+.sq-wrap .sq-tab input{width:100%}
+.sq-wrap .sq-tab td:has(>.sq-colab),.sq-wrap .sq-tab td:has(>.sq-st){padding:0!important}
+.sq-wrap .sq-tab input:focus,.sq-wrap .sq-tab select:focus{outline:2px solid var(--n-azul);outline-offset:-2px;background:var(--surface-2)}
+.sq-wrap .sq-tab tbody tr:nth-child(even) td:not(.sq-n){background:color-mix(in srgb,var(--surface-2) 40%,transparent)}
+.sq-wrap .sq-tab td.sq-n,.sq-wrap .sq-tab th.sq-n{border-color:var(--border-strong)}
 .sq-tab thead th{position:sticky;top:0;z-index:4;background:var(--surface);box-shadow:inset 0 -1px 0 var(--border-strong)}
 .sq-tab{counter-reset:sqn}
 .sq-tab tbody tr{counter-increment:sqn}
