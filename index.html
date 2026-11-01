@@ -1368,7 +1368,7 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
 /* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
 .sq-wrap{height:auto!important;max-height:calc(100vh - 16px)!important;overflow:auto!important;overscroll-behavior:contain;position:relative;border:0;border-radius:0;background:transparent}
-.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:1707px;min-width:100%;table-layout:fixed}
+.sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:1799px;min-width:100%;table-layout:fixed}
 .sq-wrap .sq-tab th:nth-child(1){width:32px;min-width:32px}
 .sq-wrap .sq-tab th:nth-child(2){width:400px;min-width:400px}
 .sq-wrap .sq-tab th:nth-child(3){width:240px;min-width:240px}
@@ -1376,7 +1376,7 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-wrap .sq-tab th:nth-child(5){width:78px;min-width:78px}
 .sq-wrap .sq-tab th:nth-child(6){width:32px;min-width:32px}
 .sq-wrap .sq-tab th:nth-child(7){width:125px;min-width:125px}
-.sq-wrap .sq-tab th:nth-child(8){width:62px;min-width:62px}
+.sq-wrap .sq-tab th:nth-child(8){width:92px;min-width:92px}
 .sq-wrap .sq-tab th:nth-child(9){width:88px;min-width:88px}
 .sq-wrap .sq-tab .sq-hr{display:flex;width:100%;gap:0}
 .sq-wrap .sq-tab .sq-hr .sq-hc{flex:1;min-width:0}
@@ -1385,7 +1385,7 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-wrap .sq-tab td:has(>.sq-hor-in),.sq-wrap .sq-tab td.sq-hor{overflow:visible}
 .sq-wrap .sq-tab th:nth-child(10){width:96px;min-width:96px}
 .sq-wrap .sq-tab th:nth-child(11){width:400px;min-width:400px}
-.sq-wrap .sq-tab th:nth-child(12){width:62px;min-width:62px}
+.sq-wrap .sq-tab th:nth-child(12){width:124px;min-width:124px}
 .sq-wrap .sq-tab th:nth-child(13){width:30px;min-width:30px}
 .sq-wrap .sq-tab .sq-del-th,.sq-wrap .sq-tab .sq-del-td{display:none!important}
 .sq-wrap .sq-tab td{white-space:nowrap}
@@ -1410,8 +1410,10 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-wrap .sq-tab tbody tr:nth-child(even) td:not(.sq-n){background:color-mix(in srgb,var(--surface-2) 40%,transparent)}
 .sq-wrap .sq-tab td.sq-n,.sq-wrap .sq-tab th.sq-n{border-color:var(--border-strong)}
 .sq-tab thead th{position:sticky;top:0;z-index:4;background:var(--surface);box-shadow:inset 0 -1px 0 var(--border-strong)}
-.sq-tab thead th.sq-n{position:sticky;top:0;left:0;z-index:7}
-.sq-wrap .sq-tab td.sq-n{z-index:3}
+.sq-tab thead th.sq-n{position:sticky;top:0;left:0;z-index:9!important}
+.sq-wrap .sq-tab thead th{z-index:8}
+.sq-wrap .sq-tab td.sq-n{z-index:6}
+.sq-wrap .sq-tab th.sq-n,.sq-wrap .sq-tab td.sq-n{width:32px;min-width:32px;max-width:32px}
 @media (min-width:761px){.sq-wrap{margin-left:-16px;margin-right:-16px}}
 .sq-tab{counter-reset:sqn}
 .sq-tab tbody tr{counter-increment:sqn}
@@ -1528,6 +1530,10 @@ body.sqx-arrasta{user-select:none;cursor:cell}
 .obs-meta{color:var(--fg-faint);font-size:11.5px}
 /* icones de acao da linha (lampada, chave Pix, prancheta, lixeira): mesmo tamanho e centralizados */
 .sq-lamp,.sq-pix-btn,.sq-obs-btn,.sq-del{width:30px!important;height:30px!important;box-sizing:border-box;flex:none}
+.sq-wrap .sq-obs-btn,.sq-wrap .sq-del{width:40px!important;height:30px!important}
+.sq-wrap .sq-obs-btn svg,.sq-wrap .sq-del svg{width:20px;height:20px}
+.sq-wrap .sq-obs-td{text-align:center!important}
+.sq-wrap .sq-obs-td .sq-del{margin-left:6px}
 .sq-tab td{vertical-align:middle}
 .sq-colab{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}
 .sq-tab td:has(>.sq-pix-btn),.sq-obs-td,.sq-del-td{text-align:center!important}
