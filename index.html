@@ -796,6 +796,37 @@ html.mapa-modo main{padding-bottom:0}
 .fm-m .km{color:var(--cor,var(--fg));font-weight:800;white-space:nowrap}
 .fm-pin{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:800 11px var(--font-sys);color:#0b0b0b;background:var(--cor,#888);border:2px solid rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer}
 .fm-corrigir{margin-top:6px;font:600 11.5px var(--font-sys);color:var(--fg);background:var(--surface);border:1px solid var(--border-strong);border-radius:8px;padding:4px 8px;cursor:pointer}.fm-corrigir:hover{border-color:var(--fg-faint)}
+.fm-topo{display:flex;gap:8px;align-items:stretch}
+.fm-topo .mapa-ruas{flex:1 1 0;width:auto;margin:0}
+.fm-topo select{flex:1 1 0;min-width:0;height:38px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:600 12.5px var(--font-sys)}
+.fm-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fm-chip{min-width:46px;height:42px;padding:0 10px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:2px solid var(--cor,#888);border-radius:10px;background:var(--surface-2);color:var(--fg);font:800 16px/1 var(--font-sys);cursor:pointer}
+.fm-chip small{font:600 10px/1 var(--font-sys);color:var(--fg-muted)}
+.fm-chip:hover{background:color-mix(in srgb,var(--cor,#888) 14%,var(--surface-2))}
+.fm-chip.on{background:var(--cor,#888);color:#0b0b0b}
+.fm-chip.on small{color:#0b0b0b}
+#fmDet{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.fm-det{border:1px solid var(--border-strong);border-left:4px solid var(--cor,#888);border-radius:10px;background:var(--surface-2);padding:10px 10px 8px}
+.fm-det h3{margin:0 0 2px;font:800 13.5px var(--font-sys);display:flex;justify-content:space-between;gap:8px}
+.fm-det h3 .km{color:var(--cor,var(--fg));white-space:nowrap}
+.fm-det>small{display:block;color:var(--fg-muted);font-size:11.5px;margin-bottom:8px}
+.fm-pts{list-style:none;margin:0;padding:0}
+.fm-pt{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;padding:6px 0}
+.fm-pt::before{content:"";position:absolute;left:11px;top:22px;bottom:-8px;border-left:2px dotted var(--fg-faint)}
+.fm-pt:last-child::before{display:none}
+.fm-pt .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:800 11px var(--font-sys);background:var(--cor,#888);color:#0b0b0b;position:relative;z-index:1}
+.fm-pt.orig .n{background:var(--surface);color:var(--fg);border:2px solid var(--fg-faint)}
+.fm-pt .t{min-width:0}
+.fm-pt .t b{display:block;font:600 12.5px/1.3 var(--font-sys);overflow-wrap:anywhere}
+.fm-pt .t small{display:block;color:var(--fg-muted);font-size:11px;margin-top:1px}
+.fm-pt .acoes{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.fm-pt select,.fm-pt button,.fm-add input,.fm-add button,.fm-add-abre{font:600 11.5px var(--font-sys);color:var(--fg);background:var(--surface);border:1px solid var(--border-strong);border-radius:7px;padding:4px 8px;cursor:pointer}
+.fm-pt.semc .n{background:transparent;color:var(--n-amarelo);border:2px dashed var(--n-amarelo)}
+.fm-add-abre{margin-top:6px;width:100%;padding:7px 8px;border-style:dashed;color:var(--fg-muted)}
+.fm-add{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.fm-add input{cursor:text;padding:7px 8px;background:var(--surface)}
+.fm-add .linha{display:flex;gap:6px}.fm-add .linha>*{flex:1 1 0;min-width:0}
+.fm-add button[type=submit]{background:var(--n-vermelho);border-color:var(--n-vermelho);color:#fff}
 .fm-pin.sem{width:12px;height:12px;background:#8a8f9c;border-width:1px;opacity:.7}
 .fm-pin.apagado{opacity:.25}
 .fm-orig{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:800 15px var(--font-sys);color:#fff;background:var(--n-vermelho);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.6)}
@@ -1945,11 +1976,11 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <section class="mapa-wrap fm-wrap" id="fmWrap">
         <div class="card mapa-card"><div id="fmEl" role="application" aria-label="Mapa da Farmoterápica"></div><button type="button" id="fmLadoBtn" class="fm-lado-btn" aria-label="Esconder o painel lateral" title="Esconder o painel lateral"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button><p class="aviso-empty mapa-vazio" id="fmVazio" style="display:none"></p></div>
         <aside class="card mapa-lado fm-lado">
-          <button type="button" class="mapa-ruas" id="fmRuas" aria-pressed="true" style="margin-bottom:10px">Ruas: ligadas</button>
-          <label class="fm-sel">Turno<select id="fmTurno"><option value="TODOS">Todos</option><option>MANHÃ</option><option>TARDE</option><option>NOITE</option></select></label>
+          <div class="fm-topo"><button type="button" class="mapa-ruas" id="fmRuas" aria-pressed="true">Ruas: ligadas</button><select id="fmTurno" aria-label="Turno"><option value="TODOS">Todos os turnos</option><option>MANHÃ</option><option>TARDE</option><option>NOITE</option></select></div>
           <p class="sub" id="fmOrigem" style="margin:10px 0 0"></p>
-          <h2 style="margin-top:14px">Rota de cada motoboy</h2>
-          <div id="fmLista"></div>
+          <h2 style="margin-top:14px">Rotas</h2>
+          <div id="fmLista" class="fm-chips"></div>
+          <div id="fmDet"></div>
           <p class="sub" id="fmNota" style="margin-top:12px"></p>
         </aside>
       </section>
@@ -2678,4 +2709,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=58254f5064c9"></script>
+<script src="app.js?v=e66aef3b32f2"></script>
