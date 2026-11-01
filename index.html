@@ -1366,7 +1366,7 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-fth{display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle}
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
 /* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
-.sq-wrap{height:auto!important;max-height:none!important;overflow:visible!important;position:static;border:0;border-radius:0;background:transparent}
+.sq-wrap{height:auto!important;max-height:none!important;overflow-x:auto!important;overflow-y:visible!important;position:relative;border:0;border-radius:0;background:transparent}
 .sq-wrap .sq-tab{border-collapse:collapse;border-spacing:0;width:100%;table-layout:auto}
 .sq-wrap .sq-tab th:nth-child(1){width:36px;min-width:36px}
 .sq-wrap .sq-tab th:nth-child(2){min-width:170px}
@@ -1394,7 +1394,8 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-wrap .sq-tab input:focus,.sq-wrap .sq-tab select:focus{outline:2px solid var(--n-azul);outline-offset:-2px;background:var(--surface-2)}
 .sq-wrap .sq-tab tbody tr:nth-child(even) td:not(.sq-n){background:color-mix(in srgb,var(--surface-2) 40%,transparent)}
 .sq-wrap .sq-tab td.sq-n,.sq-wrap .sq-tab th.sq-n{border-color:var(--border-strong)}
-.sq-tab thead th{position:sticky;top:0;z-index:4;background:var(--surface);box-shadow:inset 0 -1px 0 var(--border-strong)}
+.sq-tab thead th{position:relative;z-index:4;background:var(--surface);box-shadow:inset 0 -1px 0 var(--border-strong);will-change:transform}
+.sq-tab thead th.sq-n{position:sticky;left:0}
 .sq-tab{counter-reset:sqn}
 .sq-tab tbody tr{counter-increment:sqn}
 .sq-tab th.sq-n,.sq-tab td.sq-n{position:sticky;left:0;width:38px;min-width:38px;max-width:38px;padding:0!important;text-align:center!important;background:var(--surface-2);color:var(--fg-faint);font:600 11px var(--font-sys);border-right:1px solid var(--border-strong);z-index:3}
@@ -2648,4 +2649,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=2510d2888cf3"></script>
+<script src="app.js?v=10ed0d7698fb"></script>
