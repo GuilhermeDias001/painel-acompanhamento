@@ -108,9 +108,9 @@ main{flex:1;min-width:0;padding:0 24px 48px;display:flex;flex-direction:column;g
 .expanded main{padding-left:16px;padding-right:16px}
 @media (min-width:761px){
   html.rail-oculta .rail-slot{width:0}
-  html.rail-oculta .rail{display:none}
+  html.rail-oculta .rail{display:flex;position:fixed;left:0;top:0;height:100dvh;z-index:70;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-14px);transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s,width .18s ease,box-shadow .18s ease}
   html.rail-oculta .rail-trigger{display:block;position:fixed;left:0;top:0;width:14px;height:100dvh;z-index:49}
-  html.rail-oculta.rail-peek .rail{display:flex;position:fixed;left:0;top:0;height:100dvh;z-index:70;box-shadow:2px 0 16px rgba(0,0,0,.3);animation:railIn .18s ease}
+  html.rail-oculta.rail-peek .rail{opacity:1;visibility:visible;pointer-events:auto;transform:none;box-shadow:2px 0 16px rgba(0,0,0,.3);animation:none;transition:opacity .22s ease,transform .22s ease,visibility 0s,width .18s ease,box-shadow .18s ease}
   html.rail-oculta main{padding-left:16px;padding-right:16px}
 }
 .expanded .topline{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
