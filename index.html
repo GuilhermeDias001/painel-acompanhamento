@@ -1358,6 +1358,15 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 @media(max-width:760px){#fichaCorpo{grid-template-columns:minmax(0,1fr)}#fichaCorpo>.ficha-g{grid-column:1/-1!important}#fichaCorpo>.ficha-g:nth-child(2) dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .sq-fth{display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle}
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
+/* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
+.sq-wrap{max-height:calc(100dvh - 250px);overflow:auto;position:relative}
+.sq-tab thead th{position:sticky;top:0;z-index:4;background:var(--surface);box-shadow:inset 0 -1px 0 var(--border-strong)}
+.sq-tab{counter-reset:sqn}
+.sq-tab tbody tr{counter-increment:sqn}
+.sq-tab th.sq-n,.sq-tab td.sq-n{position:sticky;left:0;width:38px;min-width:38px;max-width:38px;padding:0!important;text-align:center!important;background:var(--surface-2);color:var(--fg-faint);font:600 11px var(--font-sys);border-right:1px solid var(--border-strong);z-index:3}
+.sq-tab th.sq-n{z-index:5}
+.sq-tab td.sq-n::before{content:counter(sqn)}
+.sq-tab tbody tr:hover td.sq-n{color:var(--fg)}
 .sq-fbtn{display:inline-grid;place-items:center;width:20px;height:20px;padding:0;border:0;border-radius:5px;background:transparent;color:var(--fg-faint);cursor:pointer}
 .sq-fbtn:hover,.sq-fbtn[aria-expanded="true"]{color:var(--fg);background:var(--surface-2)}
 .sq-fbtn.on{color:var(--n-vermelho);background:color-mix(in srgb,var(--n-vermelho) 18%,transparent)}
@@ -2020,9 +2029,9 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
             <li><b>Experiência: até 30.</b> Por loja: quantas vezes a pessoa já trabalhou nela (10 vezes ou mais = 30). Por região: quantas vezes trabalhou na região (20 ou mais = 30).</li>
             <li><b>Região: até 25.</b> A fatia do que a pessoa trabalha na região da vaga. Quem trabalha só ali ganha tudo. No ranking por loja, pesa 60% a fatia e 40% o volume (15 vezes ou mais).</li>
             <li><b>Distância: até 25.</b> Até 2 km vale 25 e cai de forma linear até 0 em 25 km. É a menor entre a casa estimada pelo CEP e as 3 lojas onde mais trabalha. Sem CEP nem histórico, não pontua.</li>
-            <li><b>Disponibilidade: até 20.</b> Livre no dia (folga ou folguista) 20; a confirmar 12; escalado no dia 4.</li>
+            <li><b>Disponibilidade: até 20.</b> Livre no dia (folga ou folguista) 20; a confirmar 12. Escalado no dia não entra.</li>
           </ul>
-          <p><b>Quem entra:</b> ativos que já trabalharam na região (ou, por loja, já cobriram a loja), além de MEI, prestador e folguista. Por loja, ficam de fora quem já está numa vaga naquele dia e o CLT que a escala manda trabalhar. Por região, todos entram e só perdem pontos de disponibilidade.</p>
+          <p><b>Quem entra:</b> ativos que já trabalharam na região (ou, por loja, já cobriram a loja), além de MEI, prestador e folguista. Ficam de fora quem já está numa vaga naquele dia e quem a escala manda trabalhar no dia (aparece como "Escalado no dia" só em consultas antigas, nunca como sugestão).</p>
           <p><b>Estimativas:</b> a distância usa o CEP de casa, que só aparece para admin e operador, e as coordenadas das lojas. O endereço não sai do navegador. Dê dois cliques numa linha para abrir o perfil.</p>
         </details>
         <div class="mot-cad-wrap func-wrap">
@@ -2117,10 +2126,10 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <p class="sub" id="sqSub" hidden style="display:none"></p>
         <div class="sq-data" id="sqData"></div>
         <div class="seg sq-filtro" id="sqFiltro" role="group" aria-label="Filtrar por status"></div>
-        <div class="mot-cad-wrap">
+        <div class="mot-cad-wrap sq-wrap">
           <ul id="sqEscMenu" role="menu" hidden></ul><ul id="sqSugMenu" role="menu" hidden></ul><div id="sqBalao" role="dialog" aria-label="Comentário" hidden><textarea id="sqBalTxt" maxlength="400" placeholder="Escreva um comentário"></textarea><div class="sq-bal-rod"><small id="sqBalMeta"></small><span><button type="button" id="sqBalDel">Apagar</button> <button type="button" class="pri" id="sqBalOk">Salvar</button></span></div></div><datalist id="sqColabs"></datalist><datalist id="sqLojas"></datalist>
           <table class="mot-cad sq-tab">
-            <thead><tr><th data-f="colab">Colaborador / reposição</th><th data-f="status">Status</th><th data-f="valor">Valor</th><th data-f="tipo">Tipo</th><th>Pix</th><th data-f="loja">Loja</th><th class="sq-hor" data-f="entrada">Entrada</th><th class="sq-hor" data-f="saida">Saída</th><th data-f="motivo">Motivo</th><th data-f="falt">Faltante</th><th data-f="obs">Observação</th><th class="sq-del-th"></th></tr></thead>
+            <thead><tr><th class="sq-n"></th><th data-f="colab">Colaborador / reposição</th><th data-f="status">Status</th><th data-f="valor">Valor</th><th data-f="tipo">Tipo</th><th>Pix</th><th data-f="loja">Loja</th><th class="sq-hor" data-f="entrada">Entrada</th><th class="sq-hor" data-f="saida">Saída</th><th data-f="motivo">Motivo</th><th data-f="falt">Faltante</th><th data-f="obs">Observação</th><th class="sq-del-th"></th></tr></thead>
             <tbody id="sqCorpo"></tbody>
           </table>
           <button type="button" class="sq-nova" id="sqNova" aria-label="Adicionar linha"><span>+</span> Nova linha</button>
@@ -2605,4 +2614,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=1d120be8387d"></script>
+<script src="app.js?v=b78c01e8d5be"></script>
