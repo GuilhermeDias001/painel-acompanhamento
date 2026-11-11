@@ -775,21 +775,23 @@ html.mapa-modo main{padding-bottom:0}
 .lg-tab thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
 .lg-tab th,.lg-tab td{white-space:nowrap}
 /* Consulta (dia registrado): mesmo formato da Operacao - sem quebra de linha, larguras fixas, rolagem sem barra */
-#viewSisCons .mot-cad-wrap{overflow:auto;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior:contain}
+#viewSisCons .mot-cad-wrap{overflow:auto;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-x:contain;overscroll-behavior-y:auto}
 #viewSisCons .mot-cad-wrap::-webkit-scrollbar{display:none}
 #viewSisCons .sq-tab{table-layout:fixed;border-collapse:separate;border-spacing:0;min-width:100%}
 #viewSisCons .sq-tab th,#viewSisCons .sq-tab td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:7px 8px}
-#viewSisCons .sq-tab:has(#scCorpo){width:1700px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(1){width:300px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(2){width:190px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(3){width:90px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(4){width:100px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(5){width:300px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(6){width:90px}
+#viewSisCons .sq-tab:has(#scCorpo){width:1738px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(1){width:38px}
+#viewSisCons .sq-tab th.sq-n,#viewSisCons .sq-tab td.sq-n{padding:0!important;text-overflow:clip;z-index:2}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(2){width:300px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(3){width:190px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(4){width:90px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(5){width:100px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(6){width:300px}
 #viewSisCons .sq-tab:has(#scCorpo) th:nth-child(7){width:90px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(8){width:150px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(8){width:90px}
 #viewSisCons .sq-tab:has(#scCorpo) th:nth-child(9){width:150px}
-#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(10){width:240px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(10){width:150px}
+#viewSisCons .sq-tab:has(#scCorpo) th:nth-child(11){width:240px}
 #viewSisCons .sq-tab:has(#scCorpo) .pill,#viewSisCons .sq-tab:has(#scCorpo) td span{white-space:nowrap}
 #viewSisCons .sq-tab:has(#scAud){width:1500px}
 .lg-tab td{vertical-align:top;max-width:480px;overflow:hidden;text-overflow:ellipsis}
@@ -2266,7 +2268,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div class="sq-data"><label for="scData">Data</label><input type="date" id="scData"><span id="scDias"></span></div>
         <div class="mot-cad-wrap">
           <table class="mot-cad sq-tab">
-            <thead><tr><th>Colaborador / reposição</th><th>Status</th><th>Valor</th><th>Tipo</th><th>Loja</th><th>Entrada</th><th>Saída</th><th>Motivo</th><th>Faltante</th><th>Observação</th></tr></thead>
+            <thead><tr><th class="sq-n"></th><th>Colaborador / reposição</th><th>Status</th><th>Valor</th><th>Tipo</th><th>Loja</th><th>Entrada</th><th>Saída</th><th>Motivo</th><th>Faltante</th><th>Observação</th></tr></thead>
             <tbody id="scCorpo"></tbody>
           </table>
         </div>
@@ -2730,4 +2732,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=681711f0d538"></script>
+<script src="app.js?v=24a5c31f44a6"></script>
