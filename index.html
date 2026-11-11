@@ -797,7 +797,10 @@ table.func-geral th:nth-child(9){width:5%}
 table.func-geral td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rep-det-btn{background:var(--surface-2)!important;color:var(--fg)!important;border:1px solid var(--border-strong)!important}
 .rep-det-btn[aria-expanded="true"]{border-color:var(--n-vermelho)!important}
-.rep-det{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:-4px 0 14px;padding:12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2)}
+.rep-det{position:fixed;z-index:200;width:min(560px,calc(100vw - 24px));display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding:16px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.45)}
+.rep-det[hidden]{display:none}
+.rep-det-tit{flex:1 1 100%;margin:0;font:700 11px var(--font-sys);letter-spacing:.06em;color:var(--fg-faint)}
+.rep-det-acoes{flex:1 1 100%;display:flex;gap:8px;justify-content:flex-end}
 .rep-det .perfil-campo{margin:0;flex:1 1 160px}
 .rep-det input[type=time]{min-width:0}
 .rk-mei{margin-left:6px;display:inline-block;padding:1px 7px;border-radius:999px;border:1px solid var(--n-verde);color:var(--n-verde);font:700 10px/1.5 var(--font-sys);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
@@ -2213,13 +2216,14 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Dia</span><input type="date" id="repDia"></label>
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Quem considerar</span><select id="repTipo" class="ficha-in"><option value="">Todos</option><option value="MEI">MEI</option><option value="PRESTADOR">Prestador</option><option value="Folguista">Folguista</option></select></label>
         </div>
-        <div class="rep-det" id="repDet" hidden>
+        <div class="rep-det" id="repDet" role="dialog" aria-label="Detalhes do texto do WhatsApp" hidden>
+          <p class="rep-det-tit">DETALHES DO TEXTO DO WHATSAPP</p>
           <label class="perfil-campo"><span>Loja no texto</span><input type="text" id="repDetLoja" list="repLojas" autocomplete="off" maxlength="90" placeholder="Usa a loja da busca se ficar vazio"></label>
           <label class="perfil-campo"><span>Entrada</span><input type="time" id="repDetEnt"></label>
           <label class="perfil-campo"><span>Saída</span><input type="time" id="repDetSai"></label>
           <label class="perfil-campo" style="flex:2 1 260px"><span>Outra informação</span><input type="text" id="repDetObs" maxlength="200" placeholder="Ex.: levar uniforme"></label>
-          <button type="button" class="perfil-btn sec" id="repDetLimpa" style="align-self:flex-end">Limpar</button>
           <p class="sub" id="repDetPrevia" style="flex:1 1 100%;margin:4px 0 0;white-space:pre-line"></p>
+          <div class="rep-det-acoes"><button type="button" class="perfil-btn sec" id="repDetLimpa">Limpar</button><button type="button" class="perfil-btn" id="repDetOk">OK</button></div>
         </div>
         <p class="sub" id="repSub" style="margin:0 0 12px">Escolha a loja e o dia: o ranking considera as regiões onde a pessoa costuma trabalhar, quantas vezes ela já trabalhou nessa loja, a distância (estimada pelo CEP) e se ela está disponível no dia.</p>
         <div class="rep-serv" id="repServBox" hidden></div>
@@ -2815,4 +2819,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=59213000560c"></script>
+<script src="app.js?v=5fcb9df96664"></script>
