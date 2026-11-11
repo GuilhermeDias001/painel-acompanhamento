@@ -776,7 +776,10 @@ html.mapa-modo main{padding-bottom:0}
 .lg-tab th,.lg-tab td{white-space:nowrap}
 /* Consulta (dia registrado): mesmo formato da Operacao - sem quebra de linha, larguras fixas, rolagem sem barra */
 #viewSisCons .mot-cad-wrap{overflow:auto;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-x:contain;overscroll-behavior-y:auto}
-#viewSisCons .mot-cad-wrap::-webkit-scrollbar{display:none}
+#viewSisCons .mot-cad-wrap:not(:has(#scCorpo))::-webkit-scrollbar{display:none}
+#viewSisCons .mot-cad-wrap:has(#scCorpo){max-height:calc(100vh - 16px);scrollbar-width:auto;-ms-overflow-style:auto;overscroll-behavior:auto}
+#viewSisCons .sq-tab:has(#scCorpo) thead th{position:sticky;top:0;z-index:4;background:var(--surface)}
+#viewSisCons .sq-tab:has(#scCorpo) thead th.sq-n{left:0;z-index:6}
 #viewSisCons .sq-tab{table-layout:fixed;border-collapse:separate;border-spacing:0;min-width:100%}
 #viewSisCons .sq-tab th,#viewSisCons .sq-tab td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:7px 8px}
 #viewSisCons .sq-tab:has(#scCorpo){width:1738px}
@@ -1421,7 +1424,7 @@ html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq
 .sq-fth{display:inline-flex;align-items:center;justify-content:center;gap:4px;vertical-align:middle}
 .sq-tab thead th{padding-top:12px;padding-bottom:12px;vertical-align:middle;line-height:20px}
 /* visual de planilha: grade rolavel com cabecalho fixo e coluna de numero de linha como no Excel */
-.sq-wrap{height:auto!important;max-height:calc(100vh - 16px)!important;overflow:auto!important;overscroll-behavior:contain;position:relative;border:0;border-radius:0;background:transparent}
+.sq-wrap{height:auto!important;max-height:calc(100vh - 16px)!important;overflow:auto!important;overscroll-behavior:auto;position:relative;border:0;border-radius:0;background:transparent}
 .sq-wrap .sq-tab{border-collapse:separate;border-spacing:0;width:1987px;min-width:100%;table-layout:fixed}
 .sq-wrap .sq-tab th:nth-child(1){width:32px;min-width:32px}
 .sq-wrap .sq-tab th:nth-child(2){width:400px;min-width:400px}
