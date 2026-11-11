@@ -16,7 +16,7 @@ import { montarFarmoOp } from './farmoop.mjs';
 import { sincronizarFarmo } from './farmohist.mjs';
 import { importarLegado } from './legado.mjs';
 import { montarFarmoMapa, completarEnderecos, linhasDoBancoParaMapa } from './farmomapa.mjs';
-import { ingerirDiasFechados } from './supabase.mjs';
+import { ingerirDiasFechados, sincronizarPedidos } from './supabase.mjs';
 import { montarMapa, vincularEquipes, montarContratos, montarColaboradores } from './mapa.mjs';
 import { montarQuadro, montarHistorico, nomeDaAba, dataDaAba } from './quadro.mjs';
 
@@ -390,6 +390,9 @@ try {
       if (process.env.SUPABASE_SECRET) {
         try { console.log(await ingerirDiasFechados(lerNO, abas, dataDaAba(hojeNome), process.env.SUPABASE_SECRET)); }
         catch (e) { console.log(`FALHA ingestão do quadro: ${String(e.message).slice(0, 200)}`); }
+        // botão Sincronizar da Operação: a planilha vale (ver sincronizarPedidos)
+        try { console.log(await sincronizarPedidos(lerNO, abas, dataDaAba(hojeNome), process.env.SUPABASE_SECRET)); }
+        catch (e) { console.log(`FALHA sincronizar: ${String(e.message).slice(0, 200)}`); }
         // 20/10: o histórico do quadro também vem do BANCO (quadro_linha, últimos 60 dias). As abas de dia somem quando o Guilherme arquiva
         // (Arquivar Operação apaga a aba), e o ranking de Reposição ficou com 6 dias. Para a mesma data vale o banco; abas só completam o que o banco não tem.
         try {

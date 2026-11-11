@@ -266,3 +266,51 @@ export async function importarContatos(pac, segredo) {
   await fetch(rest('painel?on_conflict=area'), { method: 'POST', headers: { ...h, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ area: flag, dados: { feito: new Date().toISOString(), resumo: msg }, versao: String(Date.now()), atualizado_em: new Date().toISOString() }]) });
   return msg;
 }
+
+// Botão "Sincronizar" da Operação (Guilherme, 11/11): a PLANILHA SEMPRE VALE. Cada pedido pendente em sync_pedido faz o quadro do dia
+// (quadro_linha) copiar o que está na aba do Excel: linha a linha (mesma posição), campos de texto idênticos aos da planilha (inclusive vazios);
+// Valor só quando a planilha tem número (o valor costuma ser digitado no site na hora do pagamento). Linhas novas da planilha entram;
+// linhas do banco que sobraram NÃO são apagadas (só contadas). Alterações vão para a auditoria com origem 'sincronizar (planilha)'.
+export async function sincronizarPedidos(ler, nomesAbas, hojeIso, segredo) {
+  const h = { apikey: segredo, 'Content-Type': 'application/json' };
+  if (segredo.startsWith('eyJ')) h.Authorization = 'Bearer ' + segredo;
+  const get = async (p) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${p}`, { headers: h }); if (!r.ok) throw new Error(`HTTP ${r.status} ${p.slice(0, 50)}`); return r.json(); };
+  const patch = async (p, corpo) => { const r = await fetch(`${SUPABASE_URL}/rest/v1/${p}`, { method: 'PATCH', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify(corpo) }); if (!r.ok) throw new Error(`PATCH ${p.slice(0, 40)}: ${await erroSeguro(r)}`); };
+  let pedidos;
+  try { pedidos = await get('sync_pedido?select=id,dia&status=eq.pendente&order=criado_em&limit=20'); }
+  catch (e) { return 'Sincronizar: tabela sync_pedido ainda não existe'; }
+  if (!pedidos.length) return 'Sincronizar: nenhum pedido';
+  const { lerDiaCompleto, nomeDaAba } = await import('./quadro.mjs');
+  const dias = [...new Set(pedidos.map((p) => p.dia || hojeIso))];
+  const ids = pedidos.map((p) => p.id).join(',');
+  await patch(`sync_pedido?id=in.(${ids})`, { status: 'executando', iniciado_em: new Date().toISOString() });
+  const CAMPOS = ['loja', 'colab', 'status', 'motivo', 'tipo', 'entrada', 'saida', 'faltante', 'obs'];
+  let alteradas = 0, novas = 0, sobraram = 0;
+  try {
+    for (const dia of dias) {
+      const [a, m, d] = dia.split('-');
+      const linhas = await lerDiaCompleto(ler, `${d}-${m}-${a}`, nomesAbas);
+      if (!linhas) throw new Error(`aba ${d}-${m}-${a} não encontrada`);
+      const banco = await get(`quadro_linha?select=id,ordem,${CAMPOS.join(',')},valor&dia=eq.${dia}&order=ordem&limit=2000`);
+      const porOrdem = new Map(banco.map((r) => [r.ordem, r]));
+      for (let i = 0; i < linhas.length; i++) {
+        const x = linhas[i], r = porOrdem.get(i);
+        const novo = {}; for (const c of CAMPOS) novo[c] = x[c] || '';
+        if (typeof x.valor === 'number') novo.valor = x.valor;
+        if (!r) {
+          const rr = await fetch(`${SUPABASE_URL}/rest/v1/quadro_linha`, { method: 'POST', headers: { ...h, Prefer: 'return=minimal' }, body: JSON.stringify({ dia, ordem: i, ...novo, valor: typeof x.valor === 'number' ? x.valor : null, origem_edicao: 'sincronizar (planilha)' }) });
+          if (!rr.ok) throw new Error(`nova linha ${i}: ${await erroSeguro(rr)}`);
+          novas++; continue;
+        }
+        const dif = {}; for (const [c, v] of Object.entries(novo)) if ((r[c] ?? (c === 'valor' ? null : '')) !== v) dif[c] = v;
+        if (Object.keys(dif).length) { await patch(`quadro_linha?id=eq.${r.id}`, { ...dif, origem_edicao: 'sincronizar (planilha)' }); alteradas++; }
+      }
+      sobraram += banco.filter((r) => r.ordem >= linhas.length).length;
+    }
+    await patch(`sync_pedido?id=in.(${ids})`, { status: 'concluido', concluido_em: new Date().toISOString(), linhas_alteradas: alteradas, linhas_novas: novas, linhas_sobrando: sobraram });
+    return `Sincronizar: ${pedidos.length} pedido(s), ${alteradas} linha(s) alterada(s), ${novas} nova(s), ${sobraram} só no banco`;
+  } catch (e) {
+    await patch(`sync_pedido?id=in.(${ids})`, { status: 'erro', concluido_em: new Date().toISOString(), erro: String(e.message).slice(0, 300) }).catch(() => {});
+    throw e;
+  }
+}
