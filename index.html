@@ -781,8 +781,9 @@ html.mapa-modo main{padding-bottom:0}
 .oc-anular:hover{border-color:var(--n-vermelho);color:var(--n-vermelho)}
 .oc-anula-box{display:flex;gap:6px;align-items:center}
 .oc-anula-box input{height:30px;min-width:200px;padding:0 8px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface-2);color:var(--fg);font:500 12.5px var(--font-sys)}
-.rk-est{margin-left:6px;color:var(--n-amarelo);font-size:12px;letter-spacing:1px;white-space:nowrap;text-decoration:none}
+.rk-est{margin-left:6px;color:var(--n-vermelho);font-size:12px;letter-spacing:1px;white-space:nowrap;text-decoration:none}
 .rk-est i{font-style:normal;color:var(--fg-faint)}
+td .rk-est:first-child{margin-left:0}
 .rk-mei{margin-left:6px;display:inline-block;padding:1px 7px;border-radius:999px;border:1px solid var(--n-verde);color:var(--n-verde);font:700 10px/1.5 var(--font-sys);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .lg-tab thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
 .lg-tab th,.lg-tab td{white-space:nowrap}
@@ -1584,6 +1585,11 @@ body.sqx-arrasta{user-select:none;cursor:cell}
 #sqEscMenu li.outros{cursor:default}
 #sqEscMenu li:hover,#sqEscMenu li:focus{background:color-mix(in srgb,var(--fg) 9%,transparent);outline:0}
 #sqEscMenu li.vazio{cursor:default;color:var(--fg-faint)}
+.sq-wrap .sq-tab td.sq-n{cursor:grab}
+.sq-wrap .sq-tab td.sq-n:active{cursor:grabbing}
+.sq-wrap .sq-tab tr.sq-arrasta td{opacity:.45}
+.sq-wrap .sq-tab tr.sq-drop-antes td{box-shadow:inset 0 3px 0 var(--n-azul)}
+.sq-wrap .sq-tab tr.sq-drop-depois td{box-shadow:inset 0 -3px 0 var(--n-azul)}
 .sq-pend{flex:none;color:var(--n-vermelho);font:900 15px/1 var(--font-sys);padding:0 4px;cursor:help}
 .sq-sync{margin-left:12px;display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.25);color:#fff;font:700 12.5px var(--font-sys);cursor:pointer;white-space:nowrap;flex:none}
 .sq-sync:hover{background:rgba(0,0,0,.42)}
@@ -2784,4 +2790,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=da5a61ed242e"></script>
+<script src="app.js?v=8bb343b78ef6"></script>
