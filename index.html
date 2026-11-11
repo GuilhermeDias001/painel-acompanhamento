@@ -795,6 +795,11 @@ table.func-geral th:nth-child(7){width:10%}
 table.func-geral th:nth-child(8){width:6%}
 table.func-geral th:nth-child(9){width:5%}
 table.func-geral td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rep-det-btn{background:var(--surface-2)!important;color:var(--fg)!important;border:1px solid var(--border-strong)!important}
+.rep-det-btn[aria-expanded="true"]{border-color:var(--n-vermelho)!important}
+.rep-det{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin:-4px 0 14px;padding:12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2)}
+.rep-det .perfil-campo{margin:0;flex:1 1 160px}
+.rep-det input[type=time]{min-width:0}
 .rk-mei{margin-left:6px;display:inline-block;padding:1px 7px;border-radius:999px;border:1px solid var(--n-verde);color:var(--n-verde);font:700 10px/1.5 var(--font-sys);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .lg-tab thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
 .lg-tab th,.lg-tab td{white-space:nowrap}
@@ -2203,9 +2208,18 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
       <section class="card">
         <div class="func-top" style="display:flex;align-items:flex-end;gap:12px;margin-bottom:14px;flex-wrap:wrap">
           <label class="perfil-campo" style="flex:1 1 260px;margin:0"><span>Loja da vaga ou regiões</span><input type="text" id="repLoja" list="repLojas" autocomplete="off" placeholder="Loja ou região (ex.: sul, ou centro e norte)" maxlength="90"><datalist id="repLojas"></datalist></label>
-          <button type="button" class="func-novo" id="repSolBtn" style="flex:0 0 auto"><span>+</span> Solicitar serviço</button>
+          <button type="button" class="func-novo" id="repSolBtn" style="flex:0 0 auto"><span>+</span> Solicitar esporádico</button>
+          <button type="button" class="func-novo rep-det-btn" id="repDetBtn" style="flex:0 0 auto" aria-expanded="false"><span>+</span> Adicionar detalhes</button>
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Dia</span><input type="date" id="repDia"></label>
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Quem considerar</span><select id="repTipo" class="ficha-in"><option value="">Todos</option><option value="MEI">MEI</option><option value="PRESTADOR">Prestador</option><option value="Folguista">Folguista</option></select></label>
+        </div>
+        <div class="rep-det" id="repDet" hidden>
+          <label class="perfil-campo"><span>Loja no texto</span><input type="text" id="repDetLoja" list="repLojas" autocomplete="off" maxlength="90" placeholder="Usa a loja da busca se ficar vazio"></label>
+          <label class="perfil-campo"><span>Entrada</span><input type="time" id="repDetEnt"></label>
+          <label class="perfil-campo"><span>Saída</span><input type="time" id="repDetSai"></label>
+          <label class="perfil-campo" style="flex:2 1 260px"><span>Outra informação</span><input type="text" id="repDetObs" maxlength="200" placeholder="Ex.: levar uniforme"></label>
+          <button type="button" class="perfil-btn sec" id="repDetLimpa" style="align-self:flex-end">Limpar</button>
+          <p class="sub" id="repDetPrevia" style="flex:1 1 100%;margin:4px 0 0;white-space:pre-line"></p>
         </div>
         <p class="sub" id="repSub" style="margin:0 0 12px">Escolha a loja e o dia: o ranking considera as regiões onde a pessoa costuma trabalhar, quantas vezes ela já trabalhou nessa loja, a distância (estimada pelo CEP) e se ela está disponível no dia.</p>
         <div class="rep-serv" id="repServBox" hidden></div>
@@ -2635,7 +2649,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <div class="ficha-modal" id="repSolModal" hidden>
   <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="repSolTitulo" style="max-width:780px">
     <header class="ficha-head">
-      <div><h2 id="repSolTitulo">Solicitar serviço</h2><p style="text-transform:uppercase;letter-spacing:.04em;font-size:11.5px">Monte o trajeto, veja a distância e escolha quem recebe a oferta</p></div>
+      <div><h2 id="repSolTitulo">Solicitar esporádico</h2><p style="text-transform:uppercase;letter-spacing:.04em;font-size:11.5px">Monte o trajeto, veja a distância e escolha quem recebe a oferta</p></div>
       <button type="button" id="repSolFechar" aria-label="Fechar">×</button>
     </header>
     <form class="ficha-corpo nf-form" id="repSolForm" style="display:block" autocomplete="off">
@@ -2801,4 +2815,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=c04f3d1c389c"></script>
+<script src="app.js?v=59213000560c"></script>
