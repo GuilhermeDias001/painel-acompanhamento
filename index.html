@@ -772,6 +772,18 @@ html.mapa-modo main{padding-bottom:0}
 .lg-form label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-faint)}
 .lg-form input,.lg-form textarea{height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:500 13.5px var(--font-sys);text-transform:none;letter-spacing:0}
 .lg-form textarea{height:auto;min-height:64px;padding:8px 10px}
+.lg-form select{height:36px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:500 13.5px var(--font-sys);text-transform:none;letter-spacing:0}
+.oc-tab td{white-space:nowrap}
+.oc-tab td.oc-obs{white-space:normal;min-width:220px}
+.oc-tab tr.anulada td{color:var(--fg-faint);text-decoration:line-through}
+.oc-tab tr.anulada td.oc-sit,.oc-tab tr.anulada td:last-child{text-decoration:none}
+.oc-anular{font:600 12px var(--font-sys);color:var(--fg);background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;padding:5px 10px;cursor:pointer}
+.oc-anular:hover{border-color:var(--n-vermelho);color:var(--n-vermelho)}
+.oc-anula-box{display:flex;gap:6px;align-items:center}
+.oc-anula-box input{height:30px;min-width:200px;padding:0 8px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface-2);color:var(--fg);font:500 12.5px var(--font-sys)}
+.rk-est{margin-left:6px;color:var(--n-amarelo);font-size:12px;letter-spacing:1px;white-space:nowrap;text-decoration:none}
+.rk-est i{font-style:normal;color:var(--fg-faint)}
+.rk-mei{margin-left:6px;display:inline-block;padding:1px 7px;border-radius:999px;border:1px solid var(--n-verde);color:var(--n-verde);font:700 10px/1.5 var(--font-sys);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .lg-tab thead th{position:sticky;top:0;z-index:2;background:var(--surface)}
 .lg-tab th,.lg-tab td{white-space:nowrap}
 /* Consulta (dia registrado): mesmo formato da Operacao - sem quebra de linha, larguras fixas, rolagem sem barra */
@@ -1734,6 +1746,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <a class="nav-subitem" href="#" data-view="sisplanejamento"><span class="nav-label">Planejamento</span></a>
           <a class="nav-subitem" href="#" data-view="tuflog"><span class="nav-label">TUF Log</span></a>
           <a class="nav-subitem" href="#" data-view="proibidos"><span class="nav-label">Proibidos</span></a>
+          <a class="nav-subitem" href="#" data-view="ocorrencias"><span class="nav-label">Ocorrências</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
           <a class="nav-subitem" href="#" data-view="sisconsulta"><span class="nav-label">Consulta</span></a>
           <span class="nav-sep" aria-hidden="true"></span>
@@ -2001,6 +2014,33 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <div class="lg-form" id="lgForm"></div>
           <p class="sub" id="lgModalMsg" style="margin:10px 0 0"></p>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button type="button" class="perfil-btn sec" id="lgModalCancel">Cancelar</button><button type="button" class="perfil-btn" id="lgModalOk">Salvar</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="viewOcorrencias" style="display:none">
+      <section class="banner"><div><p class="eyebrow">SISTEMA · OCORRÊNCIAS</p><h1>Ocorrências</h1></div></section>
+      <section class="lg-tela">
+        <div class="pf-barra">
+          <label style="flex:1 1 280px">Buscar<input type="search" id="ocBusca" placeholder="Prestador, loja, tipo…" autocomplete="off"></label>
+          <button type="button" class="perfil-btn" id="ocNovo">Inserir ocorrência</button>
+        </div>
+        <p class="sub" id="ocSub" style="margin:10px 0 12px"></p>
+        <div class="mot-cad-wrap lg-wrap"><table class="mot-cad cont-eq lg-tab oc-tab"><thead><tr><th>Data</th><th>Tipo</th><th>Prestador</th><th>Loja</th><th>Observação</th><th>Situação</th><th></th></tr></thead><tbody id="ocCorpo"></tbody></table></div>
+      </section>
+    </div>
+    <div class="ficha-modal" id="ocModal" hidden>
+      <div class="ficha-box" role="dialog" aria-modal="true" aria-labelledby="ocModalT" style="max-width:720px">
+        <header class="ficha-head"><div><h2 id="ocModalT">Inserir ocorrência</h2><p>Vale para o ranking de estrelas do prestador.</p></div><div class="ficha-acoes"><button type="button" id="ocModalX" aria-label="Fechar">×</button></div></header>
+        <div class="ficha-corpo" style="display:block">
+          <div class="lg-form">
+            <label>Tipo *<select id="ocTipo"></select></label>
+            <label>Data *<input type="date" id="ocData"></label>
+            <label>Prestador *<input type="text" id="ocPessoa" list="ocPessoas" autocomplete="off" placeholder="Digite o nome e escolha na lista"><datalist id="ocPessoas"></datalist></label>
+            <label>Loja<input type="text" id="ocLoja" list="ocLojas" autocomplete="off" placeholder="Escolha uma loja"><datalist id="ocLojas"></datalist></label>
+            <label style="grid-column:1/-1">Observação<textarea id="ocObs" maxlength="500"></textarea></label>
+          </div>
+          <p class="sub" id="ocModalMsg" style="margin:10px 0 0"></p>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button type="button" class="perfil-btn sec" id="ocModalCancel">Cancelar</button><button type="button" class="perfil-btn" id="ocModalOk">Salvar</button></div>
         </div>
       </div>
     </div>
@@ -2743,4 +2783,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=350066cece23"></script>
+<script src="app.js?v=c548c4d15bfb"></script>
