@@ -1572,6 +1572,13 @@ body.sqx-arrasta{user-select:none;cursor:cell}
 #sqEscMenu li.outros{cursor:default}
 #sqEscMenu li:hover,#sqEscMenu li:focus{background:color-mix(in srgb,var(--fg) 9%,transparent);outline:0}
 #sqEscMenu li.vazio{cursor:default;color:var(--fg-faint)}
+.sq-sync{margin-left:12px;display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:9px;border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.25);color:#fff;font:700 12.5px var(--font-sys);cursor:pointer;white-space:nowrap;flex:none}
+.sq-sync:hover{background:rgba(0,0,0,.42)}
+.sq-sync[disabled]{cursor:default;background:#5f6368;border-color:#5f6368;color:#e8eaed}
+.sq-sync.ok,.sq-sync.ok[disabled]{background:var(--n-verde);border-color:var(--n-verde);color:#0b0b0b}
+.sq-sync-gira{display:none;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sqSyncGira .8s linear infinite}
+.sq-sync[aria-busy="true"] .sq-sync-gira{display:inline-block}
+@keyframes sqSyncGira{to{transform:rotate(360deg)}}
 .sq-presenca{display:flex;align-items:center;margin-left:auto;margin-right:14px;padding-left:10px}
 .sq-av{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;flex:none;border:2px solid var(--bg);font:700 12px var(--font-sys);color:#fff;letter-spacing:.02em;position:relative;cursor:default;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
 .sq-av.eu{box-shadow:0 0 0 2px var(--n-verde)}
@@ -2234,6 +2241,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         <div><p class="eyebrow" id="sqEyebrow">SISTEMA · HOJE</p><h1 id="sqTitulo">Operação</h1></div>
         <div class="sq-presenca" id="sqPresenca" aria-label="Quem está neste quadro agora"></div>
         <span class="pill programado" id="sqSelo">Protótipo · salva neste navegador</span>
+        <button type="button" class="sq-sync" id="sqSync" hidden title="Traz para o quadro de hoje o que está na planilha (a planilha sempre vale)"><span class="sq-sync-gira" aria-hidden="true"></span><span class="sq-sync-txt">Sincronizar</span></button>
       </section>
       <section class="sis-grade" id="sisOpMenu" hidden style="display:none">
         <button type="button" class="sis-card on" data-sis="quadro"><b>Quadro do dia</b><span id="sqCardTxt">Status, motivo, faltante e reposição por vaga</span></button>
@@ -2735,4 +2743,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=db8d07c44fdc"></script>
+<script src="app.js?v=350066cece23"></script>
