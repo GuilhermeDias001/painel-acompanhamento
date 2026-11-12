@@ -1423,7 +1423,7 @@ html:not(.v-painel):not(.fit-modo) .view:not(:has(>.banner:first-child)){padding
 .sq-wa{color:var(--n-vermelho)}.sq-wa:hover,.sq-wa:focus-visible{border-color:var(--n-vermelho)!important}
 html.wa-lig .sq-wa{color:var(--n-verde)}html.wa-lig .sq-wa:hover,html.wa-lig .sq-wa:focus-visible{border-color:var(--n-verde)!important}
 .sq-tab input.sel,.sq-tab select.sel{background:color-mix(in srgb,var(--n-vermelho) 24%,var(--surface-2))!important;border-color:var(--n-vermelho)!important;outline:2px solid var(--n-vermelho);outline-offset:-2px}
-.sqx-sug{position:fixed;z-index:200;min-width:220px;max-height:272px;overflow:auto;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px;margin:0;list-style:none}
+.sqx-sug{position:fixed;z-index:400;min-width:220px;max-height:272px;overflow:auto;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px;margin:0;list-style:none}
 .sqx-sug li{padding:7px 10px;border-radius:6px;font:600 12.5px var(--font-sys);color:var(--fg);cursor:pointer;white-space:nowrap}
 .ficha-sens{width:100%}
 .adm-ac-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 14px;align-items:end;margin:12px 0;padding:14px;border:1px solid var(--border-strong);border-radius:12px}
@@ -2224,7 +2224,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
         </div>
         <div class="rep-det" id="repDet" role="dialog" aria-label="Detalhes do texto do WhatsApp" hidden>
           <p class="rep-det-tit">DETALHES DO TEXTO DO WHATSAPP</p>
-          <label class="perfil-campo"><span>Loja no texto</span><input type="text" id="repDetLoja" list="repLojas" autocomplete="off" maxlength="90" placeholder="Usa a loja da busca se ficar vazio"></label>
+          <label class="perfil-campo"><span>Loja no texto</span><datalist id="repDetLojas"></datalist><input type="text" id="repDetLoja" list="repDetLojas" autocomplete="off" maxlength="90" placeholder="Usa a loja da busca se ficar vazio"></label>
           <label class="perfil-campo"><span>Entrada</span><input type="time" id="repDetEnt"></label>
           <label class="perfil-campo"><span>Saída</span><input type="time" id="repDetSai"></label>
           <label class="perfil-campo" style="flex:0 1 140px"><span>Valor (R$)</span><input type="text" id="repDetValor" inputmode="decimal" maxlength="8" placeholder="Ex.: 170"></label>
@@ -2826,4 +2826,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=71af45bb3a5c"></script>
+<script src="app.js?v=2af445ad6bc3"></script>
