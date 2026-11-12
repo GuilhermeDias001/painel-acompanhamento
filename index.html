@@ -795,6 +795,12 @@ table.func-geral th:nth-child(7){width:10%}
 table.func-geral th:nth-child(8){width:6%}
 table.func-geral th:nth-child(9){width:5%}
 table.func-geral td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rep-cat{position:relative}
+.rep-cat-btn{height:38px;width:100%;padding:0 30px 0 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);color:var(--fg);font:600 13px var(--font-sys);text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.rep-cat-btn::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;border-right:2px solid var(--fg-faint);border-bottom:2px solid var(--fg-faint);transform:translateY(-70%) rotate(45deg)}
+.rep-cat-btn[aria-expanded="true"],.rep-cat-btn:focus-visible{border-color:var(--n-vermelho);outline:0}
+.rep-cat-menu{left:0;right:0;transform:none;min-width:0}
+.rep-cat-menu li[data-v].on::before{content:"✓ ";font-weight:800}
 .rep-det-btn{background:var(--surface-2)!important;color:var(--fg)!important;border:1px solid var(--border-strong)!important}
 .rep-det-btn[aria-expanded="true"]{border-color:var(--n-vermelho)!important}
 .rep-det{position:fixed;z-index:200;width:min(560px,calc(100vw - 24px));display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding:16px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.45)}
@@ -2214,7 +2220,7 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
           <button type="button" class="func-novo" id="repSolBtn" style="flex:0 0 auto"><span>+</span> Solicitar esporádico</button>
           <button type="button" class="func-novo rep-det-btn" id="repDetBtn" style="flex:0 0 auto" aria-expanded="false"><span>+</span> Adicionar detalhes</button>
           <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Dia</span><input type="date" id="repDia"></label>
-          <label class="perfil-campo" style="flex:0 0 170px;margin:0"><span>Quem considerar</span><select id="repTipo" class="ficha-in"><option value="">Todos</option><option value="MEI">MEI</option><option value="PRESTADOR">Prestador</option><option value="Folguista">Folguista</option></select></label>
+          <div class="perfil-campo rep-cat" style="flex:0 0 190px;margin:0"><span>Quem considerar</span><button type="button" id="repTipo" class="rep-cat-btn" aria-haspopup="listbox" aria-expanded="false" title="Shift + clique para escolher mais de uma">Todos</button><ul class="cont-menu rep-cat-menu" id="repTipoMenu" role="listbox" aria-multiselectable="true" hidden><li role="option" tabindex="0" data-v="">Todos</li><li role="option" tabindex="0" data-v="MEI">MEI</li><li role="option" tabindex="0" data-v="PRESTADOR">Prestador</li><li role="option" tabindex="0" data-v="CLT">CLT de folga</li><li class="cont-sep">Shift + clique: mais de uma</li></ul></div>
         </div>
         <div class="rep-det" id="repDet" role="dialog" aria-label="Detalhes do texto do WhatsApp" hidden>
           <p class="rep-det-tit">DETALHES DO TEXTO DO WHATSAPP</p>
@@ -2820,4 +2826,4 @@ tr:hover .sq-del,.sq-del:focus-visible{opacity:1}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" integrity="sha384-SYKAG6cglRMN0RVvhNeBY0r3FYKNOJtznwA0v7B5Vp9tr31xAHsZC0DqkQ/pZDmj" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous"></script>
-<script src="app.js?v=cbaa5c99df14"></script>
+<script src="app.js?v=71af45bb3a5c"></script>
